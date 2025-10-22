@@ -1,4 +1,5 @@
-export default function AboutSection() {
+import image from "../../assets/3.png";
+function AboutSection() {
   return (
     <section className="py-20 bg-secondary">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -21,7 +22,7 @@ export default function AboutSection() {
           </div>
           <div className="rounded-lg overflow-hidden bg-muted h-96">
             <img
-              src="https://images.unsplash.com/photo-1554080353-a576cf803bda?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=3387&q=80"
+              src={image}
               alt="Our studio"
               className="w-full h-full object-cover"
             />
@@ -31,3 +32,5 @@ export default function AboutSection() {
     </section>
   );
 }
+
+export default AboutSection;
