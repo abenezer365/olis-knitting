@@ -9,13 +9,13 @@
 }
 
 .header h1 {
-  color: #5C4B37;
+  color: #5c4b37;
   margin: 0 0 0.5rem 0;
   font-size: 2.5rem;
 }
 
 .header p {
-  color: #7D6D5E;
+  color: #7d6d5e;
   margin: 0;
   font-size: 1.1rem;
 }
@@ -40,27 +40,27 @@
   border-radius: 8px;
   background: none;
   border: 1px solid rgba(139, 69, 19, 0.313);
-  color: #5C4B37;
+  color: #5c4b37;
   font-size: 1rem;
 }
 
 .search:focus {
   outline: none;
   background: white;
-  box-shadow: 0 0 0 2px #5C4B37;
+  box-shadow: 0 0 0 2px #5c4b37;
 }
 
 .filters {
-    display: flex;
-    gap: 1rem;
+  display: flex;
+  gap: 1rem;
 }
 
 .filter {
-    padding: 0.75rem 1rem;
-    border-radius: 8px;
-    border: 1px solid rgba(139, 69, 19, 0.313);
+  padding: 0.75rem 1rem;
+  border-radius: 8px;
+  border: 1px solid rgba(139, 69, 19, 0.313);
   background: rgba(255, 255, 255, 0.9);
-  color: #5C4B37;
+  color: #5c4b37;
   cursor: pointer;
   min-width: 150px;
 }
@@ -72,7 +72,7 @@
 
 .productsGrid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
   gap: 1.5rem;
 }
 
@@ -130,14 +130,14 @@
 }
 
 .productName {
-  color: #5C4B37;
+  color: #5c4b37;
   margin: 0;
   font-size: 1.2rem;
   font-weight: 600;
 }
 
 .productDescription {
-  color: #7D6D5E;
+  color: #7d6d5e;
   margin: 0;
   font-size: 0.9rem;
   line-height: 1.4;
@@ -150,12 +150,12 @@
 }
 
 .stars {
-  color: #FFD700;
+  color: #ffd700;
   font-size: 1rem;
 }
 
 .ratingValue {
-  color: #7D6D5E;
+  color: #7d6d5e;
   font-size: 0.9rem;
   font-weight: 600;
 }
@@ -170,7 +170,7 @@
 .price {
   font-size: 1.5rem;
   font-weight: 700;
-  color: #5C4B37;
+  color: #5c4b37;
 }
 
 .stock {
@@ -190,11 +190,12 @@
   display: flex;
   gap: 0.5rem;
   padding: 1rem 1.5rem;
-  background: #F8F5F2;
+  background: #f8f5f2;
   border-top: 1px solid rgba(92, 75, 55, 0.1);
 }
 
-.editBtn, .deleteBtn {
+.editBtn,
+.deleteBtn {
   flex: 1;
   padding: 0.75rem 1rem;
   border: none;
@@ -205,29 +206,29 @@
 }
 
 .editBtn {
-  background: #D6C6B8;
-  color: #5C4B37;
+  background: #d6c6b8;
+  color: #5c4b37;
 }
 
 .deleteBtn {
-  background: #5C4B37;
+  background: #5c4b37;
   color: white;
 }
 
 .editBtn:hover {
-  background: #C8B8A8;
+  background: #c8b8a8;
   transform: translateY(-2px);
 }
 
 .deleteBtn:hover {
-  background: #4A3B2A;
+  background: #4a3b2a;
   transform: translateY(-2px);
 }
 
 .noResults {
   text-align: center;
   padding: 3rem;
-  color: #7D6D5E;
+  color: #7d6d5e;
   font-size: 1.1rem;
 }
 
