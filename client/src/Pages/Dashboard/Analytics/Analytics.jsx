@@ -19,12 +19,14 @@ function Analytics() {
       { category: "Gloves", revenue: 4100 },
       { category: "Hats", revenue: 3000 },
     ];
+
   const stats = [
     { label: "Customers", value: 340, suffix: "+", color: "#1C2428", path : "customers" },
     { label: "Products in Stock", value: 450, suffix: "+", color: "#A67C52", path : "products"  },
     { label: "Total Orders", value: 127, suffix: "+", color: "#D6C6B8", path : "orders"  },
     { label: "Revenue", value: "$15,600", suffix: "", color: "#F5DEB3", path : "revenue"  },
   ];
+  
   return (
     <div className={CSS.analytics}>
 
