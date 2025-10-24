@@ -6,8 +6,9 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
-import { ShoppingCart, MessageCircle } from "lucide-react";
+import { ShoppingCart } from "lucide-react";
 import { useCart } from "@/contexts/CartContext";
+import { FaWhatsapp, FaTelegramPlane } from "react-icons/fa";
 
 function QuickPreviewModal({ product, currency, onClose }) {
   const [selectedColor, setSelectedColor] = useState(product.colors[0]);
@@ -56,7 +57,7 @@ function QuickPreviewModal({ product, currency, onClose }) {
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           {/* Product Image with Zoom */}
           <div
-            className="relative lg:h-150 xs:h-96 bg-secondary rounded-lg overflow-hidden cursor-zoom-in"
+            className="relative bg-secondary rounded-lg overflow-hidden cursor-zoom-in"
             onMouseEnter={() => setZoom(true)}
             onMouseLeave={() => setZoom(false)}
             onMouseMove={handleMouseMove}
@@ -64,7 +65,7 @@ function QuickPreviewModal({ product, currency, onClose }) {
             <img
               src={product.image || "/placeholder.svg"}
               alt={product.name}
-              className={`object-cover w-full h-full transition-transform duration-200 ${
+              className={`object-contain w-full h-full transition-transform duration-200 ${
                 zoom ? "scale-150" : "scale-100"
               }`}
               style={
@@ -157,7 +158,7 @@ function QuickPreviewModal({ product, currency, onClose }) {
             {/* Add to Cart */}
             <Button
               onClick={() => handleAddToCart(product)}
-              className="w-full gap-2 mt-4"
+              className="w-full gap-2 mt-4 py-6"
               size="sm"
             >
               <ShoppingCart className="w-4 h-4" />
@@ -166,23 +167,40 @@ function QuickPreviewModal({ product, currency, onClose }) {
 
             {/* Contact Buttons */}
             <div className="flex gap-2 pt-2">
+              {/* WhatsApp Button */}
               <a
                 href="https://wa.me/251911234567"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="flex items-center gap-3 bg-green-500 text-white px-6 py-3 rounded-lg hover:bg-green-600 transition-colors font-medium"
+                className="group flex items-center gap-3 bg-gradient-to-r from-green-500 to-green-600 text-white px-6 py-3 rounded-2xl shadow-md hover:shadow-lg transition-all duration-300 font-medium"
               >
-                <MessageCircle size={20} />
-                WhatsApp
+                <FaWhatsapp
+                  size={22}
+                  className="transition-transform duration-300 group-hover:scale-110"
+                />
+                <span className="relative">
+                  WhatsApp
+                  {/* Animated underline */}
+                  <span className="absolute left-0 bottom-0 w-0 h-[1px] bg-white transition-all duration-300 group-hover:w-full"></span>
+                </span>
               </a>
+
+              {/* Telegram Button */}
               <a
                 href="https://t.me/olifashion"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="flex items-center gap-3 bg-blue-500 text-white px-6 py-3 rounded-lg hover:bg-blue-600 transition-colors font-medium"
+                className="group flex items-center gap-3 bg-gradient-to-r from-sky-500 to-blue-600 text-white px-6 py-3 rounded-2xl shadow-md hover:shadow-lg transition-all duration-300 font-medium"
               >
-                <MessageCircle size={20} />
-                Telegram
+                <FaTelegramPlane
+                  size={22}
+                  className="transition-transform duration-300 group-hover:scale-110"
+                />
+                <span className="relative">
+                  Telegram
+                  {/* Animated underline */}
+                  <span className="absolute left-0 bottom-0 w-0 h-[1px] bg-white transition-all duration-300 group-hover:w-full"></span>
+                </span>
               </a>
             </div>
           </div>

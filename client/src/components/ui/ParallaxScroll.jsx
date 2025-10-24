@@ -1,5 +1,6 @@
 import { useRef, useState, useEffect } from "react";
 import { motion, useScroll, useTransform } from "motion/react";
+import { useSpring } from "motion/react";
 import { cn } from "@/lib/utils";
 
 export const ParallaxScroll = ({ images, className }) => {
@@ -11,9 +12,20 @@ export const ParallaxScroll = ({ images, className }) => {
     offset: ["start start", "end start"],
   });
 
-  const translateFirst = useTransform(scrollYProgress, [0, 1], [0, -350]);
-  const translateSecond = useTransform(scrollYProgress, [0, 1], [0, 200]);
-  const translateThird = useTransform(scrollYProgress, [0, 1], [0, -350]);
+  const springConfig = { stiffness: 50, damping: 20 };
+
+  const translateFirst = useSpring(
+    useTransform(scrollYProgress, [0, 1], [0, -1400]),
+    springConfig
+  );
+  const translateSecond = useSpring(
+    useTransform(scrollYProgress, [0, 1], [0, -100]),
+    springConfig
+  );
+  const translateThird = useSpring(
+    useTransform(scrollYProgress, [0, 1], [0, -1400]),
+    springConfig
+  );
 
   useEffect(() => {
     const updateColumns = () => {
@@ -114,10 +126,10 @@ export const ParallaxScroll = ({ images, className }) => {
       </div>
 
       {/* Top gradient overlay */}
-      <div className="pointer-events-none absolute inset-x-0 top-0 h-5 bg-gradient-to-b from-background to-transparent z-20" />
+      <div className="pointer-events-none absolute inset-x-0 top-0 h-1 bg-gradient-to-b from-background to-transparent z-20" />
 
       {/* Bottom gradient overlay */}
-      <div className="pointer-events-none absolute inset-x-0 bottom-0 h-5 bg-gradient-to-t from-background to-transparent z-20" />
+      <div className="pointer-events-none absolute inset-x-0 bottom-0 h-1 bg-gradient-to-t from-background to-transparent z-20" />
     </div>
   );
 };

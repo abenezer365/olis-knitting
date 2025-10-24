@@ -1,4 +1,4 @@
-import image from "../../assets/3.png";
+import image from "../../assets/3.webp";
 function AboutSection() {
   return (
     <section className="py-20 bg-secondary">

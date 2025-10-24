@@ -1,9 +1,9 @@
 import React from "react";
 import { Timeline } from "./ui/Timeline";
-import s1 from "../assets/s1.png";
-import s2 from "../assets/s2.png";
-import s3 from "../assets/s3.png";
-import s4 from "../assets/s4.png";
+import s1 from "../assets/s1.webp";
+import s2 from "../assets/s2.webp";
+import s3 from "../assets/s3.webp";
+import s4 from "../assets/s4.webp";
 
 function TimelineDemo() {
   const data = [

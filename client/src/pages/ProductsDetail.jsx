@@ -1,10 +1,12 @@
 import React, { useState } from "react";
 import { useParams, Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
-import { MessageCircle, ArrowLeft } from "lucide-react";
+import { ArrowLeft } from "lucide-react";
 import ProductImageZoom from "@/components/Products/ProductImageZoom";
 import { DEMO_PRODUCTS } from "@/demo/demo";
 import RelatedProducts from "@/components/Products/RelatedProducts";
+import { useCart } from "@/contexts/CartContext";
+import { FaWhatsapp, FaTelegramPlane } from "react-icons/fa";
 
 function ProductsDetail() {
   const { id } = useParams();
@@ -20,7 +22,17 @@ function ProductsDetail() {
     currentProduct?.sizes[0] || ""
   );
   const [quantity, setQuantity] = useState(1);
+  const { addItem } = useCart();
 
+  const handleAddToCart = (product) => {
+    addItem({
+      id: product.id.toString(),
+      name: product.name,
+      price: product.price,
+      image: product.image,
+      quantity: 1,
+    });
+  };
   if (!currentProduct) {
     return (
       <main className="min-h-screen bg-background">
@@ -154,28 +166,49 @@ function ProductsDetail() {
 
             {/* Action Buttons */}
             <div className="space-y-3 pt-4">
-              <Button className="w-full" size="lg">
+              <Button
+                onClick={() => handleAddToCart(currentProduct)}
+                className="w-full"
+                size="lg"
+              >
                 Add to Cart
               </Button>
 
               <div className="flex gap-3">
+                {/* WhatsApp Button */}
                 <a
                   href="https://wa.me/251911234567"
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="flex items-center gap-3 bg-green-500 text-white px-6 py-3 rounded-lg hover:bg-green-600 transition-colors font-medium"
+                  className="group flex items-center gap-3 bg-gradient-to-r from-green-500 to-green-600 text-white px-6 py-3 rounded-2xl shadow-md hover:shadow-lg transition-all duration-300 font-medium"
                 >
-                  <MessageCircle size={20} />
-                  Chat on WhatsApp
+                  <FaWhatsapp
+                    size={22}
+                    className="transition-transform duration-300 group-hover:scale-110"
+                  />
+                  <span className="relative">
+                    Chat on WhatsApp
+                    {/* Animated underline */}
+                    <span className="absolute left-0 bottom-0 w-0 h-[1px] bg-white transition-all duration-300 group-hover:w-full"></span>
+                  </span>
                 </a>
+
+                {/* Telegram Button */}
                 <a
                   href="https://t.me/olifashion"
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="flex items-center gap-3 bg-blue-500 text-white px-6 py-3 rounded-lg hover:bg-blue-600 transition-colors font-medium"
+                  className="group flex items-center gap-3 bg-gradient-to-r from-sky-500 to-blue-600 text-white px-6 py-3 rounded-2xl shadow-md hover:shadow-lg transition-all duration-300 font-medium"
                 >
-                  <MessageCircle size={20} />
-                  Chat on Telegram
+                  <FaTelegramPlane
+                    size={22}
+                    className="transition-transform duration-300 group-hover:scale-110"
+                  />
+                  <span className="relative">
+                    Chat on Telegram
+                    {/* Animated underline */}
+                    <span className="absolute left-0 bottom-0 w-0 h-[1px] bg-white transition-all duration-300 group-hover:w-full"></span>
+                  </span>
                 </a>
               </div>
             </div>
