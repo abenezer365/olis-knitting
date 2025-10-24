@@ -47,6 +47,16 @@ function Header() {
                 Products
               </NavLink>
               <NavLink
+                to="/dashboard"
+                className={({ isActive }) =>
+                  `text-foreground transition-colors hover:text-[#f8a532]  ${
+                    isActive ? "text-[#f8a532] border-b border-black" : ""
+                  }`
+                }
+              >
+                Dashboard
+              </NavLink>
+              <NavLink
                 to="/contact"
                 className={({ isActive }) =>
                   `text-foreground transition-colors hover:text-[#f8a532]  ${

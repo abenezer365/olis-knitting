@@ -1,0 +1,61 @@
+.header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 20px;
+    position: sticky;
+    top: 10px;
+    border-radius: 20px;
+    z-index: 1;
+    background-color: #FAF0E6;
+    width: 100%;
+    margin: 0 auto;
+}
+
+.header .icons {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    
+}
+.header .icons span {
+    opacity: 0.7;
+    font-size: 15px;
+    font-weight: 300;
+}
+.header svg {
+    font-size: 22px;
+    opacity: 0.7;
+}
+.header .icons svg:hover {
+    opacity: 1;
+    cursor: pointer;
+}
+.header .icons h1{
+    width: 7px;
+    height: 7px;
+    background-color: red;
+    border-radius: 100%;
+    padding: 2px;
+}
+.mobilebar{
+    position: fixed;
+    top: 0;
+    left: 0;
+    height: 100%;
+    width: 50vw;
+    z-index: 10000;
+}
+
+@media (max-width:700px){
+    .header{
+        width: 97%;
+        margin: 0 auto;
+    }
+    .header .icons{
+        gap: 10px;
+    }
+    .header .search input{
+        width: 100px;
+    }
+}
