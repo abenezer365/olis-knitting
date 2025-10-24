@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { useParams, Link } from "react-router-dom";
+import { useParams, Link, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { ArrowLeft } from "lucide-react";
 import ProductImageZoom from "@/components/Products/ProductImageZoom";
@@ -22,7 +22,36 @@ function ProductsDetail() {
     currentProduct?.sizes[0] || ""
   );
   const [quantity, setQuantity] = useState(1);
-  const { addItem } = useCart();
+  const { addItem, setOrderData } = useCart();
+  const navigate = useNavigate();
+
+  const handleBuyNow = () => {
+    const orderItems = [
+      {
+        id: currentProduct.id.toString(),
+        name: currentProduct.name,
+        price: currentProduct.price,
+        image: currentProduct.image,
+        quantity,
+      },
+    ];
+
+    setOrderData({
+      customerName: "",
+      email: "",
+      phone: "",
+      address: "",
+      country: "",
+      city: "",
+      postalCode: "",
+      items: orderItems,
+      currency: "USD",
+      paymentMethod: "whatsapp",
+      subscribeNewsletter: false,
+    });
+
+    navigate("/order");
+  };
 
   const handleAddToCart = (product) => {
     addItem({
@@ -166,6 +195,13 @@ function ProductsDetail() {
 
             {/* Action Buttons */}
             <div className="space-y-3 pt-4">
+              <div
+                onClick={handleBuyNow}
+                className="text-center mb-4-2 px-4 py-2 bg-primary/50 text-primary-foreground hover:bg-primary/70 rounded-md"
+              >
+                Buy Now
+              </div>
+
               <Button
                 onClick={() => handleAddToCart(currentProduct)}
                 className="w-full"
@@ -174,13 +210,22 @@ function ProductsDetail() {
                 Add to Cart
               </Button>
 
-              <div className="flex gap-3">
+              {/* <Button
+                onClick={handleBuyNow}
+                variant="primary"
+                className="w-full bg-secondary"
+                size="lg"
+              >
+                Buy Now
+              </Button> */}
+
+              <div className="flex gap-3 mt-8">
                 {/* WhatsApp Button */}
                 <a
                   href="https://wa.me/251911234567"
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="group flex items-center gap-3 bg-gradient-to-r from-green-500 to-green-600 text-white px-6 py-3 rounded-2xl shadow-md hover:shadow-lg transition-all duration-300 font-medium"
+                  className="group flex items-center gap-3 bg-linear-to-r from-green-500 to-green-600 text-white px-6 py-3 rounded-2xl shadow-md hover:shadow-lg transition-all duration-300 font-medium"
                 >
                   <FaWhatsapp
                     size={22}
@@ -189,7 +234,7 @@ function ProductsDetail() {
                   <span className="relative">
                     Chat on WhatsApp
                     {/* Animated underline */}
-                    <span className="absolute left-0 bottom-0 w-0 h-[1px] bg-white transition-all duration-300 group-hover:w-full"></span>
+                    <span className="absolute left-0 bottom-0 w-0 h-px bg-white transition-all duration-300 group-hover:w-full"></span>
                   </span>
                 </a>
 
@@ -198,7 +243,7 @@ function ProductsDetail() {
                   href="https://t.me/olifashion"
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="group flex items-center gap-3 bg-gradient-to-r from-sky-500 to-blue-600 text-white px-6 py-3 rounded-2xl shadow-md hover:shadow-lg transition-all duration-300 font-medium"
+                  className="group flex items-center gap-3 bg-linear-to-r from-sky-500 to-blue-600 text-white px-6 py-3 rounded-2xl shadow-md hover:shadow-lg transition-all duration-300 font-medium"
                 >
                   <FaTelegramPlane
                     size={22}
@@ -207,7 +252,7 @@ function ProductsDetail() {
                   <span className="relative">
                     Chat on Telegram
                     {/* Animated underline */}
-                    <span className="absolute left-0 bottom-0 w-0 h-[1px] bg-white transition-all duration-300 group-hover:w-full"></span>
+                    <span className="absolute left-0 bottom-0 w-0 h-px bg-white transition-all duration-300 group-hover:w-full"></span>
                   </span>
                 </a>
               </div>

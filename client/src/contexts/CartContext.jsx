@@ -4,6 +4,8 @@ const CartContext = createContext();
 
 export function CartProvider({ children }) {
   const [items, setItems] = useState([]);
+  // Store order data for "Buy Now" flow and checkout persistence
+  const [orderData, setOrderData] = useState(null);
 
   const addItem = (newItem) => {
     setItems((prevItems) => {
@@ -44,7 +46,16 @@ export function CartProvider({ children }) {
 
   return (
     <CartContext.Provider
-      value={{ items, addItem, removeItem, updateQuantity, clearCart, total }}
+      value={{
+        items,
+        addItem,
+        removeItem,
+        updateQuantity,
+        clearCart,
+        total,
+        orderData,
+        setOrderData,
+      }}
     >
       {children}
     </CartContext.Provider>

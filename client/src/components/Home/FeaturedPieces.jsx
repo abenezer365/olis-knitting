@@ -7,8 +7,8 @@ function FeaturedPieces() {
     <section className="pt-20 pb-10 bg-background relative">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="text-center mb-15">
-          <h2 className="text-4xl md:text-5xl  font-bungee text-foreground mb-4">
-            Featured Pieces
+          <h2 className="text-4xl md:text-5xl font-bungee text-foreground mb-4">
+            Gallery
           </h2>
           <p className="text-muted-foreground text-lg">
             Handpicked selections from our latest collection

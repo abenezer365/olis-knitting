@@ -10,6 +10,8 @@ import ProductsDetail from "./pages/ProductsDetail";
 import ContactUs from "./pages/ContactUs";
 import { CartProvider } from "./contexts/CartContext";
 import Dashboard from "./pages/Dashboard/Dashboard";
+import PlaceOrder from "./pages/PlaceOrder";
+import OrderConfirmation from "./pages/PlacerOrder/OrderConfirmation";
 
 function Router() {
   const location = useLocation();
@@ -23,6 +25,8 @@ function Router() {
         <Route path="/story" element={<Story />} />
         <Route path="/products" element={<Products />} />
         <Route path="/products/:id" element={<ProductsDetail />} />
+        <Route path="/order" element={<PlaceOrder />} />
+        <Route path="/order/:id" element={<OrderConfirmation />} />
         <Route path="/contact" element={<ContactUs />} />
         <Route path="/dashboard/*" element={<Dashboard />} />
       </Routes>

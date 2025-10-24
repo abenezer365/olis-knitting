@@ -15,7 +15,7 @@ export const ParallaxScroll = ({ images, className }) => {
   const springConfig = { stiffness: 50, damping: 20 };
 
   const translateFirst = useSpring(
-    useTransform(scrollYProgress, [0, 1], [0, -1400]),
+    useTransform(scrollYProgress, [0, 1], [0, -200]),
     springConfig
   );
   const translateSecond = useSpring(
@@ -23,7 +23,7 @@ export const ParallaxScroll = ({ images, className }) => {
     springConfig
   );
   const translateThird = useSpring(
-    useTransform(scrollYProgress, [0, 1], [0, -1400]),
+    useTransform(scrollYProgress, [0, 1], [0, -200]),
     springConfig
   );
 
@@ -126,10 +126,10 @@ export const ParallaxScroll = ({ images, className }) => {
       </div>
 
       {/* Top gradient overlay */}
-      <div className="pointer-events-none absolute inset-x-0 top-0 h-1 bg-gradient-to-b from-background to-transparent z-20" />
+      {/* <div className="pointer-events-none absolute inset-x-0 top-0 h-1 bg-gradient-to-b from-background to-transparent z-20" /> */}
 
       {/* Bottom gradient overlay */}
-      <div className="pointer-events-none absolute inset-x-0 bottom-0 h-1 bg-gradient-to-t from-background to-transparent z-20" />
+      {/* <div className="pointer-events-none absolute inset-x-0 bottom-0 h-1 bg-gradient-to-t from-background to-transparent z-20" /> */}
     </div>
   );
 };

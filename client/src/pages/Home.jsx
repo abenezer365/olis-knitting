@@ -4,11 +4,13 @@ import HeroSection from "@/components/Home/HeroSection";
 import TestimonialSection from "@/components/Home/TestimonialSection";
 import "../styles/root.css";
 import FAQSection from "@/components/FAQSection";
+import ImageBackground from "@/components/Background/ImageBackground";
 
 export default function Home() {
   return (
     <main>
-      <HeroSection />
+      <ImageBackground />
+      {/* <HeroSection /> */}
       <FeaturedPieces />
       <AboutSection />
       <TestimonialSection />
