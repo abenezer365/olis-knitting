@@ -46,7 +46,7 @@ function Header() {
               >
                 Products
               </NavLink>
-              <NavLink
+              {/* <NavLink
                 to="/dashboard"
                 className={({ isActive }) =>
                   `text-foreground transition-colors hover:text-[#f8a532]  ${
@@ -55,6 +55,16 @@ function Header() {
                 }
               >
                 Dashboard
+              </NavLink> */}
+              <NavLink
+                to="/order"
+                className={({ isActive }) =>
+                  `text-foreground transition-colors hover:text-[#f8a532]  ${
+                    isActive ? "text-[#f8a532] border-b border-black" : ""
+                  }`
+                }
+              >
+                Place Order
               </NavLink>
               <NavLink
                 to="/contact"
@@ -230,8 +240,13 @@ function Header() {
                         {formatPrice(total)}
                       </span>
                     </div>
+                    <Link to="/order" className="block">
+                      <button className="w-full bg-primary text-primary-foreground py-2 rounded-lg hover:opacity-90 transition-opacity font-medium">
+                        Place Order
+                      </button>
+                    </Link>
 
-                    <div className="space-y-2">
+                    {/* <div className="space-y-2">
                       <a
                         href="https://wa.me/1234567890"
                         target="_blank"
@@ -248,7 +263,7 @@ function Header() {
                       >
                         Contact via Telegram
                       </a>
-                    </div>
+                    </div> */}
                   </div>
                 </>
               )}

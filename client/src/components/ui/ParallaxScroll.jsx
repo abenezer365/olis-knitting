@@ -15,7 +15,7 @@ export const ParallaxScroll = ({ images, className }) => {
   const springConfig = { stiffness: 50, damping: 20 };
 
   const translateFirst = useSpring(
-    useTransform(scrollYProgress, [0, 1], [0, -1400]),
+    useTransform(scrollYProgress, [0, 1], [0, -200]),
     springConfig
   );
   const translateSecond = useSpring(
@@ -23,7 +23,7 @@ export const ParallaxScroll = ({ images, className }) => {
     springConfig
   );
   const translateThird = useSpring(
-    useTransform(scrollYProgress, [0, 1], [0, -1400]),
+    useTransform(scrollYProgress, [0, 1], [0, -200]),
     springConfig
   );
 
