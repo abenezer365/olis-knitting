@@ -1,6 +1,37 @@
 @import "./styles/root.css";
 @import "tailwindcss";
 @import "tw-animate-css";
+*{
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+ }
+
+a{
+    text-decoration: none;
+    color: inherit;
+}
+
+/* Scrollbar styles */
+::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+::-webkit-scrollbar-thumb {
+  background-color: rgba(100, 100, 100, 0.3);
+  border-radius: 10px;
+  border: 2px solid transparent;
+  background-clip: padding-box;
+  transition: background-color 0.3s ease;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background-color: rgba(100, 100, 100, 0.5);
+}
 
 @custom-variant dark (&:is(.dark *));
 

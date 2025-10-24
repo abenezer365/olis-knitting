@@ -8,6 +8,7 @@ import Products from "./pages/Products";
 import ProductsDetail from "./pages/ProductsDetail";
 import ContactUs from "./pages/ContactUs";
 import { CartProvider } from "./contexts/CartContext";
+import Dashboard from './Pages/Dashboard/Dashboard'
 
 function App() {
   return (
@@ -20,6 +21,7 @@ function App() {
           <Route path="/products" element={<Products />} />
           <Route path="/products/:id" element={<ProductsDetail />} />
           <Route path="/contact" element={<ContactUs />} />
+          <Route path='/dashboard/*' element={<Dashboard />}/>   
         </Routes>
         <Footer />
       </Router>

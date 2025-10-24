@@ -1,0 +1,130 @@
+/* Orders.module.css */
+.container {
+  padding: 2rem;
+  overflow-x: auto;
+  min-height: 100vh;
+}
+
+.heading {
+  font-size: 1.8rem;
+  font-weight: bold;
+  margin-bottom: 1.5rem;
+}
+
+.tableWrapper {
+  border-radius: 8px;
+  overflow-x: auto;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+}
+
+.table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.65rem;
+  /* table-layout: auto; */
+}
+
+.table th,
+.table td {
+  padding: 1rem;
+  text-align: left;
+}
+
+.table th {
+  font-weight: 600;
+}
+
+
+.completed {
+  background-color: #09ff0041;
+  color: #000000;
+  padding: 0.3rem 0.6rem;
+  border-radius: 5px;
+  font-weight: 500;
+  font-size: 10px;
+  display: inline-block;
+  width: max-content;
+}
+
+.inProgress {
+  background-color: #ffe60067;
+  color: #000000;
+  padding: 0.3rem 0.6rem;
+  width: max-content;
+  border-radius: 5px;
+  font-weight: 500;
+  font-size: 10px;
+  display: inline-block;
+}
+
+.review {
+  margin: 5px 0;
+  width: max-content;
+  background-color: #e2e3e5;
+  color: #383d41;
+  padding: 0.3rem 0.6rem;
+  border-radius: 5px;
+  font-weight: 500;
+    font-size: 10px;
+  display: inline-block;
+}
+.generate, .send {
+  background-color: #85858588;
+  padding: 2px 5px;
+  border-radius: 3px;
+  font-weight: 500;
+  cursor: pointer;
+  display: inline-block;
+  margin-bottom: 5px;
+}
+.mark, .progress {
+  width: max-content;
+  cursor: pointer;
+  background-color: #ba9c5741;
+  text-align: center;
+  padding: 2px 5px;
+  font-size: 10px;
+  border-radius: 3px;
+  font-weight: 500;
+  display: inline-block;
+  margin-bottom: 5px;
+}
+
+.actions{
+    font-size: 15px;
+}
+.editIcon {
+  margin-right: 10px;
+  cursor: pointer;
+  transition: transform 0.2s;
+}
+
+.editIcon:hover {
+    transform: scale(1.1);
+}
+
+.deleteIcon {
+  cursor: pointer;
+  color: #dc3545;
+  transition: transform 0.2s;
+}
+
+.deleteIcon:hover {
+  transform: scale(1.1);
+}
+
+.loading {
+  text-align: center;
+  padding: 2rem;
+  font-size: 1.2rem;
+}
+.product_img{
+  width: 80px;
+  height: 100px;
+  object-fit: contain;
+  border-radius: 10px;
+}
+.detail_cell{
+  display: flex;
+  gap: 10px;
+}

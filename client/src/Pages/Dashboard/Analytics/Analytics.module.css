@@ -1,0 +1,73 @@
+.analytics {
+  background-color: #fcfcfc;
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+.statsContainer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 20px;
+  width: 90%;
+  max-width: 1000px;
+  margin: 0 auto 30px auto;
+  flex-wrap: wrap;
+}
+
+.statBox {
+  flex: 1;
+  background-color: #fff;
+  border: 1px solid #e5e5e5;
+  border-radius: 8px;
+  padding: 20px;
+  text-align: center;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.statBox:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 3px 8px rgba(0, 0, 0, 0.08);
+}
+
+.statBox h2 {
+  font-size: 2rem;
+  margin: 0;
+  font-weight: 600;
+}
+
+.suffix {
+  font-size: 1.2rem;
+  margin-left: 2px;
+  color: inherit;
+}
+
+.statBox p {
+  margin-top: 6px;
+  font-size: 0.95rem;
+  color: #555;
+}
+
+.graphs {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 40px; /* space between graphs */
+  width: 90%;
+  max-width: 1000px;
+  flex-wrap: wrap;
+}
+
+.bargraph,
+.piegraph {
+  flex: 1; /* equal width */
+  background: #fff;
+  border: 1px solid #e5e5e5;
+  border-radius: 8px;
+  padding: 20px;
+  min-width: 300px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+}
+
