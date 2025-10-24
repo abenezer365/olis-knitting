@@ -1,5 +1,5 @@
 import { useRef, useState, useEffect } from "react";
-import { motion, useScroll, useTransform } from "motion/react";
+import { useScroll, useTransform } from "motion/react";
 import { useSpring } from "motion/react";
 import { cn } from "@/lib/utils";
 
@@ -65,7 +65,7 @@ export const ParallaxScroll = ({ images, className }) => {
     <div className="relative">
       <div
         className={cn(
-          "h-[40rem] items-start overflow-y-auto w-full",
+          "h-160 items-start overflow-y-auto w-full",
           className
         )}
         ref={gridRef}
@@ -78,7 +78,7 @@ export const ParallaxScroll = ({ images, className }) => {
                 <img
                   src={el}
                   alt="thumbnail"
-                  className="h-80 w-full object-cover object-left-top rounded-lg !m-0 !p-0"
+                  className="h-80 w-full object-cover object-top-left rounded-lg m-0! p-0!"
                   height="400"
                   width="400"
                 />
@@ -97,7 +97,7 @@ export const ParallaxScroll = ({ images, className }) => {
                   <img
                     src={el}
                     alt="thumbnail"
-                    className="h-80 w-full object-cover object-left-top rounded-lg !m-0 !p-0"
+                    className="h-80 w-full object-cover object-top-left rounded-lg m-0! p-0!"
                     height="400"
                     width="400"
                   />
@@ -114,7 +114,7 @@ export const ParallaxScroll = ({ images, className }) => {
                   <img
                     src={el}
                     alt="thumbnail"
-                    className="h-80 w-full object-cover object-left-top rounded-lg !m-0 !p-0"
+                    className="h-80 w-full object-cover object-top-left rounded-lg m-0! p-0!"
                     height="400"
                     width="400"
                   />
@@ -126,10 +126,10 @@ export const ParallaxScroll = ({ images, className }) => {
       </div>
 
       {/* Top gradient overlay */}
-      <div className="pointer-events-none absolute inset-x-0 top-0 h-1 bg-gradient-to-b from-background to-transparent z-20" />
+      <div className="pointer-events-none absolute inset-x-0 top-0 h-1 bg-linear-to-b from-background to-transparent z-20" />
 
       {/* Bottom gradient overlay */}
-      <div className="pointer-events-none absolute inset-x-0 bottom-0 h-1 bg-gradient-to-t from-background to-transparent z-20" />
+      <div className="pointer-events-none absolute inset-x-0 bottom-0 h-1 bg-linear-to-t from-background to-transparent z-20" />
     </div>
   );
 };
