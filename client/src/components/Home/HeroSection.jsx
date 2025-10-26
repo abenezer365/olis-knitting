@@ -1,6 +1,6 @@
 function HeroSection() {
   return (
-    <section className="relative min-h-screen flex items-center justify-center bg-gradient-to-b from-secondary to-background overflow-hidde">
+    <section className="relative min-h-screen flex items-center justify-center bg-linear-to-b from-secondary to-background overflow-hidde">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20 text-center">
         <h1 className="text-5xl md:text-7xl font-semibold font-sans text-foreground mb-6 text-balance">
           Crafted Luxury
@@ -15,7 +15,7 @@ function HeroSection() {
       </div>
 
       {/* Decorative element */}
-      <div className="absolute bottom-0 left-0 right-0 h-32 bg-gradient-to-t from-background to-transparent" />
+      <div className="absolute bottom-0 left-0 right-0 h-32 bg-linear-to-t from-background to-transparent" />
     </section>
   );
 }

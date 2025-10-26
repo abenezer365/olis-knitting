@@ -1,0 +1,19 @@
+import express from "express";
+// Controllers
+import authenticate from "../middlewares/authenticate.js";
+import authorize from "../middlewares/authorize.js";
+import { activate, checkUser, deactivate, deleteUser, editProfile, getAllUsers, getSingleUser, signin, signup, suspend } from "../controller/user.controller.js";
+const router = express.Router();
+
+router.post("/signin", signin);
+router.post("/signup", authenticate,authorize('admin'), signup);
+router.patch("/edit",authenticate , editProfile)
+router.get("/check", authenticate, checkUser )
+router.get("/getUsers",authenticate, getAllUsers )
+router.get("/get/:id",authenticate, getSingleUser )
+router.patch("/deactivate/:id",authenticate, authorize('admin'),deactivate )
+router.patch("/activate/:id",authenticate,authorize('admin'), activate )
+router.patch("/suspend/:id",authenticate,authorize('admin'), suspend )
+router.delete("/delete/:id",authenticate,authorize('admin'), deleteUser )
+
+export default router;
