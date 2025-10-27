@@ -1,19 +1,22 @@
-import React, { useState } from "react";
+import React, { useState, useContext } from "react";
 import { useParams, Link, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { ArrowLeft } from "lucide-react";
 import ProductImageZoom from "@/components/Products/ProductImageZoom";
 import { DEMO_PRODUCTS } from "@/demo/demo";
 import RelatedProducts from "@/components/Products/RelatedProducts";
-import { useCart } from "@/contexts/CartContext";
+import { Context } from "@/contexts/Context";
 import { FaWhatsapp, FaTelegramPlane } from "react-icons/fa";
+import { Type } from "@/utils/action.type";
 
 function ProductsDetail() {
   const { id } = useParams();
+  const navigate = useNavigate();
+
+  const [, dispatch] = useContext(Context);
+
   const productId = parseInt(id);
-  const [currentProduct, setCurrentProduct] = useState(
-    DEMO_PRODUCTS.find((p) => p.id === productId)
-  );
+  const [currentProduct, setCurrentProduct] = useState(DEMO_PRODUCTS.find((p) => p.id === productId));
 
   const [selectedColor, setSelectedColor] = useState(
     currentProduct?.colors[0] || ""
@@ -22,46 +25,45 @@ function ProductsDetail() {
     currentProduct?.sizes[0] || ""
   );
   const [quantity, setQuantity] = useState(1);
-  const { addItem, setOrderData } = useCart();
-  const navigate = useNavigate();
-
-  const handleBuyNow = () => {
-    const orderItems = [
-      {
-        id: currentProduct.id.toString(),
-        name: currentProduct.name,
-        price: currentProduct.price,
-        image: currentProduct.image,
-        quantity,
-      },
-    ];
-
-    setOrderData({
-      customerName: "",
-      email: "",
-      phone: "",
-      address: "",
-      country: "",
-      city: "",
-      postalCode: "",
-      items: orderItems,
-      currency: "USD",
-      paymentMethod: "whatsapp",
-      subscribeNewsletter: false,
-    });
-
-    navigate("/order");
-  };
 
   const handleAddToCart = (product) => {
-    addItem({
-      id: product.id.toString(),
-      name: product.name,
-      price: product.price,
-      image: product.image,
-      quantity: 1,
+    if (!product) return;
+
+    dispatch({
+      type: "ADD_TO_CART",
+      item: {
+        id: product.id.toString(),
+        name: product.name,
+        price: product.price,
+        image: product.image,
+        quantity,
+        color: selectedColor,
+        size: selectedSize,
+      },
     });
   };
+
+const handleBuyNow = () => {
+  // clear the basket
+  dispatch({ type: Type.EMPTY_BASKET });
+
+  dispatch({
+    type: Type.ADD_TO_CART,
+    item: {
+      id: currentProduct.id.toString(),
+      name: currentProduct.name,
+      price: currentProduct.price,
+      image: currentProduct.image,
+      amount: quantity,
+    },
+  });
+
+
+  // redirect to order page
+  navigate("/order");
+};
+
+
   if (!currentProduct) {
     return (
       <main className="min-h-screen bg-background">
@@ -195,13 +197,6 @@ function ProductsDetail() {
 
             {/* Action Buttons */}
             <div className="space-y-3 pt-4">
-              <div
-                onClick={handleBuyNow}
-                className="text-center mb-4-2 px-4 py-2 bg-primary/50 text-primary-foreground hover:bg-primary/70 rounded-md"
-              >
-                Buy Now
-              </div>
-
               <Button
                 onClick={() => handleAddToCart(currentProduct)}
                 className="w-full"
@@ -210,50 +205,35 @@ function ProductsDetail() {
                 Add to Cart
               </Button>
 
-              {/* <Button
+              <Button
                 onClick={handleBuyNow}
-                variant="primary"
-                className="w-full bg-secondary"
+                variant="secondary"
+                className="w-full"
                 size="lg"
               >
                 Buy Now
-              </Button> */}
+              </Button>
 
+              {/* Contact Buttons */}
               <div className="flex gap-3 mt-8">
-                {/* WhatsApp Button */}
                 <a
                   href="https://wa.me/251911234567"
                   target="_blank"
                   rel="noopener noreferrer"
                   className="group flex items-center gap-3 bg-linear-to-r from-green-500 to-green-600 text-white px-6 py-3 rounded-2xl shadow-md hover:shadow-lg transition-all duration-300 font-medium"
                 >
-                  <FaWhatsapp
-                    size={22}
-                    className="transition-transform duration-300 group-hover:scale-110"
-                  />
-                  <span className="relative">
-                    Chat on WhatsApp
-                    {/* Animated underline */}
-                    <span className="absolute left-0 bottom-0 w-0 h-px bg-white transition-all duration-300 group-hover:w-full"></span>
-                  </span>
+                  <FaWhatsapp size={22} />
+                  <span>Chat on WhatsApp</span>
                 </a>
 
-                {/* Telegram Button */}
                 <a
                   href="https://t.me/olifashion"
                   target="_blank"
                   rel="noopener noreferrer"
                   className="group flex items-center gap-3 bg-linear-to-r from-sky-500 to-blue-600 text-white px-6 py-3 rounded-2xl shadow-md hover:shadow-lg transition-all duration-300 font-medium"
                 >
-                  <FaTelegramPlane
-                    size={22}
-                    className="transition-transform duration-300 group-hover:scale-110"
-                  />
-                  <span className="relative">
-                    Chat on Telegram
-                    {/* Animated underline */}
-                    <span className="absolute left-0 bottom-0 w-0 h-px bg-white transition-all duration-300 group-hover:w-full"></span>
-                  </span>
+                  <FaTelegramPlane size={22} />
+                  <span>Chat on Telegram</span>
                 </a>
               </div>
             </div>

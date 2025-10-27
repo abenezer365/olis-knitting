@@ -1,5 +1,5 @@
 import React from "react";
-import ParallaxScrollDemo from "../ParallaxScrollDemo";
+import ParallaxScrollDemo from "../Home/ParallaxScrollDemo";
 import { Link } from "react-router-dom";
 
 function FeaturedPieces() {

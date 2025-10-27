@@ -2,17 +2,10 @@ import { useState } from "react";
 import { Link } from "react-router-dom";
 import { ShoppingCart, Eye } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipProvider,
-  TooltipTrigger,
-} from "@/components/ui/tooltip";
-import { useCart } from "@/contexts/CartContext";
+import { Tooltip,TooltipContent,TooltipProvider,TooltipTrigger,} from "@/components/ui/tooltip";
 
-function ProductList({ products, currency, onQuickPreview }) {
+function ProductList({ products, onAddToCart, currency, onQuickPreview }) {
   const [hoveredImageId, setHoveredImageId] = useState(null);
-  const { addItem } = useCart();
 
   const formatPrice = (price) => {
     if (currency === "ETB") {
@@ -21,15 +14,18 @@ function ProductList({ products, currency, onQuickPreview }) {
     return `$${price}`;
   };
 
-  const handleAddToCart = (product) => {
-    addItem({
-      id: product.id.toString(),
-      name: product.name,
-      price: product.price,
-      image: product.image,
-      quantity: 1,
-    });
-  };
+const handleAddToCart = (e, product) => {
+  onAddToCart(
+    e,
+    product.id,
+    product.name,
+    product.price,
+    product.category,
+    product.image,
+    product.rating
+  );
+};
+
 
   return (
     <div className="space-y-4">
@@ -40,7 +36,7 @@ function ProductList({ products, currency, onQuickPreview }) {
         >
           {/* Product Image - hover shows Quick Preview + Add to Cart */}
           <div
-            className="relative w-32 h-32 sm:w-48 sm:h-48 bg-secondary rounded-lg overflow-hidden flex-shrink-0"
+            className="relative w-32 h-32 sm:w-48 sm:h-48 bg-secondary rounded-lg overflow-hidden shrink-0"
             onMouseEnter={() => setHoveredImageId(product.id)}
             onMouseLeave={() => setHoveredImageId(null)}
           >
@@ -105,7 +101,7 @@ function ProductList({ products, currency, onQuickPreview }) {
             {/* Add to Cart Button (mobile) */}
             <div className="mt-3 md:hidden">
               <Button
-                onClick={() => handleAddToCart(product)}
+                onClick={(e) => handleAddToCart(e, product)}
                 size="sm"
                 className="gap-2 w-full sm:w-auto"
               >

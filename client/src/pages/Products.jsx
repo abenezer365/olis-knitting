@@ -1,9 +1,11 @@
 import ProductFilters from "@/components/Products/ProductFilters";
 import QuickPreviewModal from "@/components/Products/QuickPreviewModal";
-import { useState } from "react";
+import { useContext, useState } from "react";
 import { DEMO_PRODUCTS, CATEGORIES, CURRENCIES } from "@/demo/demo";
 import ProductGrid from "@/components/Products/ProductGrid";
 import ProductList from "@/components/Products/ProductsList";
+import { Context } from "@/contexts/Context";
+import { Type } from "@/utils/action.type";
 
 function Products() {
   const [viewMode, setViewMode] = useState("grid");
@@ -11,9 +13,8 @@ function Products() {
   const [selectedCategory, setSelectedCategory] = useState("All");
   const [currency, setCurrency] = useState("USD");
   const [selectedProduct, setSelectedProduct] = useState(null);
-  const [cart, setCart] = useState([]);
   const [itemsPerPage, setItemsPerPage] = useState(10);
-
+  const [, dispatch] = useContext(Context)
   // Filter products
   const filteredProducts = DEMO_PRODUCTS.filter(
     (product) =>
@@ -43,18 +44,15 @@ function Products() {
 
   const displayedProducts = filteredProducts.slice(0, itemsPerPage);
 
-  const handleAddToCart = (productId) => {
-    setCart((prev) => {
-      const existing = prev.find((item) => item.productId === productId);
-      if (existing) {
-        return prev.map((item) =>
-          item.productId === productId
-            ? { ...item, quantity: item.quantity + 1 }
-            : item
-        );
+  const handleAddToCart = (e, id, title, price,category, image,rating) => {
+    e.stopPropagation();
+    e.preventDefault();
+    dispatch({
+      type : Type.ADD_TO_CART,
+      item : {
+        id,title,price,category,image,rating
       }
-      return [...prev, { productId, quantity: 1 }];
-    });
+    })
   };
 
   return (

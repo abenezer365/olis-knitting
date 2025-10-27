@@ -1,7 +1,7 @@
 import { useRef, useState, useEffect } from "react";
 import { motion, useScroll, useTransform } from "motion/react";
 import { useSpring } from "motion/react";
-import { cn } from "@/lib/utils";
+import { cn } from "@/utils/constants";
 
 export const ParallaxScroll = ({ images, className }) => {
   const gridRef = useRef(null);

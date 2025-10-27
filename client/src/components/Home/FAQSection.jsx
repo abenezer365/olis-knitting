@@ -59,7 +59,7 @@ function FAQSection() {
                 </h3>
                 <ChevronDown
                   size={20}
-                  className={`flex-shrink-0 transition-transform ${
+                  className={`shrink-0 transition-transform ${
                     openIndex === index ? "rotate-180" : ""
                   }`}
                 />

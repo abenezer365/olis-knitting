@@ -1,21 +1,13 @@
 import { useState } from "react";
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-} from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogHeader,  DialogTitle,} from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { ShoppingCart } from "lucide-react";
-import { useCart } from "@/contexts/CartContext";
 import { FaWhatsapp, FaTelegramPlane } from "react-icons/fa";
-
-function QuickPreviewModal({ product, currency, onClose }) {
+function QuickPreviewModal({ product,onAddToCart,currency, onClose }) {
   const [selectedColor, setSelectedColor] = useState(product.colors[0]);
   const [selectedSize, setSelectedSize] = useState(product.sizes[0]);
   const [quantity, setQuantity] = useState(1);
-  const { addItem } = useCart();
-
+  
   const [zoom, setZoom] = useState(false);
   const [position, setPosition] = useState({ x: 0, y: 0 });
 
@@ -35,16 +27,17 @@ function QuickPreviewModal({ product, currency, onClose }) {
     }
     return `$${price}`;
   };
-
-  const handleAddToCart = (product) => {
-    addItem({
-      id: product.id.toString(),
-      name: product.name,
-      price: product.price,
-      image: product.image,
-      quantity: 1,
-    });
-    onClose();
+  
+  const handleAddToCart = (e, product) => {
+    onAddToCart(
+        e,
+        product.id,
+        product.name,
+        product.price,
+        product.category,
+        product.image,
+        product.rating
+     );
   };
 
   return (
@@ -157,7 +150,7 @@ function QuickPreviewModal({ product, currency, onClose }) {
 
             {/* Add to Cart */}
             <Button
-              onClick={() => handleAddToCart(product)}
+              onClick={(e) => handleAddToCart(e,product)}
               className="w-full gap-2 mt-4 py-6"
               size="sm"
             >
@@ -172,7 +165,7 @@ function QuickPreviewModal({ product, currency, onClose }) {
                 href="https://wa.me/251911234567"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="group flex items-center gap-3 bg-gradient-to-r from-green-500 to-green-600 text-white px-6 py-3 rounded-2xl shadow-md hover:shadow-lg transition-all duration-300 font-medium"
+                className="group flex items-center gap-3 bg-linear-to-r from-green-500 to-green-600 text-white px-6 py-3 rounded-2xl shadow-md hover:shadow-lg transition-all duration-300 font-medium"
               >
                 <FaWhatsapp
                   size={22}
@@ -181,7 +174,7 @@ function QuickPreviewModal({ product, currency, onClose }) {
                 <span className="relative">
                   WhatsApp
                   {/* Animated underline */}
-                  <span className="absolute left-0 bottom-0 w-0 h-[1px] bg-white transition-all duration-300 group-hover:w-full"></span>
+                  <span className="absolute left-0 bottom-0 w-0 h-px bg-white transition-all duration-300 group-hover:w-full"></span>
                 </span>
               </a>
 
@@ -190,7 +183,7 @@ function QuickPreviewModal({ product, currency, onClose }) {
                 href="https://t.me/olifashion"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="group flex items-center gap-3 bg-gradient-to-r from-sky-500 to-blue-600 text-white px-6 py-3 rounded-2xl shadow-md hover:shadow-lg transition-all duration-300 font-medium"
+                className="group flex items-center gap-3 bg-linear-to-r from-sky-500 to-blue-600 text-white px-6 py-3 rounded-2xl shadow-md hover:shadow-lg transition-all duration-300 font-medium"
               >
                 <FaTelegramPlane
                   size={22}
@@ -199,7 +192,7 @@ function QuickPreviewModal({ product, currency, onClose }) {
                 <span className="relative">
                   Telegram
                   {/* Animated underline */}
-                  <span className="absolute left-0 bottom-0 w-0 h-[1px] bg-white transition-all duration-300 group-hover:w-full"></span>
+                  <span className="absolute left-0 bottom-0 w-0 h-px bg-white transition-all duration-300 group-hover:w-full"></span>
                 </span>
               </a>
             </div>

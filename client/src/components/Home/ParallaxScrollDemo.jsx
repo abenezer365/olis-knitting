@@ -1,5 +1,5 @@
 import React from "react";
-import { ParallaxScroll } from "./ui/ParallaxScroll";
+import { ParallaxScroll } from "../ui/ParallaxScroll";
 import { images } from "@/demo/demo";
 
 function ParallaxScrollDemo() {

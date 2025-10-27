@@ -1,9 +1,13 @@
 import React from 'react'
 import Router from './Router'
+import { ContextProvider } from './contexts/Context'
+import { InitialState, Reducer } from './utils/reducer';
 function App() {
   return (
     <>
-      <Router />
+    <ContextProvider initialState={InitialState} reducer={Reducer}>
+        <Router />
+    </ContextProvider>
     </>
   )
 }

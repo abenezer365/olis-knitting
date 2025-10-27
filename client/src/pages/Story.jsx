@@ -1,4 +1,4 @@
-import TimelineDemo from "@/components/TimelineDemo";
+import TimelineDemo from "@/components/ui/TimelineDemo";
 import React from "react";
 
 function Story() {

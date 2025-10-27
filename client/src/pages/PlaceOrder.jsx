@@ -1,32 +1,28 @@
-import React, { useState } from "react";
+import React, { useState, useContext } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import { Trash2, ArrowLeft } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { useCart } from "@/contexts/CartContext";
+import { Context } from "@/contexts/Context";
+import { Type } from "@/utils/action.type";
 
 function PlaceOrder() {
   const navigate = useNavigate();
-  const { items, removeItem, updateQuantity, orderData, setOrderData } =
-    useCart();
-
+  const [{ basket }, dispatch] = useContext(Context);
   const [formData, setFormData] = useState({
-    customerName: orderData?.customerName || "",
-    email: orderData?.email || "",
-    phone: orderData?.phone || "",
-    address: orderData?.address || "",
-    country: orderData?.country || "",
-    city: orderData?.city || "",
-    postalCode: orderData?.postalCode || "",
-    currency: orderData?.currency || "USD",
-    paymentMethod: orderData?.paymentMethod || "whatsapp",
-    subscribeNewsletter: orderData?.subscribeNewsletter || false,
+    customerName: basket?.customerName || "",
+    email: basket?.email || "",
+    phone: basket?.phone || "",
+    address: basket?.address || "",
+    country: basket?.country || "",
+    city: basket?.city || "",
+    postalCode: basket?.postalCode || "",
+    currency: basket?.currency || "USD",
+    paymentMethod: basket?.paymentMethod || "whatsapp",
+    subscribeNewsletter: basket?.subscribeNewsletter || false,
   });
-
-  const displayItems = orderData?.items || items;
-  const total = displayItems.reduce(
-    (sum, item) => sum + item.price * item.quantity,
-    0
-  );
+  console.log(basket)
+  const displayItems = Array.isArray(basket) ? basket : (basket?.items || []);
+  const total = displayItems.reduce((sum, item) => sum + item.price * item.quantity, 0);
 
   const handleInputChange = (e) => {
     const { name, value, type, checked } = e.target;
@@ -37,29 +33,16 @@ function PlaceOrder() {
   };
 
   const handlePlaceOrder = () => {
-    if (
-      !formData.customerName ||
-      !formData.email ||
-      !formData.phone ||
-      !formData.address
-    ) {
+    if (!formData.customerName || !formData.email || !formData.phone || !formData.address) {
       alert("Please fill in all required fields");
       return;
     }
 
     const orderId = Math.random().toString(36).substr(2, 9).toUpperCase();
-
-    setOrderData({
-      ...formData,
-      items: displayItems,
-      currency: formData.currency,
-      paymentMethod: formData.paymentMethod,
-    });
-
     navigate(`/order/${orderId}`);
   };
 
-  if (displayItems.length === 0) {
+  if (displayItems.length == 0) {
     return (
       <main className="min-h-screen bg-background">
         <div className="max-w-4xl mx-auto px-4 py-12">
@@ -90,52 +73,30 @@ function PlaceOrder() {
 
         <h1 className="text-4xl font-bold mb-8">Place Order</h1>
 
-        <div className="max-w-7xl grid grid-cols-1 lg:grid-cols-4 gap-8">
+        <div className="grid grid-cols-1 lg:grid-cols-4 gap-8">
           {/* Left: Forms */}
           <div className="lg:col-span-2 space-y-8">
             {/* Customer Info */}
             <div className="bg-card border border-border rounded-lg p-6">
               <h2 className="text-xl font-bold mb-4">Customer Information</h2>
               <div className="space-y-4">
-                <div>
-                  <label className="block text-sm font-medium mb-2">
-                    Full Name *
-                  </label>
-                  <input
-                    type="text"
-                    name="customerName"
-                    value={formData.customerName}
-                    onChange={handleInputChange}
-                    className="w-full px-4 py-2 border border-border rounded-lg bg-secondary focus:outline-none focus:ring-2 focus:ring-accent"
-                    placeholder="John Doe"
-                  />
-                </div>
-                <div>
-                  <label className="block text-sm font-medium mb-2">
-                    Email *
-                  </label>
-                  <input
-                    type="email"
-                    name="email"
-                    value={formData.email}
-                    onChange={handleInputChange}
-                    className="w-full px-4 py-2 border border-border rounded-lg bg-secondary focus:outline-none focus:ring-2 focus:ring-accent"
-                    placeholder="john@example.com"
-                  />
-                </div>
-                <div>
-                  <label className="block text-sm font-medium mb-2">
-                    Phone Number *
-                  </label>
-                  <input
-                    type="tel"
-                    name="phone"
-                    value={formData.phone}
-                    onChange={handleInputChange}
-                    className="w-full px-4 py-2 border border-border rounded-lg bg-secondary focus:outline-none focus:ring-2 focus:ring-accent"
-                    placeholder="+1 (555) 000-0000"
-                  />
-                </div>
+                {[
+                  { label: "Full Name *", name: "customerName", type: "text", placeholder: "John Doe" },
+                  { label: "Email *", name: "email", type: "email", placeholder: "john@example.com" },
+                  { label: "Phone Number *", name: "phone", type: "tel", placeholder: "+1 (555) 000-0000" },
+                ].map(({ label, name, type, placeholder }) => (
+                  <div key={name}>
+                    <label className="block text-sm font-medium mb-2">{label}</label>
+                    <input
+                      type={type}
+                      name={name}
+                      value={formData[name]}
+                      onChange={handleInputChange}
+                      className="w-full px-4 py-2 border border-border rounded-lg bg-secondary focus:outline-none focus:ring-2 focus:ring-accent"
+                      placeholder={placeholder}
+                    />
+                  </div>
+                ))}
               </div>
             </div>
 
@@ -144,9 +105,7 @@ function PlaceOrder() {
               <h2 className="text-xl font-bold mb-4">Shipping Information</h2>
               <div className="space-y-4">
                 <div>
-                  <label className="block text-sm font-medium mb-2">
-                    Address *
-                  </label>
+                  <label className="block text-sm font-medium mb-2">Address *</label>
                   <input
                     type="text"
                     name="address"
@@ -156,11 +115,10 @@ function PlaceOrder() {
                     placeholder="123 Main Street"
                   />
                 </div>
+
                 <div className="grid grid-cols-2 gap-4">
                   <div>
-                    <label className="block text-sm font-medium mb-2">
-                      Country *
-                    </label>
+                    <label className="block text-sm font-medium mb-2">Country *</label>
                     <input
                       type="text"
                       name="country"
@@ -171,9 +129,7 @@ function PlaceOrder() {
                     />
                   </div>
                   <div>
-                    <label className="block text-sm font-medium mb-2">
-                      City *
-                    </label>
+                    <label className="block text-sm font-medium mb-2">City *</label>
                     <input
                       type="text"
                       name="city"
@@ -184,10 +140,9 @@ function PlaceOrder() {
                     />
                   </div>
                 </div>
+
                 <div>
-                  <label className="block text-sm font-medium mb-2">
-                    Postal Code
-                  </label>
+                  <label className="block text-sm font-medium mb-2">Postal Code</label>
                   <input
                     type="text"
                     name="postalCode"
@@ -205,10 +160,7 @@ function PlaceOrder() {
               <h2 className="text-xl font-bold mb-4">Payment Method</h2>
               <div className="space-y-3">
                 {["whatsapp", "telegram", "instagram"].map((method) => (
-                  <label
-                    key={method}
-                    className="flex items-center gap-3 cursor-pointer"
-                  >
+                  <label key={method} className="flex items-center gap-3 cursor-pointer">
                     <input
                       type="radio"
                       name="paymentMethod"
@@ -248,36 +200,37 @@ function PlaceOrder() {
 
               {/* Products */}
               <div className="space-y-4 mb-6 max-h-96 overflow-y-auto">
-                {displayItems.map((item) => (
+                {displayItems?.map((item) => (
                   <div
                     key={item.id}
                     className="flex gap-3 pb-4 border-b border-border items-center"
                   >
-                    <div className="relative w-16 h-16 flex-shrink-0 rounded-lg overflow-hidden">
+                    <div className="relative w-16 h-16 shrink-0 rounded-lg overflow-hidden">
                       <img
                         src={item.image || "/placeholder.svg"}
                         alt={item.name}
                         className="object-cover w-full h-full"
                       />
                     </div>
+
                     <div className="flex-1">
                       <h3 className="font-semibold text-sm">{item.name}</h3>
 
-                      {/* Quantity controls */}
+                      {/* Quantity Controls */}
                       <div className="flex items-center gap-2 mt-1">
                         <button
                           onClick={() =>
-                            updateQuantity(item.id, item.quantity - 1)
+                            dispatch({ type: Type.DECREMENT_ITEM, item: item })
                           }
                           disabled={item.quantity <= 1}
                           className="px-2 py-1 border border-border rounded"
                         >
                           -
                         </button>
-                        <span>{item.quantity}</span>
+                        <span>{item.amount}</span>
                         <button
                           onClick={() =>
-                            updateQuantity(item.id, item.quantity + 1)
+                            dispatch({ type: Type.INCREMENT_ITEM, item: item })
                           }
                           className="px-2 py-1 border border-border rounded"
                         >
@@ -286,14 +239,17 @@ function PlaceOrder() {
                       </div>
 
                       <p className="text-sm text-muted-foreground mt-1">
-                        Qty: {item.quantity}
+                        Qty: {item.amount}
                       </p>
                       <p className="text-sm font-bold text-primary">
-                        ${(item.price * item.quantity).toFixed(2)}
+                        ${(item.price * item.amount).toFixed(2)}
                       </p>
                     </div>
+
                     <button
-                      onClick={() => removeItem(item.id)}
+                      onClick={() =>
+                        dispatch({ type: Type.REMOVE_FROM_CART, item: item })
+                      }
                       className="p-1 hover:bg-red-100 rounded transition-colors"
                     >
                       <Trash2 size={16} className="text-red-600" />
@@ -304,9 +260,7 @@ function PlaceOrder() {
 
               {/* Currency */}
               <div className="mb-6">
-                <label className="block text-sm font-medium mb-2">
-                  Currency
-                </label>
+                <label className="block text-sm font-medium mb-2">Currency</label>
                 <select
                   name="currency"
                   value={formData.currency}
@@ -324,7 +278,7 @@ function PlaceOrder() {
                   <span className="font-semibold">Total:</span>
                   <span className="text-2xl font-bold text-primary">
                     {formData.currency === "ETH"
-                      ? `${(total * 160).toFixed(2)} ETH`
+                      ? `${(total * 0.0016).toFixed(4)} ETH`
                       : `$${total.toFixed(2)}`}
                   </span>
                 </div>

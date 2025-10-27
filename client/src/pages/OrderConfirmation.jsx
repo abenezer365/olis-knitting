@@ -1,13 +1,14 @@
 import { useParams, Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { CheckCircle, Package, MapPin, CreditCard } from "lucide-react";
-import { useCart } from "@/contexts/CartContext";
+import { useContext } from "react";
+import { Context } from "@/contexts/Context";
 
 export default function OrderConfirmation() {
   const { id: orderId } = useParams();
-  const { orderData } = useCart();
+  const [{basket}] =useContext(Context)
 
-  if (!orderData) {
+  if (!basket) {
     return (
       <main className="min-h-screen bg-background">
         <div className="max-w-4xl mx-auto px-4 py-12 text-center">
@@ -20,9 +21,8 @@ export default function OrderConfirmation() {
     );
   }
 
-  const total = orderData.items.reduce(
-    (sum, item) => sum + item.price * item.quantity,
-    0
+  const total = basket.items.reduce(
+    (sum, item) => sum + item.price * item.amount, 0
   );
 
   return (
@@ -59,28 +59,28 @@ export default function OrderConfirmation() {
               <div className="space-y-2 text-foreground">
                 <p>
                   <span className="font-semibold">Name:</span>{" "}
-                  {orderData.customerName}
+                  {basket.customerName}
                 </p>
                 <p>
                   <span className="font-semibold">Email:</span>{" "}
-                  {orderData.email}
+                  {basket.email}
                 </p>
                 <p>
                   <span className="font-semibold">Phone:</span>{" "}
-                  {orderData.phone}
+                  {basket.phone}
                 </p>
                 <p>
                   <span className="font-semibold">Address:</span>{" "}
-                  {orderData.address}
+                  {basket.address}
                 </p>
                 <p>
-                  <span className="font-semibold">City:</span> {orderData.city},{" "}
-                  {orderData.country}
+                  <span className="font-semibold">City:</span> {basket.city},{" "}
+                  {basket.country}
                 </p>
-                {orderData.postalCode && (
+                {basket.postalCode && (
                   <p>
                     <span className="font-semibold">Postal Code:</span>{" "}
-                    {orderData.postalCode}
+                    {basket.postalCode}
                   </p>
                 )}
               </div>
@@ -95,10 +95,10 @@ export default function OrderConfirmation() {
               <div className="space-y-2">
                 <p className="text-foreground">
                   <span className="font-semibold">Method:</span>{" "}
-                  {orderData.paymentMethod.toUpperCase()}
+                  {basket.paymentMethod.toUpperCase()}
                 </p>
                 <p className="text-sm text-muted-foreground">
-                  Our team will contact you via {orderData.paymentMethod} to
+                  Our team will contact you via {basket.paymentMethod} to
                   complete the payment.
                 </p>
               </div>
@@ -111,12 +111,12 @@ export default function OrderConfirmation() {
                 <h2 className="text-lg font-bold">Order Items</h2>
               </div>
               <div className="space-y-4">
-                {orderData.items.map((item) => (
+                {basket.items.map((item) => (
                   <div
                     key={item.id}
                     className="flex gap-4 pb-4 border-b border-border last:border-b-0"
                   >
-                    <div className="relative w-20 h-20 flex-shrink-0 rounded-lg overflow-hidden">
+                    <div className="relative w-20 h-20 shrink-0 rounded-lg overflow-hidden">
                       <img
                         src={item.image || "/placeholder.svg"}
                         alt={item.name}
@@ -155,7 +155,7 @@ export default function OrderConfirmation() {
                 <div className="border-t border-border pt-3 flex justify-between">
                   <span className="font-bold">Total:</span>
                   <span className="text-xl font-bold text-primary">
-                    {orderData.currency === "ETH"
+                    {basket.currency === "ETH"
                       ? `${(total / 2000).toFixed(4)} ETH`
                       : `$${total.toFixed(2)}`}
                   </span>
@@ -165,7 +165,7 @@ export default function OrderConfirmation() {
               <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-6">
                 <p className="text-sm text-blue-900">
                   A confirmation email has been sent to{" "}
-                  <span className="font-semibold">{orderData.email}</span>
+                  <span className="font-semibold">{basket.email}</span>
                 </p>
               </div>
 

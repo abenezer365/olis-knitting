@@ -1,15 +1,46 @@
-import { useState } from "react";
+import { useContext, useState, useMemo } from "react";
 import { Link, NavLink } from "react-router-dom";
 import { ShoppingCart, LogIn, Menu, X, Trash2 } from "lucide-react";
-import { useCart } from "@/contexts/CartContext";
+import { Context } from "@/contexts/Context";
+import { Type } from "@/utils/action.type";
 
 function Header() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isCartOpen, setIsCartOpen] = useState(false);
   const [isLoginOpen, setIsLoginOpen] = useState(false);
-  const { items, removeItem, updateQuantity, total } = useCart();
+  const [{ basket }, dispatch] = useContext(Context);
+
+  const total = useMemo(
+    () => basket.reduce((sum, item) => sum + item.price * item.amount, 0),
+    [basket]
+  );
 
   const formatPrice = (price) => `$${price.toFixed(2)}`;
+
+  // 🗑 Remove an item
+  const removeItem = (id) => {
+    dispatch({
+      type: Type.REMOVE_FROM_CART,
+      item: { id },
+    });
+  };
+
+  // ➕➖ Update quantity
+  const updateQuantity = (id, newAmount) => {
+    if (newAmount > 1) {
+      dispatch({
+        type: Type.INCREMENT_ITEM,
+        item: { id },
+      });
+    } else if (newAmount === 1) {
+      dispatch({
+        type: Type.DECREMENT_ITEM,
+        item: { id },
+      });
+    } else if (newAmount === 0) {
+      removeItem(id);
+    }
+  };
 
   return (
     <>
@@ -18,7 +49,7 @@ function Header() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 ">
           <div className="flex items-center justify-between h-20">
             {/* Logo */}
-            <Link to="/" className="flex-shrink-0">
+            <Link to="/" className="shrink-0">
               <div className="text-2xl font-bold font-bungee text-foreground">
                 OLI
               </div>
@@ -46,16 +77,6 @@ function Header() {
               >
                 Products
               </NavLink>
-              {/* <NavLink
-                to="/dashboard"
-                className={({ isActive }) =>
-                  `text-foreground transition-colors hover:text-[#f8a532]  ${
-                    isActive ? "text-[#f8a532] border-b border-black" : ""
-                  }`
-                }
-              >
-                Dashboard
-              </NavLink> */}
               <NavLink
                 to="/order"
                 className={({ isActive }) =>
@@ -86,9 +107,9 @@ function Header() {
                 aria-label="Shopping cart"
               >
                 <ShoppingCart size={20} />
-                {items.length > 0 && (
+                {basket.length > 0 && (
                   <span className="absolute top-0 right-0 bg-primary text-primary-foreground text-xs rounded-full w-5 h-5 flex items-center justify-center">
-                    {items.length}
+                    {basket.length}
                   </span>
                 )}
               </button>
@@ -117,7 +138,7 @@ function Header() {
             <nav className="md:hidden pb-4 flex flex-col gap-4">
               <NavLink
                 to="/story"
-                onClick={() => setIsMenuOpen(!isMenuOpen)}
+                onClick={() => setIsMenuOpen(false)}
                 className={({ isActive }) =>
                   `text-foreground transition-colors hover:text-white hover:bg-muted-foreground p-4 ${
                     isActive ? "text-white bg-muted-foreground/60 " : ""
@@ -128,7 +149,7 @@ function Header() {
               </NavLink>
               <NavLink
                 to="/products"
-                onClick={() => setIsMenuOpen(!isMenuOpen)}
+                onClick={() => setIsMenuOpen(false)}
                 className={({ isActive }) =>
                   `text-foreground transition-colors hover:text-white  hover:bg-muted-foreground p-4 ${
                     isActive ? "text-white bg-muted-foreground/60" : ""
@@ -139,7 +160,7 @@ function Header() {
               </NavLink>
               <NavLink
                 to="/contact"
-                onClick={() => setIsMenuOpen(!isMenuOpen)}
+                onClick={() => setIsMenuOpen(false)}
                 className={({ isActive }) =>
                   `text-foreground transition-colors hover:text-white  hover:bg-muted-foreground p-4 ${
                     isActive ? "text-white bg-muted-foreground/60" : ""
@@ -172,7 +193,7 @@ function Header() {
                 </button>
               </div>
 
-              {items.length === 0 ? (
+              {basket.length === 0 ? (
                 <div className="text-center py-12 text-muted-foreground flex-1 flex items-center justify-center">
                   Your cart is empty
                 </div>
@@ -180,12 +201,12 @@ function Header() {
                 <>
                   {/* Cart Items */}
                   <div className="flex-1 space-y-4 mb-6 overflow-y-auto">
-                    {items.map((item) => (
+                    {basket.map((item) => (
                       <div
                         key={item.id}
                         className="flex gap-4 bg-secondary p-4 rounded-lg"
                       >
-                        <div className="relative w-20 h-20 flex-shrink-0 rounded-lg overflow-hidden">
+                        <div className="relative w-20 h-20 shrink-0 rounded-lg overflow-hidden">
                           <img
                             src={item.image || "/placeholder.svg"}
                             alt={item.name}
@@ -202,18 +223,18 @@ function Header() {
                           <div className="flex items-center gap-2 mt-2">
                             <button
                               onClick={() =>
-                                updateQuantity(item.id, item.quantity - 1)
+                                updateQuantity(item.id, item.amount - 1)
                               }
                               className="px-2 py-1 bg-background rounded hover:bg-border transition-colors"
                             >
                               −
                             </button>
                             <span className="w-8 text-center">
-                              {item.quantity}
+                              {item.amount}
                             </span>
                             <button
                               onClick={() =>
-                                updateQuantity(item.id, item.quantity + 1)
+                                updateQuantity(item.id, item.amount + 1)
                               }
                               className="px-2 py-1 bg-background rounded hover:bg-border transition-colors"
                             >
@@ -232,7 +253,7 @@ function Header() {
                     ))}
                   </div>
 
-                  {/* Total + Contact */}
+                  {/* Total + Checkout */}
                   <div className="border-t border-border pt-4 space-y-4">
                     <div className="flex items-center justify-between">
                       <span className="font-semibold">Total:</span>
@@ -245,25 +266,6 @@ function Header() {
                         Place Order
                       </button>
                     </Link>
-
-                    {/* <div className="space-y-2">
-                      <a
-                        href="https://wa.me/1234567890"
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="block w-full bg-green-500 text-white py-2 rounded-lg hover:bg-green-600 transition-colors text-center font-medium"
-                      >
-                        Contact via WhatsApp
-                      </a>
-                      <a
-                        href="https://t.me/username"
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="block w-full bg-blue-500 text-white py-2 rounded-lg hover:bg-blue-600 transition-colors text-center font-medium"
-                      >
-                        Contact via Telegram
-                      </a>
-                    </div> */}
                   </div>
                 </>
               )}

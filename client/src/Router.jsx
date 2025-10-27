@@ -8,17 +8,16 @@ import Story from "./pages/Story";
 import Products from "./pages/Products";
 import ProductsDetail from "./pages/ProductsDetail";
 import ContactUs from "./pages/ContactUs";
-import { CartProvider } from "./contexts/CartContext";
 import Dashboard from "./pages/Dashboard/Dashboard";
 import PlaceOrder from "./pages/PlaceOrder";
-import OrderConfirmation from "./pages/PlacerOrder/OrderConfirmation";
+import OrderConfirmation from "./pages/OrderConfirmation";
 
 function Router() {
   const location = useLocation();
   const hideLayout =
     location.pathname.startsWith("/dashboard") || location.pathname === "/auth";
   return (
-    <CartProvider>
+    <>
       {!hideLayout && <Header />}
       <Routes>
         <Route path="/" element={<Home />} />
@@ -31,7 +30,7 @@ function Router() {
         <Route path="/dashboard/*" element={<Dashboard />} />
       </Routes>
       {!hideLayout && <Footer />}
-    </CartProvider>
+    </>
   );
 }
 
