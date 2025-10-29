@@ -1,15 +1,16 @@
 import AboutSection from "@/components/Home/AboutSection";
-import FeaturedPieces from "@/components/Home/FeaturedPieces";
 import TestimonialSection from "@/components/Home/TestimonialSection";
 import FAQSection from "@/components/Home/FAQSection";
-import ImageBackground from "@/components/Background/ImageBackground";
+import ImageBackground from "@/components/Home/ImageBackground";
+import FeaturedProducts from "@/components/Home/FeaturedProducts";
+import AppleCardsCarouselDemo from "@/components/Home/AppleCardsCarouselDemo";
 
 export default function Home() {
   return (
     <main>
       <ImageBackground />
-      {/* <HeroSection /> */}
-      <FeaturedPieces />
+      <FeaturedProducts />
+      <AppleCardsCarouselDemo />
       <AboutSection />
       <TestimonialSection />
       <FAQSection />

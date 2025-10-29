@@ -1,10 +1,14 @@
 import { useState } from "react";
 import { Link } from "react-router-dom";
 import { ShoppingCart, Eye } from "lucide-react";
-import { Tooltip,  TooltipContent,  TooltipProvider,  TooltipTrigger,} from "@/components/ui/tooltip";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 
-
-function ProductGrid({ products, onAddToCart ,currency, onQuickPreview }) {
+function ProductGrid({ products, onAddToCart, currency, onQuickPreview }) {
   const [hoveredImageId, setHoveredImageId] = useState(null);
 
   const formatPrice = (price) => {
@@ -14,18 +18,10 @@ function ProductGrid({ products, onAddToCart ,currency, onQuickPreview }) {
     return `$${price}`;
   };
 
-const handleAddToCart = (e, product) => {
-  onAddToCart(
-    e,
-    product.id,
-    product.name,
-    product.price,
-    product.category,
-    product.image,
-    product.rating
-  );
-};
-
+  const handleAddToCart = (e, product) => {
+    // Pass only the product to the parent handler — parent will fill default color/size
+    onAddToCart(product);
+  };
 
   return (
     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
@@ -66,7 +62,7 @@ const handleAddToCart = (e, product) => {
                   <Tooltip>
                     <TooltipTrigger asChild>
                       <button
-                        onClick={(e) => handleAddToCart(e,product)}
+                        onClick={(e) => handleAddToCart(e, product)}
                         className="bg-white text-black p-3 rounded-full hover:bg-accent transition-colors"
                       >
                         <ShoppingCart className="w-5 h-5" />

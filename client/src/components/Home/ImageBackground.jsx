@@ -1,4 +1,3 @@
-import "./videoBack.css";
 import bgImage from "../../assets/3a.webp"; // your image file
 
 const ImageBackground = () => {

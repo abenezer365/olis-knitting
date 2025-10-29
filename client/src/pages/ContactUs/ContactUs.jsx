@@ -38,7 +38,7 @@ export default function ContactUs() {
                 </h2>
                 <div className="space-y-6">
                   <div className="flex gap-4">
-                    <MapPin className="w-6 h-6 text-primary flex-shrink-0 mt-1" />
+                    <MapPin className="w-6 h-6 text-primary shrink-0 mt-1" />
                     <div>
                       <h3 className="font-semibold text-foreground mb-1">
                         Address
@@ -50,7 +50,7 @@ export default function ContactUs() {
                   </div>
 
                   <div className="flex gap-4">
-                    <Phone className="w-6 h-6 text-primary flex-shrink-0 mt-1" />
+                    <Phone className="w-6 h-6 text-primary shrink-0 mt-1" />
                     <div>
                       <h3 className="font-semibold text-foreground mb-1">
                         Phone
@@ -61,7 +61,7 @@ export default function ContactUs() {
                   </div>
 
                   <div className="flex gap-4">
-                    <Mail className="w-6 h-6 text-primary flex-shrink-0 mt-1" />
+                    <Mail className="w-6 h-6 text-primary shrink-0 mt-1" />
                     <div>
                       <h3 className="font-semibold text-foreground mb-1">
                         Email
@@ -169,7 +169,7 @@ export default function ContactUs() {
                     href="https://wa.me/251911234567"
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="group flex items-center gap-3 bg-gradient-to-r from-green-500 to-green-600 text-white px-6 py-3 rounded-2xl shadow-md hover:shadow-lg transition-all duration-300 font-medium"
+                    className="group flex items-center gap-3 bg-linear-to-r from-green-500 to-green-600 text-white px-6 py-3 rounded-2xl shadow-md hover:shadow-lg transition-all duration-300 font-medium"
                   >
                     <FaWhatsapp
                       size={22}
@@ -178,7 +178,7 @@ export default function ContactUs() {
                     <span className="relative">
                       Chat on WhatsApp
                       {/* Animated underline */}
-                      <span className="absolute left-0 bottom-0 w-0 h-[1px] bg-white transition-all duration-300 group-hover:w-full"></span>
+                      <span className="absolute left-0 bottom-0 w-0 h-px bg-white transition-all duration-300 group-hover:w-full"></span>
                     </span>
                   </a>
 
@@ -187,7 +187,7 @@ export default function ContactUs() {
                     href="https://t.me/olifashion"
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="group flex items-center gap-3 bg-gradient-to-r from-sky-500 to-blue-600 text-white px-6 py-3 rounded-2xl shadow-md hover:shadow-lg transition-all duration-300 font-medium"
+                    className="group flex items-center gap-3 bg-linear-to-r from-sky-500 to-blue-600 text-white px-6 py-3 rounded-2xl shadow-md hover:shadow-lg transition-all duration-300 font-medium"
                   >
                     <FaTelegramPlane
                       size={22}
@@ -196,7 +196,7 @@ export default function ContactUs() {
                     <span className="relative">
                       Chat on Telegram
                       {/* Animated underline */}
-                      <span className="absolute left-0 bottom-0 w-0 h-[1px] bg-white transition-all duration-300 group-hover:w-full"></span>
+                      <span className="absolute left-0 bottom-0 w-0 h-px bg-white transition-all duration-300 group-hover:w-full"></span>
                     </span>
                   </a>
                 </div>

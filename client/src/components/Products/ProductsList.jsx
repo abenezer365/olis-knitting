@@ -2,7 +2,12 @@ import { useState } from "react";
 import { Link } from "react-router-dom";
 import { ShoppingCart, Eye } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Tooltip,TooltipContent,TooltipProvider,TooltipTrigger,} from "@/components/ui/tooltip";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 
 function ProductList({ products, onAddToCart, currency, onQuickPreview }) {
   const [hoveredImageId, setHoveredImageId] = useState(null);
@@ -14,18 +19,12 @@ function ProductList({ products, onAddToCart, currency, onQuickPreview }) {
     return `$${price}`;
   };
 
-const handleAddToCart = (e, product) => {
-  onAddToCart(
-    e,
-    product.id,
-    product.name,
-    product.price,
-    product.category,
-    product.image,
-    product.rating
-  );
-};
-
+  const handleAddToCart = (arg1, arg2) => {
+    // support two call styles: (event, product) or (product)
+    const product = arg2 ?? arg1;
+    if (!product) return;
+    onAddToCart(product);
+  };
 
   return (
     <div className="space-y-4">
@@ -68,7 +67,7 @@ const handleAddToCart = (e, product) => {
                   <Tooltip>
                     <TooltipTrigger asChild>
                       <button
-                        onClick={() => handleAddToCart(product)}
+                        onClick={(e) => handleAddToCart(e, product)}
                         className="bg-white text-black p-3 rounded-full hover:bg-accent transition-colors"
                       >
                         <ShoppingCart className="w-5 h-5" />

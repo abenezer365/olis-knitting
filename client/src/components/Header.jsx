@@ -1,44 +1,28 @@
-import { useContext, useState, useMemo } from "react";
+import { useState } from "react";
 import { Link, NavLink } from "react-router-dom";
 import { ShoppingCart, LogIn, Menu, X, Trash2 } from "lucide-react";
-import { Context } from "@/contexts/Context";
-import { Type } from "@/utils/action.type";
+import { useGlobalContext } from "@/contexts/Context";
 
 function Header() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isCartOpen, setIsCartOpen] = useState(false);
   const [isLoginOpen, setIsLoginOpen] = useState(false);
-  const [{ basket }, dispatch] = useContext(Context);
 
-  const total = useMemo(
-    () => basket.reduce((sum, item) => sum + item.price * item.amount, 0),
-    [basket]
-  );
+  const { cart, updateQuantity, removeFromCart, total, itemCount } =
+    useGlobalContext();
 
   const formatPrice = (price) => `$${price.toFixed(2)}`;
 
-  // 🗑 Remove an item
-  const removeItem = (id) => {
-    dispatch({
-      type: Type.REMOVE_FROM_CART,
-      item: { id },
-    });
+  const removeItem = (idOrPayload) => {
+    // idOrPayload may be a primitive id or an object { id, color, size }
+    removeFromCart(idOrPayload);
   };
 
-  // ➕➖ Update quantity
-  const updateQuantity = (id, newAmount) => {
-    if (newAmount > 1) {
-      dispatch({
-        type: Type.INCREMENT_ITEM,
-        item: { id },
-      });
-    } else if (newAmount === 1) {
-      dispatch({
-        type: Type.DECREMENT_ITEM,
-        item: { id },
-      });
-    } else if (newAmount === 0) {
-      removeItem(id);
+  const handleUpdateQuantity = (id, newAmount, color, size) => {
+    if (newAmount <= 0) {
+      removeFromCart({ id, color, size });
+    } else {
+      updateQuantity(id, newAmount, color, size);
     }
   };
 
@@ -78,7 +62,7 @@ function Header() {
                 Products
               </NavLink>
               <NavLink
-                to="/order"
+                to="/place_order"
                 className={({ isActive }) =>
                   `text-foreground transition-colors hover:text-[#f8a532]  ${
                     isActive ? "text-[#f8a532] border-b border-black" : ""
@@ -107,9 +91,9 @@ function Header() {
                 aria-label="Shopping cart"
               >
                 <ShoppingCart size={20} />
-                {basket.length > 0 && (
+                {itemCount > 0 && (
                   <span className="absolute top-0 right-0 bg-primary text-primary-foreground text-xs rounded-full w-5 h-5 flex items-center justify-center">
-                    {basket.length}
+                    {itemCount}
                   </span>
                 )}
               </button>
@@ -193,7 +177,7 @@ function Header() {
                 </button>
               </div>
 
-              {basket.length === 0 ? (
+              {cart.length === 0 ? (
                 <div className="text-center py-12 text-muted-foreground flex-1 flex items-center justify-center">
                   Your cart is empty
                 </div>
@@ -201,9 +185,11 @@ function Header() {
                 <>
                   {/* Cart Items */}
                   <div className="flex-1 space-y-4 mb-6 overflow-y-auto">
-                    {basket.map((item) => (
+                    {cart.map((item) => (
                       <div
-                        key={item.id}
+                        key={`${item.id}-${item.color || "default"}-${
+                          item.size || "default"
+                        }`}
                         className="flex gap-4 bg-secondary p-4 rounded-lg"
                       >
                         <div className="relative w-20 h-20 shrink-0 rounded-lg overflow-hidden">
@@ -216,6 +202,16 @@ function Header() {
 
                         <div className="flex-1">
                           <h3 className="font-semibold text-sm">{item.name}</h3>
+                          {item.color && (
+                            <p className="text-sm text-muted-foreground">
+                              Color: {item.color}
+                            </p>
+                          )}
+                          {item.size && (
+                            <p className="text-sm text-muted-foreground">
+                              Size: {item.size}
+                            </p>
+                          )}
                           <p className="text-primary font-bold">
                             {formatPrice(item.price)}
                           </p>
@@ -223,25 +219,41 @@ function Header() {
                           <div className="flex items-center gap-2 mt-2">
                             <button
                               onClick={() =>
-                                updateQuantity(item.id, item.amount - 1)
+                                handleUpdateQuantity(
+                                  item.id,
+                                  item.quantity - 1,
+                                  item.color,
+                                  item.size
+                                )
                               }
                               className="px-2 py-1 bg-background rounded hover:bg-border transition-colors"
                             >
                               −
                             </button>
                             <span className="w-8 text-center">
-                              {item.amount}
+                              {item.quantity}
                             </span>
                             <button
                               onClick={() =>
-                                updateQuantity(item.id, item.amount + 1)
+                                handleUpdateQuantity(
+                                  item.id,
+                                  item.quantity + 1,
+                                  item.color,
+                                  item.size
+                                )
                               }
                               className="px-2 py-1 bg-background rounded hover:bg-border transition-colors"
                             >
                               +
                             </button>
                             <button
-                              onClick={() => removeItem(item.id)}
+                              onClick={() =>
+                                removeItem({
+                                  id: item.id,
+                                  color: item.color,
+                                  size: item.size,
+                                })
+                              }
                               className="ml-auto p-1 hover:bg-red-100 rounded transition-colors"
                               aria-label="Remove item"
                             >
@@ -261,7 +273,11 @@ function Header() {
                         {formatPrice(total)}
                       </span>
                     </div>
-                    <Link to="/order" className="block">
+                    <Link
+                      to="/place_order"
+                      className="block"
+                      onClick={() => setIsCartOpen(false)}
+                    >
                       <button className="w-full bg-primary text-primary-foreground py-2 rounded-lg hover:opacity-90 transition-opacity font-medium">
                         Place Order
                       </button>

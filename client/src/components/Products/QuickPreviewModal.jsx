@@ -1,13 +1,19 @@
 import { useState } from "react";
-import { Dialog, DialogContent, DialogHeader,  DialogTitle,} from "@/components/ui/dialog";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { ShoppingCart } from "lucide-react";
 import { FaWhatsapp, FaTelegramPlane } from "react-icons/fa";
-function QuickPreviewModal({ product,onAddToCart,currency, onClose }) {
+
+function QuickPreviewModal({ product, onAddToCart, currency, onClose }) {
   const [selectedColor, setSelectedColor] = useState(product.colors[0]);
   const [selectedSize, setSelectedSize] = useState(product.sizes[0]);
   const [quantity, setQuantity] = useState(1);
-  
+
   const [zoom, setZoom] = useState(false);
   const [position, setPosition] = useState({ x: 0, y: 0 });
 
@@ -27,17 +33,22 @@ function QuickPreviewModal({ product,onAddToCart,currency, onClose }) {
     }
     return `$${price}`;
   };
-  
-  const handleAddToCart = (e, product) => {
-    onAddToCart(
-        e,
-        product.id,
-        product.name,
-        product.price,
-        product.category,
-        product.image,
-        product.rating
-     );
+
+  const handleAddToCart = (product) => {
+    const payload = {
+      id: product.id,
+      name: product.name,
+      price: product.price,
+      category: product.category,
+      image: product.image || product.images?.[0],
+      rating: product.rating,
+      quantity,
+      color: selectedColor,
+      size: selectedSize,
+    };
+    onAddToCart(payload);
+    // close the quick preview modal after adding to cart
+    if (typeof onClose === "function") onClose();
   };
 
   return (
@@ -150,7 +161,7 @@ function QuickPreviewModal({ product,onAddToCart,currency, onClose }) {
 
             {/* Add to Cart */}
             <Button
-              onClick={(e) => handleAddToCart(e,product)}
+              onClick={() => handleAddToCart(product)}
               className="w-full gap-2 mt-4 py-6"
               size="sm"
             >

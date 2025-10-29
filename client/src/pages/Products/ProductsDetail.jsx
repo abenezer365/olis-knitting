@@ -1,68 +1,65 @@
-import React, { useState, useContext } from "react";
+import React, { useState } from "react";
 import { useParams, Link, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { ArrowLeft } from "lucide-react";
 import ProductImageZoom from "@/components/Products/ProductImageZoom";
 import { DEMO_PRODUCTS } from "@/demo/demo";
 import RelatedProducts from "@/components/Products/RelatedProducts";
-import { Context } from "@/contexts/Context";
+import { useGlobalContext } from "@/contexts/Context";
 import { FaWhatsapp, FaTelegramPlane } from "react-icons/fa";
-import { Type } from "@/utils/action.type";
 
 function ProductsDetail() {
   const { id } = useParams();
   const navigate = useNavigate();
 
-  const [, dispatch] = useContext(Context);
+  const { addToCart, clearCart } = useGlobalContext();
 
   const productId = parseInt(id);
-  const [currentProduct, setCurrentProduct] = useState(DEMO_PRODUCTS.find((p) => p.id === productId));
+  const [currentProduct, setCurrentProduct] = useState(
+    DEMO_PRODUCTS.find((p) => p.id === productId)
+  );
 
   const [selectedColor, setSelectedColor] = useState(
-    currentProduct?.colors[0] || ""
+    currentProduct?.colors?.[0] || ""
   );
   const [selectedSize, setSelectedSize] = useState(
-    currentProduct?.sizes[0] || ""
+    currentProduct?.sizes?.[0] || ""
   );
   const [quantity, setQuantity] = useState(1);
 
   const handleAddToCart = (product) => {
     if (!product) return;
 
-    dispatch({
-      type: "ADD_TO_CART",
-      item: {
-        id: product.id.toString(),
-        name: product.name,
-        price: product.price,
-        image: product.image,
-        quantity,
-        color: selectedColor,
-        size: selectedSize,
-      },
+    addToCart({
+      id: product.id,
+      name: product.name,
+      price: product.price,
+      image: product.image,
+      quantity,
+      color: selectedColor,
+      size: selectedSize,
     });
   };
 
-const handleBuyNow = () => {
-  // clear the basket
-  dispatch({ type: Type.EMPTY_BASKET });
+  const handleBuyNow = () => {
+    if (!currentProduct) return;
 
-  dispatch({
-    type: Type.ADD_TO_CART,
-    item: {
-      id: currentProduct.id.toString(),
+    // clear the cart then add the product with the chosen quantity
+    clearCart();
+
+    addToCart({
+      id: currentProduct.id,
       name: currentProduct.name,
       price: currentProduct.price,
       image: currentProduct.image,
-      amount: quantity,
-    },
-  });
+      quantity,
+      color: selectedColor,
+      size: selectedSize,
+    });
 
-
-  // redirect to order page
-  navigate("/order");
-};
-
+    // redirect to order page
+    navigate("/order");
+  };
 
   if (!currentProduct) {
     return (
@@ -86,8 +83,8 @@ const handleBuyNow = () => {
     const newProduct = DEMO_PRODUCTS.find((p) => p.id === productId);
     if (newProduct) {
       setCurrentProduct(newProduct);
-      setSelectedColor(newProduct.colors[0]);
-      setSelectedSize(newProduct.sizes[0]);
+      setSelectedColor(newProduct.colors?.[0] || "");
+      setSelectedSize(newProduct.sizes?.[0] || "");
       setQuantity(1);
       window.scrollTo({ top: 0, behavior: "smooth" });
     }

@@ -1,10 +1,10 @@
 import ProductFilters from "@/components/Products/ProductFilters";
 import QuickPreviewModal from "@/components/Products/QuickPreviewModal";
-import { useContext, useState } from "react";
+import { useState } from "react";
 import { DEMO_PRODUCTS, CATEGORIES, CURRENCIES } from "@/demo/demo";
 import ProductGrid from "@/components/Products/ProductGrid";
 import ProductList from "@/components/Products/ProductsList";
-import { Context } from "@/contexts/Context";
+import { useGlobalContext } from "@/contexts/Context";
 import { Type } from "@/utils/action.type";
 
 function Products() {
@@ -14,7 +14,9 @@ function Products() {
   const [currency, setCurrency] = useState("USD");
   const [selectedProduct, setSelectedProduct] = useState(null);
   const [itemsPerPage, setItemsPerPage] = useState(10);
-  const [, dispatch] = useContext(Context)
+
+  const { addToCart } = useGlobalContext();
+
   // Filter products
   const filteredProducts = DEMO_PRODUCTS.filter(
     (product) =>
@@ -44,15 +46,28 @@ function Products() {
 
   const displayedProducts = filteredProducts.slice(0, itemsPerPage);
 
-  const handleAddToCart = (e, id, title, price,category, image,rating) => {
-    e.stopPropagation();
-    e.preventDefault();
-    dispatch({
-      type : Type.ADD_TO_CART,
-      item : {
-        id,title,price,category,image,rating
-      }
-    })
+  const handleAddToCart = (product) => {
+    // product may be passed directly from child components
+    if (!product) return;
+
+    // If the child already provided a full payload (color/size/quantity), pass it through
+    if (product.color || product.size || product.quantity) {
+      addToCart(product);
+      return;
+    }
+
+    // otherwise build a payload and use default color/size when available
+    addToCart({
+      id: product.id,
+      name: product.name || product.title,
+      price: product.price,
+      category: product.category,
+      image: product.image || product.images?.[0],
+      rating: product.rating,
+      quantity: 1,
+      color: product.colors?.[0] || null,
+      size: product.sizes?.[0] || null,
+    });
   };
 
   return (

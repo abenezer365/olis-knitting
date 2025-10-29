@@ -1,15 +1,16 @@
-import React from 'react'
-import Router from './Router'
-import { ContextProvider } from './contexts/Context'
-import { InitialState, Reducer } from './utils/reducer';
+import React from "react";
+import Router from "./Router";
+import { ContextProvider } from "./contexts/Context";
+import { Toaster } from "@/components/ui/sonner";
 function App() {
   return (
     <>
-    <ContextProvider initialState={InitialState} reducer={Reducer}>
+      <ContextProvider>
+        <Toaster />
         <Router />
-    </ContextProvider>
+      </ContextProvider>
     </>
-  )
+  );
 }
 
-export default App
+export default App;
