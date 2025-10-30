@@ -36,7 +36,7 @@ function Dashboard() {
           <Route path="/" element={<Analytics />} />
           <Route path="/orders" element={<Orders />} />
           <Route path="/customers" element={<Customers />} />
-          <Route path="/staffs" element={<Staffs />} />
+          <Route path="/staff" element={<Staffs />} />
           <Route path="/products" element={<Products />} />
           <Route path="/messages" element={<Messages />} />
           <Route path="/revenue" element={<Revenue />} />

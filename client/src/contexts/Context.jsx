@@ -22,7 +22,7 @@ export const ContextProvider = ({ children }) => {
 
   // ---- USER ACTIONS ----
   const setUser = (user) => dispatch({ type: Type.SET_USER, payload: user });
-  const clearUser = () => dispatch({ type: Type.CLEAR_USER });
+  const clearUser = () => dispatch({ type: Type.EMPTY_USER });
 
   // ---- DERIVED VALUES ----
   const total = state.cart.reduce(

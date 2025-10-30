@@ -1,200 +1,177 @@
-import React, { useState } from 'react';
-import CSS from './Messages.module.css';
+import { useEffect, useState } from "react";
+import axios from "@/utils/axios.instance";
+import { Loader2, Trash2, Reply, RotateCcw } from "lucide-react";
+import { toast } from "sonner";
 
 const Messages = () => {
-  const [messages, setMessages] = useState([
-    {
-      id: 1,
-      name: 'Alex Johnson',
-      email: 'alex.johnson@example.com',
-      subject: 'Partnership Inquiry',
-      message: 'Hello! I represent a tech startup and would like to discuss potential partnership opportunities with your company. We believe our products complement each other well and could create great value for both our customers.',
-      timestamp: '2024-01-15 14:30',
-      read: false,
-      avatar: 'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=100&h=100&fit=crop&crop=face'
-    },
-    {
-      id: 2,
-      name: 'Sarah Miller',
-      email: 'sarah.m@creative.com',
-      subject: 'Product Feedback',
-      message: 'I\'ve been using your service for 3 months now and wanted to share some feedback. The dashboard is amazing but I think the mobile app could use some improvements in the navigation flow.',
-      timestamp: '2024-01-14 11:20',
-      read: true,
-      avatar: 'https://images.unsplash.com/photo-1494790108755-2616b612b786?w=100&h=100&fit=crop&crop=face'
-    },
-    {
-      id: 3,
-      name: 'Mike Chen',
-      email: 'mike.chen@techcorp.com',
-      subject: 'Technical Support Needed',
-      message: 'We\'re experiencing some API integration issues with your platform. The authentication seems to be timing out after 30 minutes. Can you help us resolve this?',
-      timestamp: '2024-01-14 09:45',
-      read: false,
-      avatar: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=100&h=100&fit=crop&crop=face'
-    },
-    {
-      id: 4,
-      name: 'Emily Rodriguez',
-      email: 'emily.r@designstudio.com',
-      subject: 'Collaboration Request',
-      message: 'Love your work! We\'re organizing a design conference next month and would be honored if you could join us as a speaker. The theme is "Future of Digital Experiences".',
-      timestamp: '2024-01-13 16:15',
-      read: true,
-      avatar: 'https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=100&h=100&fit=crop&crop=face'
-    },
-    {
-      id: 5,
-      name: 'David Kim',
-      email: 'david.kim@startup.io',
-      subject: 'Pricing Question',
-      message: 'I\'m interested in your enterprise plan but had some questions about the custom features. Do you offer trial periods for enterprise clients?',
-      timestamp: '2024-01-12 13:30',
-      read: true,
-      avatar: 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=100&h=100&fit=crop&crop=face'
-    }
-  ]);
-
+  const [messages, setMessages] = useState([]);
+  const [visibleCount, setVisibleCount] = useState(10);
+  const [loading, setLoading] = useState(true);
   const [replyingTo, setReplyingTo] = useState(null);
-  const [replyText, setReplyText] = useState('');
+  const [replyText, setReplyText] = useState("");
+  const [sending, setSending] = useState(false);
 
-  const handleReply = (messageId) => {
-    if (replyingTo === messageId) {
-      // Send reply logic would go here
-      console.log('Sending reply:', replyText);
-      setReplyingTo(null);
-      setReplyText('');
-      
-      // Mark as read when replying
-      setMessages(messages.map(msg => 
-        msg.id === messageId ? { ...msg, read: true } : msg
-      ));
-    } else {
-      setReplyingTo(messageId);
-      setReplyText('');
+  const fetchMessages = async () => {
+    try {
+      setLoading(true);
+      const res = await axios.get("/message/messages");
+      setMessages(res.data || []);
+    } catch {
+      toast.error("Failed to load messages.");
+    } finally {
+      setLoading(false);
+    }
+  };
+  function refresh() {
+    fetchMessages()
+  }
+  useEffect(() => {
+    fetchMessages();
+  }, []);
+
+  const handleDelete = async (id) => {
+    try {
+      await axios.delete(`/message/delete/${id}`);
+      toast.success("Message deleted!");
+      setMessages((prev) => prev.filter((m) => m.id !== id));
+    } catch {
+      toast.error("Failed to delete message.");
     }
   };
 
-  const handleMarkAsRead = (messageId) => {
-    setMessages(messages.map(msg => 
-      msg.id === messageId ? { ...msg, read: true } : msg
-    ));
+  const handleReply = async (id) => {
+    if (!replyText.trim()) return;
+    try {
+      setSending(true);
+      await axios.post(`/message/replyMessage/${id}`, { reply: replyText });
+      toast.success("Reply sent!");
+      setReplyText("");
+      setReplyingTo(null);
+      fetchMessages();
+    } catch {
+      toast.error("Failed to send reply.");
+    } finally {
+      setSending(false);
+    }
   };
 
-  const handleDelete = (messageId) => {
-    setMessages(messages.filter(msg => msg.id !== messageId));
-  };
+  if (loading)
+    return (
+      <div className="flex justify-center items-center h-64 text-muted-foreground">
+        <Loader2 className="w-6 h-6 animate-spin mr-2" /> Loading messages...
+      </div>
+    );
 
-  const formatTime = (timestamp) => {
-    const date = new Date(timestamp);
-    return date.toLocaleDateString() + ' ' + date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
-  };
+  const visibleMessages = messages.slice(0, visibleCount);
 
   return (
-    <div className={CSS.messagesContainer}>
-      <header className={CSS.header}>
-        <div className={CSS.headerContent}>
-          <h1 className={CSS.title}>Messages</h1>
-          <div className={CSS.stats}>
-            <span className={CSS.unreadCount}>
-              {messages.filter(msg => !msg.read).length} unread
-            </span>
-            <span className={CSS.totalCount}>
-              {messages.length} total
-            </span>
-          </div>
-        </div>
-        <p className={CSS.subtitle}>Customer inquiries and feedback</p>
-      </header>
+    <div className="p-6 max-w-5xl mx-auto font-sans text-foreground space-y-6">
+      <div className="flex justify-between align-middle">
+      <h1 className="text-3xl font-bold text-primary mb-6">
+        Messages Management
+      </h1>
+      <RotateCcw onClick={refresh} className=""/>
+      </div>
 
-      <div className={CSS.messagesList}>
-        {messages.map(message => (
-          <div 
-            key={message.id} 
-            className={`${CSS.messageCard} ${!message.read ? CSS.unread : ''} ${
-              replyingTo === message.id ? CSS.expanded : ''
-            }`}
+      {visibleMessages.length === 0 ? (
+        <p className="text-center text-muted-foreground">No messages found.</p>
+      ) : (
+        visibleMessages.map((msg) => (
+          <div
+            key={msg.id}
+            className="border border-border rounded-xl bg-card shadow-sm p-4 space-y-4"
           >
-            <div className={CSS.messageHeader}>
-              <div className={CSS.userInfo}>
-                <img 
-                  src={message.avatar} 
-                  alt={message.name}
-                  className={CSS.avatar}
-                />
-                <div className={CSS.userDetails}>
-                  <h3 className={CSS.userName}>{message.name}</h3>
-                  <p className={CSS.userEmail}>{message.email}</p>
+            {/* Top Bar */}
+            <div className="flex justify-between items-center border-b border-border pb-3">
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center font-semibold text-primary">
+                  {msg.first_name[0]}
+                  {msg.last_name[0]}
+                </div>
+                <div>
+                  <h3 className="font-medium">
+                    {msg.first_name} {msg.last_name}
+                  </h3>
+                  <p className="text-xs text-muted-foreground">{msg.email}</p>
                 </div>
               </div>
-              
-              <div className={CSS.messageMeta}>
-                <span className={CSS.timestamp}>
-                  {formatTime(message.timestamp)}
-                </span>
-                {!message.read && <div className={CSS.unreadDot}></div>}
+              <div className="flex gap-2">
+                <button
+                  onClick={() =>
+                    setReplyingTo(replyingTo === msg.id ? null : msg.id)
+                  }
+                  className="flex items-center gap-1 text-sm text-blue-600 hover:text-blue-700"
+                >
+                  <Reply className="w-4 h-4" /> Reply
+                </button>
+                <button
+                  onClick={() => handleDelete(msg.id)}
+                  className="flex items-center gap-1 text-sm text-red-600 hover:text-red-700"
+                >
+                  <Trash2 className="w-4 h-4" /> Delete
+                </button>
               </div>
             </div>
 
-            <div className={CSS.messageContent}>
-              <h4 className={CSS.subject}>{message.subject}</h4>
-              <p className={CSS.messageText}>{message.message}</p>
-            </div>
+            {/* Message + Reply */}
+            <div className="flex flex-col gap-3">
+              <div className="flex justify-start">
+                <div className="max-w-[80%] bg-secondary text-foreground p-3 rounded-2xl rounded-bl-none">
+                  <p className="text-sm leading-relaxed">{msg.message}</p>
+                  <p className="text-[11px] text-muted-foreground mt-1 text-right">
+                    {new Date(msg.created_at).toLocaleString()}
+                  </p>
+                </div>
+              </div>
 
-            <div className={CSS.actionBar}>
-              <button 
-                className={`${CSS.actionButton} ${CSS.replyButton}`}
-                onClick={() => handleReply(message.id)}
-              >
-                {replyingTo === message.id ? 'Send Reply' : 'Reply'}
-              </button>
-              
-              {!message.read && (
-                <button 
-                  className={`${CSS.actionButton} ${CSS.readButton}`}
-                  onClick={() => handleMarkAsRead(message.id)}
-                >
-                  Mark Read
-                </button>
+              {msg.reply && (
+                <div className="flex justify-end">
+                  <div className="max-w-[80%] bg-violet-100 text-foreground p-3 rounded-2xl rounded-br-none">
+                    <p className="text-sm leading-relaxed">{msg.reply}</p>
+                    <p className="text-[11px] opacity-80 mt-1 text-right">
+                      {new Date(msg.replied_at).toLocaleString()}
+                    </p>
+                  </div>
+                </div>
               )}
-              
-              <button 
-                className={`${CSS.actionButton} ${CSS.deleteButton}`}
-                onClick={() => handleDelete(message.id)}
-              >
-                Delete
-              </button>
-            </div>
 
-            {replyingTo === message.id && (
-              <div className={CSS.replySection}>
+           {replyingTo === msg.id && (
+            <div className="flex justify-end mt-3">
+              <div className="w-[80%] flex flex-col gap-2">
                 <textarea
-                  className={CSS.replyInput}
+                  className="border border-border rounded-md p-2 bg-popover text-foreground text-sm resize-none focus:ring-1 focus:ring-ring outline-none"
+                  rows={3}
+                  placeholder="Write a reply..."
                   value={replyText}
                   onChange={(e) => setReplyText(e.target.value)}
-                  placeholder="Type your reply here..."
-                  rows="4"
                 />
-                <div className={CSS.replyActions}>
-                  <button 
-                    className={`${CSS.actionButton} ${CSS.cancelButton}`}
-                    onClick={() => setReplyingTo(null)}
+                <div className="flex justify-end">
+                  <button
+                    disabled={sending}
+                    onClick={() => handleReply(msg.id)}
+                    className="bg-primary text-primary-foreground px-4 py-2 rounded-md text-sm font-medium hover:opacity-90 transition disabled:opacity-70"
                   >
-                    Cancel
-                  </button>
-                  <button 
-                    className={`${CSS.actionButton} ${CSS.sendButton}`}
-                    onClick={() => handleReply(message.id)}
-                    disabled={!replyText.trim()}
-                  >
-                    Send Message
+                    {sending ? "Sending..." : "Send Reply"}
                   </button>
                 </div>
               </div>
-            )}
+            </div>
+          )}
+            </div>
           </div>
-        ))}
-      </div>
+        ))
+      )}
+
+      {visibleCount < messages.length && (
+        <div className="text-center">
+          <button
+            onClick={() => setVisibleCount((prev) => prev + 10)}
+            className="px-6 py-2 rounded-md bg-secondary text-foreground hover:bg-secondary/80 transition text-sm font-medium"
+          >
+            Show More
+          </button>
+        </div>
+      )}
     </div>
   );
 };

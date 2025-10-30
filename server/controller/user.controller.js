@@ -115,68 +115,71 @@ export async function signup(req, res) {
 
 // Update user info Controller
 export async function editProfile(req, res) {
-  const { first_name, last_name, email, phone } = req.body;
-  const userId = req.user.id;
-
-  if (!email || !first_name || !last_name || !phone) {
-    return res.status(400).json({
-      message: "Missing required fields",
-      success: false
-    });
-  }
-
   try {
-    // 1. Check for duplicate email (excluding current user)
+    const { first_name, last_name, email, phone, password } = req.body;
+    const userId = req.user?.id;
+
+    // ✅ Validation
+    if (!userId) {
+      return res.status(401).json({
+        success: false,
+        message: "Unauthorized access — user not found in request.",
+      });
+    }
+
+    if (!first_name || !last_name || !email || !phone) {
+      return res.status(400).json({
+        success: false,
+        message: "Missing required fields.",
+      });
+    }
+
+    // ✅ Check for duplicate email (excluding current user)
     const [existingUser] = await connection.execute(
-      "SELECT user_id FROM users WHERE email = ? AND user_id != ?",
+      "SELECT id FROM users WHERE email = ? AND id != ?",
       [email, userId]
     );
 
     if (existingUser.length > 0) {
       return res.status(409).json({
-        message: "Email already in use by another account",
-        success: false
+        success: false,
+        message: "Email already in use by another account.",
       });
     }
 
-    // Handle conditional password update
-    if (password) {
+    // ✅ Prepare update query
+    let query = `
+      UPDATE users 
+      SET first_name = ?, last_name = ?, email = ?, phone = ?
+    `;
+    const values = [first_name, last_name, email, phone];
+
+    // ✅ Optional password update
+    if (password && password.trim() !== "") {
       const salt = await bcrypt.genSalt(10);
       const hashedPassword = await bcrypt.hash(password, salt);
-
-      await connection.execute(
-        `UPDATE users 
-         SET first_name = ?, 
-             last_name = ?, 
-             email = ?, 
-             password = ?, 
-             phone = ? 
-         WHERE user_id = ?`,
-        [first_name, last_name, email, hashedPassword, phone, userId]
-      );
-    } else {
-      await connection.execute(
-        `UPDATE users 
-         SET first_name = ?, 
-             last_name = ?, 
-             email = ?, 
-             phone = ? 
-         WHERE user_id = ?`,
-        [first_name, last_name, email, phone, userId]
-      );
+      query += `, password = ?`;
+      values.push(hashedPassword);
     }
 
+    query += ` WHERE id = ?`;
+    values.push(userId);
+
+    // ✅ Execute update
+    await connection.execute(query, values);
+
+    // ✅ Send success response
     return res.status(200).json({
-      message: "User profile updated successfully!",
-      success: true
+      success: true,
+      message: "Profile updated successfully!",
     });
 
   } catch (error) {
-    console.log("Error editing profile:", error);
+    console.error("Error editing profile:", error);
     return res.status(500).json({
-      message: "Internal server error!",
       success: false,
-      error: error.message
+      message: "Internal server error.",
+      error: error.message,
     });
   }
 }

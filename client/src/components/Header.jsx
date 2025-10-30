@@ -1,20 +1,26 @@
-import { useState } from "react";
-import { Link, NavLink } from "react-router-dom";
-import { ShoppingCart, LogIn, Menu, X, Trash2 } from "lucide-react";
-import { useGlobalContext } from "@/contexts/Context";
+import { useContext, useEffect, useState } from "react";
+import { Link, NavLink, useNavigate } from "react-router-dom";
+import { ShoppingCart, LogIn, Menu, X, Trash2, LayoutDashboard  } from "lucide-react";
+import { GlobalContext, useGlobalContext } from "@/contexts/Context";
+import axios from "@/utils/axios.instance";
+import { toast } from "sonner";
 
 function Header() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isCartOpen, setIsCartOpen] = useState(false);
   const [isLoginOpen, setIsLoginOpen] = useState(false);
+  const [email, setEmail] = useState("")
+  const [password, setPassword] = useState("")
+  const [loading, setLoading] = useState(false)
+  const [error, setError] = useState("")
+  const navigate = useNavigate()
+  const { cart, updateQuantity, removeFromCart, total, itemCount } = useGlobalContext();
+  const {setUser, clearUser, user} = useContext(GlobalContext)
 
-  const { cart, updateQuantity, removeFromCart, total, itemCount } =
-    useGlobalContext();
 
   const formatPrice = (price) => `$${price.toFixed(2)}`;
 
   const removeItem = (idOrPayload) => {
-    // idOrPayload may be a primitive id or an object { id, color, size }
     removeFromCart(idOrPayload);
   };
 
@@ -25,6 +31,54 @@ function Header() {
       updateQuantity(id, newAmount, color, size);
     }
   };
+  
+  const handleLogin = async (e) => {
+    e.preventDefault()
+    setError("")
+    setLoading(true)
+
+    try {
+      const res = await axios.post('/user/signin',
+        { email, password }
+      )
+      if (res.data.success) {
+        const token = res.data.token;
+
+        localStorage.setItem('token', token);
+
+        const res2 = await axios.get('/user/check', {
+            headers: { Authorization: `Bearer ${token}` },
+          });
+
+        if (res2.data.success) {
+          setUser(res2.data.user)
+        } else {
+          localStorage.removeItem('token');
+          clearUser()
+        }
+        setIsLoginOpen(false)
+        navigate("/dashboard")
+        toast.success("Login successfull")
+      } else {
+        setError(res.data.message || "Invalid credentials")
+      }
+    } catch (err) {
+      setError(err.response?.data?.message || "Login failed. Try again.")
+      toast.error("Error occured")
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  useEffect(() => {
+    if (!error) return; // only run if there’s an error message
+    const timer = setTimeout(() => {
+      setError(null)
+    }, 3000);
+
+    return () => clearTimeout(timer); // cleanup when error changes or component unmounts
+  }, [error]);
+
 
   return (
     <>
@@ -97,14 +151,25 @@ function Header() {
                   </span>
                 )}
               </button>
-
-              <button
-                onClick={() => setIsLoginOpen(!isLoginOpen)}
-                className="p-2 hover:bg-secondary rounded-lg transition-colors"
-                aria-label="Login"
-              >
-                <LogIn size={20} />
-              </button>
+                {
+                  user ? 
+                  <Link to="/dashboard">
+                    <button
+                      className="p-2 hover:bg-secondary rounded-lg transition-colors"
+                      aria-label="Login"
+                    >
+                      <LayoutDashboard  size={20} />
+                    </button>
+                  </Link>
+                  : 
+                  <button
+                    onClick={() => setIsLoginOpen(!isLoginOpen)}
+                    className="p-2 hover:bg-secondary rounded-lg transition-colors"
+                    aria-label="Login"
+                  >
+                    <LogIn size={20} />
+                  </button>
+                }
 
               {/* Mobile Menu Toggle */}
               <button
@@ -308,11 +373,12 @@ function Header() {
               </button>
             </div>
 
-            <form className="space-y-4">
+            <form className="space-y-4" onSubmit={handleLogin}>
               <div>
                 <label className="block text-sm font-medium mb-2">Email</label>
                 <input
                   type="email"
+                  onChange={(e) => setEmail(e.target.value)}
                   className="w-full px-4 py-2 border border-border rounded-lg bg-secondary focus:outline-none focus:ring-2 focus:ring-accent"
                   placeholder="admin@example.com"
                 />
@@ -324,6 +390,7 @@ function Header() {
                 </label>
                 <input
                   type="password"
+                  onChange={(e) => setPassword(e.target.value)}
                   className="w-full px-4 py-2 border border-border rounded-lg bg-secondary focus:outline-none focus:ring-2 focus:ring-accent"
                   placeholder="••••••••"
                 />
@@ -331,10 +398,12 @@ function Header() {
 
               <button
                 type="submit"
+                disabled={loading}
                 className="w-full bg-primary text-primary-foreground py-2 rounded-lg hover:opacity-90 transition-opacity font-medium"
               >
-                Login
+                {loading ? "Logging in..." : "Login"}
               </button>
+              {error && <p className="text-red-500 font- text-center">{error}</p>}
             </form>
           </div>
         </div>

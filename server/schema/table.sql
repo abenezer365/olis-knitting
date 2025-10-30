@@ -36,7 +36,6 @@ CREATE TABLE customers (
   email VARCHAR(150) NOT NULL UNIQUE,
   phone VARCHAR(20),
   status ENUM('active', 'inactive', 'banned') DEFAULT 'active',
-  prefered_account ENUM('telegram', 'instagram', 'whatsapp') DEFAULT 'whatsapp',
   registered_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
 
   INDEX (email),
@@ -55,6 +54,7 @@ CREATE TABLE orders (
   
   total_amount DECIMAL(10,2) NOT NULL,
   payment_method ENUM('cash_on_delivery', 'credit_card', 'paypal', 'bank_transfer') DEFAULT 'bank_transfer',
+  prefered_account ENUM('telegram', 'instagram', 'whatsapp') DEFAULT 'whatsapp',
   
   created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
   order_date DATETIME DEFAULT CURRENT_TIMESTAMP,
@@ -183,7 +183,18 @@ CREATE TABLE revenue (
 );
 
 
+CREATE TABLE analytics (
+  id INT AUTO_INCREMENT PRIMARY KEY,
+  uuid CHAR(36) NOT NULL UNIQUE,
 
--- ALTER DATABASE olis
---   CHARACTER SET = utf8mb4
---   COLLATE = utf8mb4_unicode_ci;
+  total_revenue DECIMAL(15,2) NOT NULL DEFAULT 0.00,
+  total_orders INT NOT NULL DEFAULT 0,
+  total_products INT NOT NULL DEFAULT 0,
+  total_customers INT NOT NULL DEFAULT 0,
+
+  sales_data JSON DEFAULT NULL,
+  revenue_data JSON DEFAULT NULL, 
+
+  recorded_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+);

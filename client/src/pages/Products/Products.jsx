@@ -5,7 +5,6 @@ import { DEMO_PRODUCTS, CATEGORIES, CURRENCIES } from "@/demo/demo";
 import ProductGrid from "@/components/Products/ProductGrid";
 import ProductList from "@/components/Products/ProductsList";
 import { useGlobalContext } from "@/contexts/Context";
-import { Type } from "@/utils/action.type";
 
 function Products() {
   const [viewMode, setViewMode] = useState("grid");

@@ -6,9 +6,9 @@ import { deleteMessage, getAllMessages, getSingleMessage, replyMessage, writeMes
 const router = express.Router();
 
 router.post("/writeMessage", writeMessage);
-router.post("/replyMessage/:id", authenticate, authorize("admin"), replyMessage);
-router.get("/get/:id", authenticate, getSingleMessage);
-router.get("/messages", authenticate, authorize("admin"), getAllMessages);
-router.delete("/delete/:id", authenticate, authorize("admin"), deleteMessage);
+router.post("/replyMessage/:id", replyMessage);
+router.get("/get/:id", getSingleMessage);
+router.get("/messages", getAllMessages);
+router.delete("/delete/:id",  deleteMessage);
 
 export default router;

@@ -4,7 +4,6 @@ import { Link } from 'react-router-dom';
 import { IoMenu } from "react-icons/io5";
 import { IoMdSettings } from "react-icons/io";
 import { FaHome } from "react-icons/fa";
-import { FaUserCircle } from "react-icons/fa";
 import Sidebar from '../Sidebar/Sidebar';
 import useWidth from '../../../hooks/useWidth';
 

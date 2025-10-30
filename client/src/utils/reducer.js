@@ -91,8 +91,9 @@ export const Reducer = (state, action) => {
       return { ...state, user: action.payload };
     }
 
-    case Type.CLEAR_USER: {
+    case Type.EMPTY_USER: {
       localStorage.removeItem("user");
+      localStorage.removeItem("token");
       return { ...state, user: null };
     }
 

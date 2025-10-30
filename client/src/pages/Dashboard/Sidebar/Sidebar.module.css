@@ -6,7 +6,9 @@
     left: 0;
     z-index: 10000;
     overflow-y: auto;
-    background-color: #D6C6B8;
+    background-color:#253036;
+    color: white;
+    padding-bottom: 20px;
 }
 .sidebar .routes{
     display: flex;
@@ -20,14 +22,6 @@
     padding-left: 30px;
     cursor: pointer;
 }
-.sidebar .single:hover{
-    background-color: #090e1627;
-}
-.sidebar span{
-    color: #ff0055;
-    text-align: center;
-    padding: 5px 0;
-}
 .sidebar .profile{
     display: flex;
     flex-direction: column;
@@ -35,12 +29,6 @@
     background-color: #1C2428;
     color: beige;
     padding: 10px 0;
-}
-.sidebar .profile img{
-    width: 100px;
-    height: 100px;
-    object-fit: cover;
-    
 }
 .pp_title{
     font-size: 15px;
