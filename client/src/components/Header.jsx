@@ -153,7 +153,7 @@ function Header() {
               </button>
                 {
                   user ? 
-                  <Link to="/dashboard">
+                  <Link to="/dashboard/">
                     <button
                       className="p-2 hover:bg-secondary rounded-lg transition-colors"
                       aria-label="Login"

@@ -164,6 +164,74 @@ export const getSingleOrder = async (req, res) => {
   }
 };
 
+// Get order by uuid
+export const getSingleOrderByUuid = async (req, res) => {
+  try {
+    const { uuid } = req.params;
+
+    // Step 1: Fetch order with customer info
+    const [orderRows] = await connection.execute(
+      `SELECT 
+          o.*,
+          c.id AS customer_id,
+          c.first_name AS customer_fname,
+          c.last_name AS customer_lname,
+          c.email AS customer_email,
+          c.phone AS customer_phone
+        FROM orders o
+        JOIN customers c ON o.customer_id = c.id
+        WHERE o.uuid = ?`,
+      [uuid]
+    );
+
+    if (orderRows.length === 0) {
+      return res.status(404).json({ message: "Order not found" });
+    }
+
+    const order = orderRows[0];
+
+    // Step 2: Fetch ordered items for this order
+    const [items] = await connection.execute(
+      `SELECT 
+          oi.*,
+          p.id AS product_id,
+          p.name AS product_name,
+          p.image AS product_image,
+          p.price AS product_price
+        FROM ordered_items oi
+        JOIN products p ON oi.product_id = p.id
+        WHERE oi.order_id = ?`,
+      [order.id]
+    );
+
+    const products = items.map(item => ({
+      id: item.product_id,
+      name: item.product_name,
+      image: item.product_image,
+      price: item.product_price,
+      quantity: item.quantity,
+      subtotal: item.subtotal
+    }));
+
+    const formattedOrder = {
+      ...order,
+      client: {
+        id: order.customer_id,
+        fname: order.customer_fname,
+        lname: order.customer_lname,
+        email: order.customer_email,
+        phone: order.customer_phone
+      },
+      products
+    };
+
+    res.status(200).json(formattedOrder);
+  } catch (error) {
+    console.error("Error fetching order:", error);
+    res.status(500).json({ message: "Failed to fetch order" });
+  }
+};
+
 
 // Update order status controller
 export const orderStatus = async (req, res) => {

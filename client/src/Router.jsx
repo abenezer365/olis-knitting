@@ -11,6 +11,10 @@ import ContactUs from "./pages/ContactUs/ContactUs";
 import Dashboard from "./pages/Dashboard/Dashboard";
 import PlaceOrder from "./pages/Order/PlaceOrder";
 import OrderConfirmation from "./pages/Order/OrderConfirmation";
+import OrderTracking from "./pages/Order/OrderTracking";
+import AuthWrapper from "./components/AuthWrapper";
+import Unavailable from "./pages/Unavailable/Unavailable";
+import Unauthorized from "./pages/Unauthorized/Unauthorized";
 
 function Router() {
   const location = useLocation();
@@ -25,12 +29,12 @@ function Router() {
         <Route path="/products" element={<Products />} />
         <Route path="/products/:id" element={<ProductsDetail />} />
         <Route path="/place_order" element={<PlaceOrder />} />
-        <Route
-          path="/order_confirmation/:orderId"
-          element={<OrderConfirmation />}
-        />
+        <Route path="/order_confirmation/:uuid" element={<OrderConfirmation />}/>
+        <Route path="/order/:uuid" element={<OrderTracking />}/>
         <Route path="/contact" element={<ContactUs />} />
-        <Route path="/dashboard/*" element={<Dashboard />} />
+        <Route path="/dashboard/*" element={<AuthWrapper><Dashboard /></AuthWrapper>} />
+        <Route path="/unauthorized" element={<Unauthorized />} />
+        <Route path="/*" element={<Unavailable />} />
       </Routes>
       {!hideLayout && <Footer />}
     </>

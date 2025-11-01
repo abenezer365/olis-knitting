@@ -1,249 +1,409 @@
-import { useParams, useLocation, Link } from "react-router-dom";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
+import { useParams, Link } from "react-router-dom";
+import { toast } from "sonner";
+import axios from "@/utils/axios.instance";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { CheckCircle, MessageCircle, Send, Instagram } from "lucide-react";
-import { useGlobalContext } from "@/contexts/Context";
+import { Card, CardContent, CardHeader, CardTitle,  } from "@/components/ui/card";
+import { Copy, CheckCheck, Calendar, User, Package ,Truck, MapPin} from "lucide-react";
+import { FaWhatsapp, FaTelegramPlane, FaInstagram } from "react-icons/fa";
 
 function OrderConfirmation() {
-  const { orderId } = useParams();
-  const location = useLocation();
-  const { state: orderData } = location;
+  const { uuid } = useParams();
+  const [orderData, setOrderData] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [copiedField, setCopiedField] = useState(null);
 
-  // eslint-disable-next-line no-unused-vars
-  const { cart, total, clearCart } = useGlobalContext();
+  const exchangeRate = 160;
+
+  const getPrice = (price) => {
+    const numPrice = parseFloat(price);
+    return `$${numPrice.toFixed(2)} (${(numPrice * exchangeRate).toFixed(2)} ETB)`;
+  };
+
+  const getStatusDisplay = (status) => {
+    const statusConfig = {
+      pending: { class: "bg-yellow-100 text-yellow-800", label: "Pending" },
+      confirmed: { class: "bg-blue-100 text-blue-800", label: "Confirmed" },
+      processing: { class: "bg-purple-100 text-purple-800", label: "Processing" },
+      completed: { class: "bg-green-100 text-green-800", label: "Completed" },
+      cancelled: { class: "bg-red-100 text-red-800", label: "Cancelled" }
+    };
+    const config = statusConfig[status] || statusConfig.pending;
+    return (
+      <span className={`px-3 py-1 rounded-full text-sm font-medium ${config.class}`}>
+        {config.label}
+      </span>
+    );
+  };
 
   useEffect(() => {
-    // Clear cart after successful order if provider is available
-    if (clearCart) clearCart();
-  }, [clearCart]);
+    const fetchOrderData = async () => {
+      try {
+        setLoading(true);
+        const response = await axios.get(`/order/get_by_uuid/${uuid}`);
+        setOrderData(response.data);
+      } catch (error) {
+        console.error("Error fetching order data:", error);
+        toast.error("Failed to load order details");
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    if (uuid) {
+      fetchOrderData();
+    }
+  }, [uuid]);
+
+  const copyToClipboard = (text, field) => {
+    navigator.clipboard.writeText(text);
+    setCopiedField(field);
+    setTimeout(() => setCopiedField(null), 2000);
+    toast.success(`${field} copied to clipboard`);
+  };
+
+  const generateOrderMessage = () => {
+    if (!orderData) return "";
+    
+    const order = orderData;
+    const customer = orderData.client || {};
+    const items = orderData.products || [];
+    
+    const itemList = items.map(item => 
+      `• ${item.name} (Qty: ${item.quantity}) - $${item.price}`
+    ).join('\n');
+
+    return `Hello! I would like to discuss payment for my order #${order.id}
+
+        Order Details:
+        ${itemList}
+
+        Total Amount: $${order.total_amount}
+        Customer: ${customer.fname} ${customer.lname}
+        Email: ${customer.email}
+        Phone: ${customer.phone}
+
+        Please let me know the available payment options and next steps.`;
+  };
+
+  const handleSocialMediaRedirect = (platform) => {
+    const message = encodeURIComponent(generateOrderMessage());
+    const urls = {
+      whatsapp: `https://wa.me/+251972936889?text=${message}`,
+      telegram: `https://t.me/lil_kimber?text=${message}`,
+      instagram: `https://instagram.com/abenether_`
+    };
+
+    window.open(urls[platform], '_blank');
+  };
+
+  if (loading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-background/50">
+        <div className="text-center space-y-4">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto"></div>
+          <div>
+            <h2 className="text-xl font-semibold">Loading Order Details</h2>
+            <p className="text-muted-foreground">Preparing your order summary...</p>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   if (!orderData) {
     return (
-      <div className="min-h-screen flex flex-col">
-        <div className="flex-1 container mx-auto px-4 py-20 text-center">
-          <h1 className="text-4xl font-display mb-4">Order Not Found</h1>
+      <div className="min-h-screen flex items-center justify-center bg-background/50">
+        <div className="text-center space-y-6">
+          <Package className="h-16 w-16 text-muted-foreground mx-auto" />
+          <div>
+            <h1 className="text-2xl font-bold mb-2">Order Not Found</h1>
+            <p className="text-muted-foreground">The order you're looking for doesn't exist or has been removed.</p>
+          </div>
           <Button asChild>
-            <Link to="/">Go Home</Link>
+            <Link to="/products">Continue Shopping</Link>
           </Button>
         </div>
       </div>
     );
   }
 
-  const {
-    customerInfo,
-    shippingInfo,
-    items,
-    total: orderTotal,
-    currency,
-    paymentMethod,
-  } = orderData;
-
-  // Currency exchange rate (1 USD = X ETB). Keep consistent with OrderPage.
-  const exchangeRate = 160;
-
-  const computedTotal =
-    orderTotal ??
-    total ??
-    items?.reduce(
-      (s, it) => s + (it.price || 0) * (it.quantity ?? it.amount ?? 1),
-      0
-    );
-
-  const getContactLink = () => {
-    // Display total in selected currency for the contact message
-    const displayTotal =
-      currency === "ETB"
-        ? (computedTotal * exchangeRate).toFixed(2)
-        : computedTotal.toFixed(2);
-    const displayTotalLabel =
-      currency === "ETB" ? `${displayTotal} ETB` : `$${displayTotal}`;
-
-    const message = encodeURIComponent(
-      `Hello! I would like to complete my order #${orderId}\n\nCustomer: ${customerInfo.fullName}\nEmail: ${customerInfo.email}\nPhone: ${customerInfo.phone}\n\nShipping Address:\n${shippingInfo.address}, ${shippingInfo.city}, ${shippingInfo.country}\n\nTotal: ${displayTotalLabel}`
-    );
-
-    switch (paymentMethod) {
-      case "whatsapp":
-        return `https://wa.me/251911234567?text=${message}`;
-      case "telegram":
-        return `https://t.me/olis_fashion?text=${message}`;
-      case "instagram":
-        return "https://instagram.com/olis_fashion";
-      default:
-        return `https://wa.me/251911234567?text=${message}`;
-    }
-  };
-
-  const getContactIcon = () => {
-    switch (paymentMethod) {
-      case "whatsapp":
-        return <MessageCircle className="h-5 w-5" />;
-      case "telegram":
-        return <Send className="h-5 w-5" />;
-      case "instagram":
-        return <Instagram className="h-5 w-5" />;
-      default:
-        return <MessageCircle className="h-5 w-5" />;
-    }
-  };
+  const order = orderData;
+  const customer = orderData.client || {};
+  const items = orderData.products || [];
 
   return (
-    <div className="min-h-screen flex flex-col">
-      <main className="flex-1 container mx-auto px-4 py-12">
-        <div className="max-w-3xl mx-auto">
-          {/* Success Message */}
-          <div className="text-center mb-12">
-            <CheckCircle className="h-20 w-20 text-green-500 mx-auto mb-4" />
-            <h1 className="text-4xl font-display mb-4">
-              Order Placed Successfully!
-            </h1>
-            <p className="text-muted-foreground text-lg">
-              Thank you for your order. Your order ID is:{" "}
-              <span className="font-semibold">#{orderId}</span>
+    <div className="min-h-screen bg-background/50 py-8">
+      <div className="container mx-auto px-4 max-w-4xl">
+        {/* Header */}
+        <div className="text-center mb-12">
+          <div className="w-20 h-20 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-6">
+            <CheckCheck className="h-10 w-10 text-green-600" />
+          </div>
+          <h1 className="text-4xl font-bold mb-4">Order Confirmed!</h1>
+          <p className="text-xl text-muted-foreground mb-6">
+            Thank you for your purchase. We're preparing your order.
+          </p>
+          {/* Animated Tracking Link */}
+          <div className="mt-8 mb-8 p-6  text-center">
+            <div className="flex items-center justify-center gap-3 mb-3">
+              <Package className="h-6 w-6 text-accent animate-bounce" />
+              <h3 className="text-xl font-semibold text-foreground">Track Your Order</h3>
+              <Truck className="h-6 w-6 text-accent animate-bounce" style={{ animationDelay: '0.2s' }} />
+            </div>
+            <p className="text-muted-foreground mb-4">
+              Use this link to track your order in real-time:
+            </p>
+            <div className="flex items-center justify-center gap-2 max-w-md mx-auto">
+              <div className="flex-1 bg-background border border-border rounded-lg px-4 py-3 font-mono text-sm truncate">
+                {`${window.location.origin}/order/${order.uuid}`}
+              </div>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => {
+                  navigator.clipboard.writeText(`${window.location.origin}/tracking/${order.uuid}`);
+                  toast.success("Tracking link copied to clipboard!");
+                }}
+                className="shrink-0"
+              >
+                <Copy className="h-4 w-4" />
+              </Button>
+              <Button
+                size="sm"
+                onClick={() => window.open(`/order/${order.uuid}`, '_blank')}
+                className="shrink-0 bg-accent hover:bg-accent/80"
+              >
+                <MapPin className="h-4 w-4 mr-1" />
+                View
+              </Button>
+            </div>
+            <p className="text-xs text-muted-foreground mt-3">
+              Bookmark this page for easy access to your order status
             </p>
           </div>
 
-          {/* Contact Seller */}
-          <Card className="mb-8 border-accent">
-            <CardContent className="p-6 text-center">
-              <h3 className="text-xl font-semibold mb-3">
-                Complete Your Payment
-              </h3>
-              <p className="text-muted-foreground mb-4">
-                Click the button below to contact our team and arrange payment
-              </p>
-              <Button variant="luxury" size="lg" asChild>
-                <a
-                  href={getContactLink()}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                >
-                  {getContactIcon()}
-                  <span className="ml-2">
-                    Contact via{" "}
-                    {paymentMethod?.charAt(0).toUpperCase() +
-                      paymentMethod?.slice(1)}
-                  </span>
-                </a>
-              </Button>
-            </CardContent>
-          </Card>
-
-          {/* Order Summary */}
-          <Card className="mb-8">
-            <CardHeader>
-              <CardTitle>Order Summary</CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              {(items || []).map((item) => (
-                <div
-                  key={item.id}
-                  className="flex gap-4 pb-4 border-b last:border-0"
-                >
-                  <img
-                    src={item.image}
-                    alt={item.name}
-                    className="w-16 h-16 object-cover rounded"
-                  />
-                  <div className="flex-1">
-                    <h4 className="font-semibold">{item.name}</h4>
-                    {item.color && (
-                      <p className="text-sm text-muted-foreground">
-                        Color: {item.color}
-                      </p>
-                    )}
-                    {item.size && (
-                      <p className="text-sm text-muted-foreground">
-                        Size: {item.size}
-                      </p>
-                    )}
-                    <p className="text-sm">
-                      Quantity: {item.quantity ?? item.amount ?? 1}
-                    </p>
-                  </div>
-                  <div className="text-right">
-                    <p className="font-semibold">
-                      {currency === "ETB"
-                        ? `${(
-                            (item.price || 0) *
-                            (item.quantity ?? item.amount ?? 1) *
-                            exchangeRate
-                          ).toFixed(2)} ETB`
-                        : `$${(
-                            (item.price || 0) *
-                            (item.quantity ?? item.amount ?? 1)
-                          ).toFixed(2)}`}
-                    </p>
-                  </div>
-                </div>
-              ))}
-              <div className="pt-4 border-t">
-                <div className="flex justify-between text-xl font-semibold">
-                  <span>Total:</span>
-                  <span>
-                    {currency === "ETB"
-                      ? `${(computedTotal * exchangeRate).toFixed(2)} ETB`
-                      : `$${computedTotal.toFixed(2)}`}
-                  </span>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-
-          {/* Delivery Info */}
-          <Card className="mb-8">
-            <CardHeader>
-              <CardTitle>Delivery Information</CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-3">
-              <div>
-                <p className="text-sm text-muted-foreground">Customer</p>
-                <p className="font-semibold">{customerInfo.fullName}</p>
-                <p className="text-sm">{customerInfo.email}</p>
-                <p className="text-sm">{customerInfo.phone}</p>
-              </div>
-              <div>
-                <p className="text-sm text-muted-foreground">
-                  Shipping Address
-                </p>
-                <p>{shippingInfo.address}</p>
-                <p>
-                  {shippingInfo.city}, {shippingInfo.country}
-                </p>
-                {shippingInfo.postalCode && <p>{shippingInfo.postalCode}</p>}
-              </div>
-            </CardContent>
-          </Card>
-
-          {/* Payment Status */}
-          <Card>
-            <CardHeader>
-              <CardTitle>Payment Status</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <p className="text-muted-foreground">
-                <span className="inline-block w-3 h-3 rounded-full bg-yellow-500 mr-2"></span>
-                Pending - Please contact us via{" "}
-                {paymentMethod?.charAt(0).toUpperCase() +
-                  paymentMethod?.slice(1)}{" "}
-                to complete payment
-              </p>
-            </CardContent>
-          </Card>
-
-          {/* Actions */}
-          <div className="flex flex-col sm:flex-row gap-4 mt-8">
-            <Button variant="outline" asChild className="flex-1">
-              <Link to="/products">Continue Shopping</Link>
-            </Button>
-            <Button asChild className="flex-1">
-              <Link to="/">Return Home</Link>
-            </Button>
+          <div className="flex justify-center gap-4">
+            Order Status: {getStatusDisplay(order.order_status)}
+            Payment Status: {getStatusDisplay(order.payment_status)}
           </div>
         </div>
-      </main>
+
+        <div className="grid lg:grid-cols-3 gap-8">
+          {/* Main Content */}
+          <div className="lg:col-span-2 space-y-6">
+            {/* Order Items */}
+            <Card>
+              <CardHeader className="pb-4">
+                <CardTitle className="flex items-center gap-2">
+                  <Package className="h-5 w-5" />
+                  Order Items ({items.length})
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                {items.map((item) => (
+                  <div
+                    key={`${item.id}-${item.quantity}`}
+                    className="flex gap-4 p-4 border rounded-lg"
+                  >
+                    <img
+                      src={item.image}
+                      alt={item.name}
+                      className="w-16 h-16 object-cover rounded-lg"
+                    />
+                    <div className="flex-1 min-w-0">
+                      <h4 className="font-semibold truncate">{item.name}</h4>
+                      <div className="flex items-center justify-between mt-2">
+                        <div className="text-sm text-muted-foreground space-y-1">
+                          <div>Quantity: {item.quantity}</div>
+                          <div>Price: ${parseFloat(item.price).toFixed(2)}</div>
+                        </div>
+                        <div className="font-semibold text-right">
+                          ${(item.quantity * parseFloat(item.price)).toFixed(2)}
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                ))}
+                
+                {/* Order Total */}
+                <div className="border-t pt-4 mt-4">
+                  <div className="flex justify-between items-center text-lg font-semibold">
+                    <span>Total Amount:</span>
+                    <span>{getPrice(order.total_amount)}</span>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+                        {/* Contact Actions */}
+            <Card>
+              <CardHeader className="pb-4">
+                <CardTitle>Complete Your Order</CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <p className="text-sm text-muted-foreground">
+                  Contact us to arrange payment and delivery. Your order details will be shared automatically.
+                </p>
+                
+                <div className="space-y-3">
+                    {/* WhatsApp */}
+                  <div 
+                  onClick={() => handleSocialMediaRedirect('whatsapp')}
+                  className="group flex items-center gap-3 bg-linear-to-r from-green-500 to-green-600 text-white px-6 py-3 rounded-2xl shadow-md hover:shadow-lg transition-all duration-300 font-medium" >
+                    <FaWhatsapp
+                      size={22}
+                      className="transition-transform duration-300 group-hover:scale-110"
+                    />
+                    <span className="relative">
+                      Chat on WhatsApp
+                      {/* Animated underline */}
+                      <span className="absolute left-0 bottom-0 w-0 h-px bg-white transition-all duration-300 group-hover:w-full"></span>
+                    </span>
+                  </div>
+                   {/*Telegram */}
+                  <div 
+                  onClick={() => handleSocialMediaRedirect('telegram')}
+                    className="group flex items-center gap-3 bg-linear-to-r from-sky-500 to-blue-600 text-white px-6 py-3 rounded-2xl shadow-md hover:shadow-lg transition-all duration-300 font-medium">
+                    <FaTelegramPlane
+                      size={22}
+                      className="transition-transform duration-300 group-hover:scale-110"
+                    />
+                    <span className="relative">
+                      Chat on Telegram
+                      {/* Animated underline */}
+                      <span className="absolute left-0 bottom-0 w-0 h-px bg-white transition-all duration-300 group-hover:w-full"></span>
+                    </span>
+                  </div>
+
+                   {/*Instagram */}
+                  <div 
+                  onClick={() => handleSocialMediaRedirect('instagram')}
+                  className="group flex items-center gap-3 bg-linear-to-r from-pink-500 via-red-500 to-yellow-500 text-white px-6 py-3 rounded-2xl shadow-md hover:shadow-lg transition-all duration-300 font-medium">
+                    <FaInstagram
+                      size={22}
+                      className="transition-transform duration-300 group-hover:scale-110"
+                    />
+                    <span className="relative">
+                      Chat on Instagram
+                      {/* Animated underline */}
+                      <span className="absolute left-0 bottom-0 w-0 h-px bg-white transition-all duration-300 group-hover:w-full"></span>
+                    </span>
+                  </div>
+                </div>
+
+                <div className="text-center">
+                  <Button asChild variant="outline" className="w-full">
+                    <Link to="/products">Continue Shopping</Link>
+                  </Button>
+                </div>
+              </CardContent>
+            </Card>
+          </div>
+
+          {/* Sidebar */}
+          <div className="space-y-6">
+            {/* Order Information */}
+            <Card>
+              <CardHeader className="pb-4">
+                <CardTitle className="flex items-center gap-2">
+                  <Calendar className="h-5 w-5" />
+                  Order Information
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <div className="flex justify-between items-center">
+                  <span className="text-muted-foreground">Order ID:</span>
+                  <div className="flex items-center gap-2">
+                    <code className="text-sm font-mono">#{order.id}</code>
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      className="h-6 w-6"
+                      onClick={() => copyToClipboard(order.id.toString(), "Order ID")}
+                    >
+                      {copiedField === "Order ID" ? (
+                        <CheckCheck className="h-3 w-3 text-green-600" />
+                      ) : (
+                        <Copy className="h-3 w-3" />
+                      )}
+                    </Button>
+                  </div>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-muted-foreground">Order Date:</span>
+                  <span className="font-medium">
+                    {new Date(order.created_at).toLocaleDateString('en-US', {
+                      year: 'numeric',
+                      month: 'long',
+                      day: 'numeric'
+                    })}
+                  </span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-muted-foreground">Payment Method:</span>
+                  <span className="font-medium capitalize">
+                    {order.payment_method?.replace('_', ' ') || 'Not specified'}
+                  </span>
+                </div>
+              </CardContent>
+            </Card>
+
+            {/* Customer Information */}
+            <Card>
+              <CardHeader className="pb-4">
+                <CardTitle className="flex items-center gap-2">
+                  <User className="h-5 w-5" />
+                  Customer Details
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-3">
+                <div>
+                  <div className="text-sm text-muted-foreground mb-1">Name</div>
+                  <div className="font-medium">{customer.fname} {customer.lname}</div>
+                </div>
+                <div>
+                  <div className="text-sm text-muted-foreground mb-1">Email</div>
+                  <div className="flex items-center gap-2">
+                    <div className="font-medium truncate">{customer.email}</div>
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      className="h-6 w-6 shrink-0"
+                      onClick={() => copyToClipboard(customer.email, "Email")}
+                    >
+                      {copiedField === "Email" ? (
+                        <CheckCheck className="h-3 w-3 text-green-600" />
+                      ) : (
+                        <Copy className="h-3 w-3" />
+                      )}
+                    </Button>
+                  </div>
+                </div>
+                <div>
+                  <div className="text-sm text-muted-foreground mb-1">Phone</div>
+                  <div className="flex items-center gap-2">
+                    <div className="font-medium">{customer.phone}</div>
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      className="h-6 w-6 shrink-0"
+                      onClick={() => copyToClipboard(customer.phone, "Phone")}
+                    >
+                      {copiedField === "Phone" ? (
+                        <CheckCheck className="h-3 w-3 text-green-600" />
+                      ) : (
+                        <Copy className="h-3 w-3" />
+                      )}
+                    </Button>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+
+
+          </div>
+        </div>
+      </div>
     </div>
   );
 }

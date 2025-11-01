@@ -5,9 +5,9 @@ import { addOrderedItem, getAllOrderedItems, getOrderedItemsByOrderId, editOrder
 
 const router = express.Router();
 
-router.post("/add", authenticate, addOrderedItem);
+router.post("/add", addOrderedItem);
 router.get("/all", authenticate, authorize("admin"), getAllOrderedItems);
-router.get("/order/:order_id", authenticate, getOrderedItemsByOrderId);
+router.get("/order/:order_id", getOrderedItemsByOrderId);
 router.patch("/edit/:id", authenticate, editOrderedItem);
 router.delete("/delete/:id", authenticate, authorize("admin"), deleteOrderedItem);
 

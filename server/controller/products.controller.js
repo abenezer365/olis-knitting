@@ -3,8 +3,9 @@ import { v4 as uuidv4 } from "uuid";
 
 // Add product controller
 export async function addProduct(req, res) {
-  const { name, description, price, rating,category_id } = req.body;
+  const { name, description, price, rating, category_id } = req.body;
   const imageUrl = req.body.image_url;
+  const otherImagesUrls = req.body.other_images_urls || [];
 
   if (!name || !price || !category_id || !imageUrl) {
     return res.status(400).json({
@@ -16,10 +17,11 @@ export async function addProduct(req, res) {
   try {
     const productUuid = uuidv4();
 
+    // Insert product with other_images as JSON
     await connection.execute(
-      `INSERT INTO products (uuid, category_id, name, description, price, rating,image)
-       VALUES (?, ?, ?, ?, ?, ?, ?)`,
-      [productUuid, category_id, name, description || null, price, rating,imageUrl]
+      `INSERT INTO products (uuid, category_id, name, description, price, rating, image, other_images)
+       VALUES (?, ?, ?, ?, ?, ?, ?, ?)`,
+      [productUuid, category_id, name, description || null, price, rating, imageUrl, JSON.stringify(otherImagesUrls)]
     );
 
     return res.status(201).json({
@@ -36,11 +38,11 @@ export async function addProduct(req, res) {
   }
 }
 
-//Change image controller
+// Change image controller
 export async function changeImage(req, res) {
   const { id } = req.body;
   const imageUrl = req.body.image_url;
-  console.log(id)
+
   if (!imageUrl) {
     return res.status(400).json({
       success: false,
@@ -90,6 +92,12 @@ export async function getAllProducts(req, res) {
        ORDER BY p.created_at DESC`
     );
 
+    // Parse other_images JSON
+    // const products = rows.map(product => ({
+    //   ...product,
+    //   other_images: product.other_images ? JSON.parse(product.other_images) : []
+    // }));
+
     return res.status(200).json({
       success: true,
       message: "Products fetched successfully ✅",
@@ -104,7 +112,7 @@ export async function getAllProducts(req, res) {
   }
 }
 
-// Get single products
+// Get single product
 export async function getSingleProduct(req, res) {
   const { id } = req.params;
 
@@ -124,9 +132,10 @@ export async function getSingleProduct(req, res) {
       });
     }
 
+
     return res.status(200).json({
       success: true,
-      product: rows[0],
+      product: rows,
     });
   } catch (error) {
     return res.status(500).json({
@@ -175,7 +184,7 @@ export async function editProduct(req, res) {
   }
 }
 
-// Delete prodcut controller
+// Delete product controller
 export async function deleteProduct(req, res) {
   const { id } = req.params;
 

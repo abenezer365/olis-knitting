@@ -16,6 +16,7 @@ CREATE TABLE products (
   price DECIMAL(10,2) NOT NULL,
   rating DECIMAL(3,2) CHECK (rating >= 0 AND rating <= 5),
   image VARCHAR(255),
+  other_images JSON,
   available_colors JSON,
   available_sizes JSON,
   created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
@@ -54,7 +55,6 @@ CREATE TABLE orders (
   
   total_amount DECIMAL(10,2) NOT NULL,
   payment_method ENUM('cash_on_delivery', 'credit_card', 'paypal', 'bank_transfer') DEFAULT 'bank_transfer',
-  prefered_account ENUM('telegram', 'instagram', 'whatsapp') DEFAULT 'whatsapp',
   
   created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
   order_date DATETIME DEFAULT CURRENT_TIMESTAMP,

@@ -1,27 +1,44 @@
 import { useState } from "react";
-import { Mail, Phone, MapPin, MessageCircle } from "lucide-react";
+import { Mail, Phone, MapPin } from "lucide-react";
 import { FaWhatsapp, FaTelegramPlane } from "react-icons/fa";
+import axios from "@/utils/axios.instance";
+import { toast } from "sonner";
 
 export default function ContactUs() {
   const [formData, setFormData] = useState({
-    name: "",
+    first_name: "",
+    last_name: "",
     email: "",
+    subject: "",
     message: "",
   });
-  const [submitted, setSubmitted] = useState(false);
-
+  const [submitted,setSubmitted] = useState(false)
   const handleChange = (e) => {
     const { name, value } = e.target;
     setFormData((prev) => ({ ...prev, [name]: value }));
   };
 
-  const handleSubmit = async(e) => {
-    e.preventDefault();
-    console.log("Form submitted:", formData);
+const handleSubmit = async (e) => {
+  e.preventDefault();
+  try {
+    const res = await axios.post("/message/writeMessage", formData);
+    console.log("Message sent:", res.data);
     setSubmitted(true);
-    setFormData({ name: "", email: "", message: "" });
+    setFormData({
+      first_name: "",
+      last_name: "",
+      email: "",
+      subject: "",
+      message: "",
+    });
     setTimeout(() => setSubmitted(false), 3000);
-  };
+    toast.success("Message sent successfully!");
+  } catch (error) {
+    console.error("Error sending message:", error);
+    toast.error("Failed to send message.");
+  }
+};
+
 
   return (
     <>
@@ -99,25 +116,38 @@ export default function ContactUs() {
                   Send us a Message
                 </h2>
                 <form onSubmit={handleSubmit} className="space-y-6">
+
+                  {/* First Name */}
                   <div className="flex items-center gap-4">
-                    <label className=" text-lg font-medium text-foreground mb-2">
-                      Name
-                    </label>
+                    <label className="font-medium text-foreground text-nowrap">First Name</label>
                     <input
                       type="text"
-                      name="name"
-                      value={formData.name}
+                      name="first_name"
+                      value={formData.first_name}
                       onChange={handleChange}
                       required
                       className="w-full px-4 py-3 border border-border rounded-lg bg-background focus:outline-none focus:ring-2 focus:ring-primary transition-colors"
-                      placeholder="Your name"
+                      placeholder="First name"
                     />
                   </div>
 
+                  {/* Last Name */}
                   <div className="flex items-center gap-4">
-                    <label className=" text-lg font-medium text-foreground mb-2">
-                      Email
-                    </label>
+                    <label className="font-medium text-foreground text-nowrap">Last Name</label>
+                    <input
+                      type="text"
+                      name="last_name"
+                      value={formData.last_name}
+                      onChange={handleChange}
+                      required
+                      className="w-full px-4 py-3 border border-border rounded-lg bg-background focus:outline-none focus:ring-2 focus:ring-primary transition-colors"
+                      placeholder="Last name"
+                    />
+                  </div>
+
+                  {/* Email */}
+                  <div className="flex items-center gap-4">
+                    <label className="font-medium text-foreground text-nowrap">Email</label>
                     <input
                       type="email"
                       name="email"
@@ -129,10 +159,23 @@ export default function ContactUs() {
                     />
                   </div>
 
+                  {/* Subject */}
+                  <div className="flex items-center gap-4">
+                    <label className="font-medium text-foreground text-nowrap">Subject</label>
+                    <input
+                      type="text"
+                      name="subject"
+                      value={formData.subject}
+                      onChange={handleChange}
+                      required
+                      className="w-full px-4 py-3 border border-border rounded-lg bg-background focus:outline-none focus:ring-2 focus:ring-primary transition-colors"
+                      placeholder="Subject..."
+                    />
+                  </div>
+
+                  {/* Message */}
                   <div className="flex flex-col gap-2">
-                    <label className="block text-lg font-medium text-foreground mb-2">
-                      Message
-                    </label>
+                    <label className="block text-lg font-medium text-foreground mb-2">Message</label>
                     <textarea
                       name="message"
                       value={formData.message}
@@ -150,13 +193,8 @@ export default function ContactUs() {
                   >
                     Send Message
                   </button>
-
-                  {submitted && (
-                    <div className="bg-green-100 border border-green-300 text-green-800 px-4 py-3 rounded-lg">
-                      Thank you! Your message has been sent successfully.
-                    </div>
-                  )}
                 </form>
+
               </div>
               {/* Quick Contact Buttons */}
               <div className="">

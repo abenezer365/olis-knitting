@@ -24,14 +24,15 @@ export async function addCustomer(req, res) {
       }
     }
     const uuid = uuidv4();
-    await connection.execute(
+    const [result] = await connection.execute(
       "INSERT INTO customers (uuid, first_name, last_name, email, phone) VALUES (?,?,?,?,?)",
       [uuid, first_name, last_name, email, phone]
     );
 
     return res.status(201).json({
         message: "Customer registered succesfully",
-        success: true
+        success: true,
+        id : result.insertId
     });
     } catch (error) {
     return res.status(500).json({
@@ -222,7 +223,7 @@ export async function editCustomer(req, res) {
 
     // Check for duplicate email
     const [existingCustomer] = await connection.execute(
-      "SELECT customer_id FROM customers WHERE email = ? AND id != ?",
+      "SELECT id FROM customers WHERE email = ? AND id != ?",
       [email, id]
     );
 
@@ -263,7 +264,7 @@ export async function deleteCustomer(req, res) {
 
   try {
     const [customer] = await connection.execute(
-      "SELECT * FROM customers WHERE customer_id = ?",[id]
+      "SELECT * FROM customers WHERE id = ?",[id]
     );
 
     if (customer.length === 0) {
@@ -274,7 +275,7 @@ export async function deleteCustomer(req, res) {
     }
        // Perform deletion
     await connection.execute(
-      "DELETE FROM customers WHERE customer_id = ?",
+      "DELETE FROM customers WHERE id = ?",
       [id]
     );
     return(

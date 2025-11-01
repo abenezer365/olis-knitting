@@ -14,6 +14,7 @@ import orderedItemsRouter from './routes/orderedItems.routes.js'
 import messageRouter from './routes/messages.routes.js'
 import revenueRouter from './routes/revenue.routes.js'
 import anayticsRouter from './routes/analytics.routes.js'
+import shippingRoutes from "./routes/shipping.routes.js";
 
 // Configuration
 dotenv.config()
@@ -38,6 +39,7 @@ app.use("/api/orderedItems", orderedItemsRouter);
 app.use("/api/message", messageRouter);
 app.use("/api/revenue", revenueRouter);
 app.use("/api/analytics", anayticsRouter);
+app.use("/api/shipping", shippingRoutes);
 
 
 // Successful connection message on get request to root

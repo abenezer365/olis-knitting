@@ -1,5 +1,7 @@
 import { useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
+import { toast } from "sonner";
+import axios from "@/utils/axios.instance";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -23,8 +25,9 @@ import {
 import { useGlobalContext } from "@/contexts/Context";
 
 function PlaceOrder() {
-  const { cart, updateQuantity, removeFromCart, total } = useGlobalContext();
+  const { cart, updateQuantity, removeFromCart, total, clearCart } = useGlobalContext();
   const navigate = useNavigate();
+  const [isPlacingOrder, setIsPlacingOrder] = useState(false);
 
   const [currency, setCurrency] = useState("USD");
   const [paymentMethod, setPaymentMethod] = useState("whatsapp");
@@ -35,10 +38,14 @@ function PlaceOrder() {
     phone: "",
   });
   const [shippingInfo, setShippingInfo] = useState({
-    address: "",
     country: "Ethiopia",
     city: "",
-    postalCode: "",
+    sub_city: "",
+    street: "",
+    house_number: "",
+    postal_code: "",
+    phone_number: "",
+    additional_info: "",
   });
 
   const exchangeRate = 160;
@@ -47,32 +54,107 @@ function PlaceOrder() {
     currency === "ETB"
       ? `${(price * exchangeRate).toFixed(2)} ETB`
       : `$${price.toFixed(2)}`;
-  // keep total in base USD — don't multiply here (avoids double conversion)
+  
   const totalPrice = total;
 
-  const handlePlaceOrder = () => {
-    if (!customerInfo.fullName || !customerInfo.email || !customerInfo.phone) {
-      alert("Please fill in all customer information");
-      return;
-    }
-    if (!shippingInfo.address || !shippingInfo.city) {
-      alert("Please fill in all shipping information");
-      return;
-    }
+  const handlePlaceOrder = async () => {
+    if (isPlacingOrder) return;
 
-    const orderId = Math.random().toString(36).substring(2, 15);
+    try {
+      // ✅ Validation
+      if (!customerInfo.fullName || !customerInfo.email || !customerInfo.phone) {
+        toast.error("Please fill all customer information");
+        return;
+      }
+      if (!shippingInfo.city || !shippingInfo.street) {
+        toast.error("Please fill all required shipping information");
+        return;
+      }
 
-    navigate(`/order_confirmation/${orderId}`, {
-      state: {
-        customerInfo,
-        shippingInfo,
-        items: cart,
-        total: totalPrice,
-        currency,
-        paymentMethod,
-        subscribeNewsletter,
-      },
-    });
+      setIsPlacingOrder(true);
+      toast.loading("Placing order...");
+
+      // ✅ Step 1: Create customer and capture ID
+      const [first_name, ...rest] = customerInfo.fullName.split(" ");
+      const last_name = rest.join(" ") || "Unknown";
+      
+      const customerRes = await axios.post("/customer/addCustomer", {
+        first_name,
+        last_name,
+        email: customerInfo.email,
+        phone: customerInfo.phone,
+      });
+      
+      // Dynamic ID extraction
+      const customer_id = customerRes.data.id;
+      
+      if (!customer_id) {
+        throw new Error("Failed to get customer ID");
+      }
+
+      // ✅ Step 2: Create order and capture order ID
+      const orderRes = await axios.post("/order/placeOrder", {
+        customer_id,
+        total_amount: totalPrice,
+      });
+      
+      // Dynamic order ID extraction
+      const order_id = orderRes.data.order_id;
+      const order_uuid = orderRes.data.uuid;
+      
+      if (!order_id) {
+        throw new Error("Failed to get order ID");
+      }
+
+      // ✅ Step 3: Create shipping with captured IDs
+      await axios.post("/shipping/addShipping", {
+        order_id,
+        customer_id,
+        country: shippingInfo.country,
+        city: shippingInfo.city,
+        sub_city: shippingInfo.sub_city,
+        street: shippingInfo.street,
+        house_number: shippingInfo.house_number,
+        postal_code: shippingInfo.postal_code,
+        phone_number: shippingInfo.phone_number || customerInfo.phone,
+        additional_info: shippingInfo.additional_info,
+      });
+
+      // ✅ Step 4: Create ordered items with captured order ID
+      const orderedItemsPromises = cart.map(item => {
+        console.log('Sending product_id:', item.id);
+        axios.post("/orderedItems/add", {
+          order_id,
+          product_id: item.id,
+          quantity: item.quantity,
+          price: item.price,
+        })}
+      );
+
+      await Promise.all(orderedItemsPromises);
+
+      toast.success("Order placed successfully!");
+
+      // ✅ Redirect to confirmation
+      navigate(`/order_confirmation/${order_uuid}`, {
+        state: {
+          customerInfo,
+          shippingInfo,
+          items: cart,
+          total: totalPrice,
+          currency,
+          paymentMethod,
+          subscribeNewsletter,
+        },
+      });
+      clearCart()
+    } catch (error) {
+      console.error("Order placement failed:", error);
+      toast.error("Something went wrong while placing your order");
+    } finally {
+      setIsPlacingOrder(false);
+      toast.dismiss();
+    }
   };
 
   if (cart.length === 0) {
@@ -98,129 +180,7 @@ function PlaceOrder() {
 
         <div className="grid lg:grid-cols-3 gap-8">
           <div className="lg:col-span-2 space-y-8">
-            {/* Customer Info */}
-            <Card>
-              <CardHeader>
-                <CardTitle className="text-2xl font-semibold">
-                  Customer Information
-                </CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                <div className="space-y-2">
-                  <Label htmlFor="fullName">Full Name *</Label>
-                  <Input
-                    id="fullName"
-                    value={customerInfo.fullName}
-                    onChange={(e) =>
-                      setCustomerInfo({
-                        ...customerInfo,
-                        fullName: e.target.value,
-                      })
-                    }
-                    required
-                  />
-                </div>
-                <div className="space-y-2">
-                  <Label htmlFor="email">Email *</Label>
-                  <Input
-                    id="email"
-                    type="email"
-                    value={customerInfo.email}
-                    onChange={(e) =>
-                      setCustomerInfo({
-                        ...customerInfo,
-                        email: e.target.value,
-                      })
-                    }
-                    required
-                  />
-                </div>
-                <div className="space-y-2">
-                  <Label htmlFor="phone">Phone Number *</Label>
-                  <Input
-                    id="phone"
-                    type="tel"
-                    value={customerInfo.phone}
-                    onChange={(e) =>
-                      setCustomerInfo({
-                        ...customerInfo,
-                        phone: e.target.value,
-                      })
-                    }
-                    required
-                  />
-                </div>
-              </CardContent>
-            </Card>
-
-            {/* Shipping Info */}
-            <Card>
-              <CardHeader>
-                <CardTitle className="text-2xl font-semibold">
-                  Shipping Information
-                </CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                <div className="space-y-2">
-                  <Label htmlFor="address">Address *</Label>
-                  <Input
-                    id="address"
-                    value={shippingInfo.address}
-                    onChange={(e) =>
-                      setShippingInfo({
-                        ...shippingInfo,
-                        address: e.target.value,
-                      })
-                    }
-                    required
-                  />
-                </div>
-                <div className="grid grid-cols-2 gap-4">
-                  <div className="space-y-2">
-                    <Label htmlFor="country">Country</Label>
-                    <Input
-                      id="country"
-                      value={shippingInfo.country}
-                      onChange={(e) =>
-                        setShippingInfo({
-                          ...shippingInfo,
-                          country: e.target.value,
-                        })
-                      }
-                    />
-                  </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="city">City *</Label>
-                    <Input
-                      id="city"
-                      value={shippingInfo.city}
-                      onChange={(e) =>
-                        setShippingInfo({
-                          ...shippingInfo,
-                          city: e.target.value,
-                        })
-                      }
-                      required
-                    />
-                  </div>
-                </div>
-                <div className="space-y-2">
-                  <Label htmlFor="postalCode">Postal Code</Label>
-                  <Input
-                    id="postalCode"
-                    value={shippingInfo.postalCode}
-                    onChange={(e) =>
-                      setShippingInfo({
-                        ...shippingInfo,
-                        postalCode: e.target.value,
-                      })
-                    }
-                  />
-                </div>
-              </CardContent>
-            </Card>
-
-            {/* Order Details */}
+               {/* Order Details */}
             <Card>
               <CardHeader>
                 <CardTitle className="text-2xl font-semibold">
@@ -322,6 +282,180 @@ function PlaceOrder() {
                 ))}
               </CardContent>
             </Card>
+            {/* Customer Info */}
+            <Card>
+              <CardHeader>
+                <CardTitle className="text-2xl font-semibold">
+                  Customer Information
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <div className="space-y-2">
+                  <Label htmlFor="fullName">Full Name *</Label>
+                  <Input
+                    id="fullName"
+                    value={customerInfo.fullName}
+                    onChange={(e) =>
+                      setCustomerInfo({
+                        ...customerInfo,
+                        fullName: e.target.value,
+                      })
+                    }
+                    required
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="email">Email *</Label>
+                  <Input
+                    id="email"
+                    type="email"
+                    value={customerInfo.email}
+                    onChange={(e) =>
+                      setCustomerInfo({
+                        ...customerInfo,
+                        email: e.target.value,
+                      })
+                    }
+                    required
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="phone">Phone Number *</Label>
+                  <Input
+                    id="phone"
+                    type="tel"
+                    value={customerInfo.phone}
+                    onChange={(e) =>
+                      setCustomerInfo({
+                        ...customerInfo,
+                        phone: e.target.value,
+                      })
+                    }
+                    required
+                  />
+                </div>
+              </CardContent>
+            </Card>
+
+            {/* Shipping Info */}
+            <Card>
+              <CardHeader>
+                <CardTitle className="text-2xl font-semibold">
+                  Shipping Information
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label htmlFor="country">Country</Label>
+                  <Input
+                    id="country"
+                    value={shippingInfo.country}
+                    onChange={(e) =>
+                      setShippingInfo({
+                        ...shippingInfo,
+                        country: e.target.value,
+                      })
+                    }
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="city">City *</Label>
+                  <Input
+                    id="city"
+                    value={shippingInfo.city}
+                    onChange={(e) =>
+                      setShippingInfo({
+                        ...shippingInfo,
+                        city: e.target.value,
+                      })
+                    }
+                    required
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="sub_city">Sub City</Label>
+                  <Input
+                    id="sub_city"
+                    value={shippingInfo.sub_city}
+                    onChange={(e) =>
+                      setShippingInfo({
+                        ...shippingInfo,
+                        sub_city: e.target.value,
+                      })
+                    }
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="street">Street *</Label>
+                  <Input
+                    id="street"
+                    value={shippingInfo.street}
+                    onChange={(e) =>
+                      setShippingInfo({
+                        ...shippingInfo,
+                        street: e.target.value,
+                      })
+                    }
+                    required
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="house_number">House Number</Label>
+                  <Input
+                    id="house_number"
+                    value={shippingInfo.house_number}
+                    onChange={(e) =>
+                      setShippingInfo({
+                        ...shippingInfo,
+                        house_number: e.target.value,
+                      })
+                    }
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="postal_code">Postal Code</Label>
+                  <Input
+                    id="postal_code"
+                    value={shippingInfo.postal_code}
+                    onChange={(e) =>
+                      setShippingInfo({
+                        ...shippingInfo,
+                        postal_code: e.target.value,
+                      })
+                    }
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="phone_number">Shipping Phone</Label>
+                  <Input
+                    id="phone_number"
+                    type="tel"
+                    value={shippingInfo.phone_number}
+                    onChange={(e) =>
+                      setShippingInfo({
+                        ...shippingInfo,
+                        phone_number: e.target.value,
+                      })
+                    }
+                    placeholder="Optional - uses customer phone if empty"
+                  />
+                </div>
+                <div className="space-y-2 md:col-span-2">
+                  <Label htmlFor="additional_info">Additional Information</Label>
+                  <Input
+                    id="additional_info"
+                    value={shippingInfo.additional_info}
+                    onChange={(e) =>
+                      setShippingInfo({
+                        ...shippingInfo,
+                        additional_info: e.target.value,
+                      })
+                    }
+                    placeholder="Any additional delivery instructions"
+                  />
+                </div>
+              </CardContent>
+            </Card>
           </div>
 
           {/* Order Summary */}
@@ -401,8 +535,9 @@ function PlaceOrder() {
                   className="w-full"
                   size="lg"
                   onClick={handlePlaceOrder}
+                  disabled={isPlacingOrder}
                 >
-                  Place Order
+                  {isPlacingOrder ? "Placing Order..." : "Place Order"}
                 </Button>
               </CardContent>
             </Card>

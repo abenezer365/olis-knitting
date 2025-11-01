@@ -2,16 +2,33 @@ import cloudinary from "../config/cloudinary.config.js";
 
 const uploadCloudinary = async (req, res, next) => {
   try {
-    if (!req.file) return next();
+    // Handle main image from fields
+    if (req.files && req.files.image) {
+      const file = req.files.image[0];
+      const fileBuffer = `data:${file.mimetype};base64,${file.buffer.toString("base64")}`;
+      const result = await cloudinary.uploader.upload(fileBuffer, {
+        folder: "olis",
+        resource_type: "image",
+      });
+      req.body.image_url = result.secure_url;
+    }
 
-    const fileBuffer = `data:${req.file.mimetype};base64,${req.file.buffer.toString("base64")}`;
+    // Handle multiple other images
+    if (req.files && req.files.other_images) {
+      const otherImagesUrls = [];
+      
+      for (const file of req.files.other_images) {
+        const fileBuffer = `data:${file.mimetype};base64,${file.buffer.toString("base64")}`;
+        const result = await cloudinary.uploader.upload(fileBuffer, {
+          folder: "olis",
+          resource_type: "image",
+        });
+        otherImagesUrls.push(result.secure_url);
+      }
+      
+      req.body.other_images_urls = otherImagesUrls;
+    }
 
-    const result = await cloudinary.uploader.upload(fileBuffer, {
-      folder: "olis",
-      resource_type: "image",
-    });
-
-    req.body.image_url = result.secure_url;
     next();
 
   } catch (error) {
@@ -23,4 +40,4 @@ const uploadCloudinary = async (req, res, next) => {
   }
 };
 
-export default uploadCloudinary
+export default uploadCloudinary;

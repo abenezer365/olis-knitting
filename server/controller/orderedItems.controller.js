@@ -9,6 +9,26 @@ export const addOrderedItem = async (req, res) => {
       return res.status(400).json({ message: "All fields are required" });
     }
 
+    // Check if product exists
+    const [productRows] = await connection.execute(
+      `SELECT id FROM products WHERE id = ?`,
+      [product_id]
+    );
+
+    if (productRows.length === 0) {
+      return res.status(404).json({ message: "Product not found" });
+    }
+
+    // Check if order exists
+    const [orderRows] = await connection.execute(
+      `SELECT id FROM orders WHERE id = ?`,
+      [order_id]
+    );
+
+    if (orderRows.length === 0) {
+      return res.status(404).json({ message: "Order not found" });
+    }
+
     await connection.execute(
       `INSERT INTO ordered_items (order_id, product_id, quantity, price)
        VALUES (?, ?, ?, ?)`,
