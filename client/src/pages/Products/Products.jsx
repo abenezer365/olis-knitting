@@ -1,10 +1,14 @@
+// components/Products/Products.js
+import { useState, useEffect } from "react";
 import ProductFilters from "@/components/Products/ProductFilters";
 import QuickPreviewModal from "@/components/Products/QuickPreviewModal";
-import { useState } from "react";
-import { DEMO_PRODUCTS, CATEGORIES, CURRENCIES } from "@/demo/demo";
+
+import { useGlobalContext } from "@/contexts/Context";
+import { useProducts } from "@/hooks/useProducts";
+import { Button } from "@/components/ui/button";
+import { ChevronLeft, ChevronRight } from "lucide-react";
 import ProductGrid from "@/components/Products/ProductGrid";
 import ProductList from "@/components/Products/ProductsList";
-import { useGlobalContext } from "@/contexts/Context";
 
 function Products() {
   const [viewMode, setViewMode] = useState("grid");
@@ -13,61 +17,116 @@ function Products() {
   const [currency, setCurrency] = useState("USD");
   const [selectedProduct, setSelectedProduct] = useState(null);
   const [itemsPerPage, setItemsPerPage] = useState(10);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [priceRange, setPriceRange] = useState([0, 1000]);
 
   const { addToCart } = useGlobalContext();
+  const { products, categories, currencyRate, loading, error } = useProducts();
+
+  // Transform API data to match component expectations
+  const transformProduct = (product) => ({
+    id: product.id,
+    uuid: product.uuid,
+    name: product.name,
+    price: parseFloat(product.price),
+    image: product.image,
+    category: product.category_name,
+    rating: product.rating ? parseFloat(product.rating) : 4.0,
+    description: product.description,
+    colors: product.available_colors || [],
+    sizes: product.available_sizes || [],
+    images: [product.image, ...(product.other_images || [])],
+  });
+
+  const transformedProducts = products.map(transformProduct);
 
   // Filter products
-  const filteredProducts = DEMO_PRODUCTS.filter(
-    (product) =>
-      selectedCategory === "All" || product.category === selectedCategory
-  );
+  const filteredProducts = transformedProducts.filter((product) => {
+    const categoryMatch =
+      selectedCategory === "All" || product.category === selectedCategory;
+    const priceMatch =
+      product.price >= priceRange[0] && product.price <= priceRange[1];
+    return categoryMatch && priceMatch;
+  });
 
   // Sort products
-  switch (sortBy) {
-    case "name-asc":
-      filteredProducts.sort((a, b) => a.name.localeCompare(b.name));
-      break;
-    case "name-desc":
-      filteredProducts.sort((a, b) => b.name.localeCompare(a.name));
-      break;
-    case "price-asc":
-      filteredProducts.sort((a, b) => a.price - b.price);
-      break;
-    case "price-desc":
-      filteredProducts.sort((a, b) => b.price - a.price);
-      break;
-    case "rating":
-      filteredProducts.sort((a, b) => b.rating - a.rating);
-      break;
-    default:
-      break;
-  }
+  const sortedProducts = [...filteredProducts].sort((a, b) => {
+    switch (sortBy) {
+      case "name-asc":
+        return a.name.localeCompare(b.name);
+      case "name-desc":
+        return b.name.localeCompare(a.name);
+      case "price-asc":
+        return a.price - b.price;
+      case "price-desc":
+        return b.price - a.price;
+      case "rating":
+        return b.rating - a.rating;
+      default:
+        return 0;
+    }
+  });
 
-  const displayedProducts = filteredProducts.slice(0, itemsPerPage);
+  // Pagination
+  const totalPages = Math.ceil(sortedProducts.length / itemsPerPage);
+  const startIndex = (currentPage - 1) * itemsPerPage;
+  const endIndex = startIndex + itemsPerPage;
+  const displayedProducts = sortedProducts.slice(startIndex, endIndex);
+
+  // Reset to first page when filters change
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [selectedCategory, sortBy, priceRange, itemsPerPage]);
 
   const handleAddToCart = (product) => {
-    // product may be passed directly from child components
     if (!product) return;
 
-    // If the child already provided a full payload (color/size/quantity), pass it through
     if (product.color || product.size || product.quantity) {
       addToCart(product);
       return;
     }
 
-    // otherwise build a payload and use default color/size when available
     addToCart({
       id: product.id,
-      name: product.name || product.title,
+      name: product.name,
       price: product.price,
       category: product.category,
-      image: product.image || product.images?.[0],
+      image: product.image,
       rating: product.rating,
       quantity: 1,
       color: product.colors?.[0] || null,
       size: product.sizes?.[0] || null,
     });
   };
+
+  const handlePageChange = (page) => {
+    setCurrentPage(page);
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  };
+
+  if (loading) {
+    return (
+      <main className="min-h-screen bg-background">
+        <div className="max-w-7xl mx-auto px-4 py-12">
+          <div className="flex justify-center items-center h-64">
+            <p className="text-lg">Loading products...</p>
+          </div>
+        </div>
+      </main>
+    );
+  }
+
+  if (error) {
+    return (
+      <main className="min-h-screen bg-background">
+        <div className="max-w-7xl mx-auto px-4 py-12">
+          <div className="flex justify-center items-center h-64">
+            <p className="text-lg text-red-500">{error}</p>
+          </div>
+        </div>
+      </main>
+    );
+  }
 
   return (
     <main className="min-h-screen bg-background">
@@ -78,10 +137,10 @@ function Products() {
 
         {/* Filters Section */}
         <ProductFilters
-          categories={CATEGORIES}
+          categories={categories}
           selectedCategory={selectedCategory}
           onCategoryChange={setSelectedCategory}
-          currencies={CURRENCIES}
+          currencies={["USD", "ETB"]}
           selectedCurrency={currency}
           onCurrencyChange={setCurrency}
           viewMode={viewMode}
@@ -90,6 +149,9 @@ function Products() {
           onSortChange={setSortBy}
           itemsPerPage={itemsPerPage}
           onItemsPerPageChange={setItemsPerPage}
+          priceRange={priceRange}
+          onPriceRangeChange={setPriceRange}
+          totalProducts={filteredProducts.length}
         />
 
         {/* Products Display */}
@@ -97,6 +159,7 @@ function Products() {
           <ProductGrid
             products={displayedProducts}
             currency={currency}
+            currencyRate={currencyRate}
             onQuickPreview={setSelectedProduct}
             onAddToCart={handleAddToCart}
           />
@@ -104,9 +167,44 @@ function Products() {
           <ProductList
             products={displayedProducts}
             currency={currency}
+            currencyRate={currencyRate}
             onQuickPreview={setSelectedProduct}
             onAddToCart={handleAddToCart}
           />
+        )}
+
+        {/* Pagination */}
+        {totalPages > 1 && (
+          <div className="flex justify-center items-center gap-2 mt-8">
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => handlePageChange(currentPage - 1)}
+              disabled={currentPage === 1}
+            >
+              <ChevronLeft className="w-4 h-4" />
+            </Button>
+
+            {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => (
+              <Button
+                key={page}
+                variant={currentPage === page ? "default" : "outline"}
+                size="sm"
+                onClick={() => handlePageChange(page)}
+              >
+                {page}
+              </Button>
+            ))}
+
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => handlePageChange(currentPage + 1)}
+              disabled={currentPage === totalPages}
+            >
+              <ChevronRight className="w-4 h-4" />
+            </Button>
+          </div>
         )}
       </div>
 
@@ -115,6 +213,7 @@ function Products() {
         <QuickPreviewModal
           product={selectedProduct}
           currency={currency}
+          currencyRate={currencyRate}
           onClose={() => setSelectedProduct(null)}
           onAddToCart={handleAddToCart}
         />

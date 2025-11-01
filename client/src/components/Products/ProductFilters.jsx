@@ -1,3 +1,4 @@
+// components/Products/ProductFilters.js
 import { Button } from "@/components/ui/button";
 import {
   Select,
@@ -7,6 +8,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Grid3x3, List } from "lucide-react";
+import { Slider } from "@/components/ui/slider";
 
 function ProductFilters({
   categories,
@@ -21,6 +23,9 @@ function ProductFilters({
   onSortChange,
   itemsPerPage,
   onItemsPerPageChange,
+  priceRange,
+  onPriceRangeChange,
+  totalProducts,
 }) {
   return (
     <div className="space-y-6 mb-8">
@@ -36,6 +41,23 @@ function ProductFilters({
             {category}
           </Button>
         ))}
+      </div>
+
+      {/* Price Range Filter */}
+      <div className="space-y-4">
+        <div className="flex justify-between items-center">
+          <label className="text-sm font-medium">Price Range</label>
+          <span className="text-sm text-muted-foreground">
+            ${priceRange[0]} - ${priceRange[1]}
+          </span>
+        </div>
+        <Slider
+          value={priceRange}
+          onValueChange={onPriceRangeChange}
+          max={1000}
+          step={10}
+          className="w-full"
+        />
       </div>
 
       {/* Controls Row */}
@@ -93,19 +115,24 @@ function ProductFilters({
           </Select>
         </div>
 
-        {/* Currency Select */}
-        <Select value={selectedCurrency} onValueChange={onCurrencyChange}>
-          <SelectTrigger className="w-32">
-            <SelectValue placeholder="Currency" />
-          </SelectTrigger>
-          <SelectContent>
-            {currencies.map((currency) => (
-              <SelectItem key={currency} value={currency}>
-                {currency}
-              </SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
+        {/* Results count and Currency */}
+        <div className="flex items-center gap-4">
+          <span className="text-sm text-muted-foreground">
+            {totalProducts} products
+          </span>
+          <Select value={selectedCurrency} onValueChange={onCurrencyChange}>
+            <SelectTrigger className="w-32">
+              <SelectValue placeholder="Currency" />
+            </SelectTrigger>
+            <SelectContent>
+              {currencies.map((currency) => (
+                <SelectItem key={currency} value={currency}>
+                  {currency}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </div>
       </div>
     </div>
   );

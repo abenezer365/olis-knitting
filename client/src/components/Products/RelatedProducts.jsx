@@ -12,7 +12,7 @@ export default function RelatedProducts({ products, onProductClick }) {
         Related Products
       </h2>
 
-      <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4 h-80">
+      <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4 ">
         {products.map((product) => (
           <Link
             key={product.id}
@@ -33,7 +33,10 @@ export default function RelatedProducts({ products, onProductClick }) {
                 {product.name}
               </h3>
               <p className="text-sm text-muted-foreground mt-1">
-                ${product.price}
+                ${product.price.toFixed(2)}
+              </p>
+              <p className="text-xs text-muted-foreground mt-1">
+                {product.category}
               </p>
             </div>
           </Link>
