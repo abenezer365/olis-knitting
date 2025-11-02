@@ -1,22 +1,48 @@
 import React from "react";
-import CSS from "./Sidebar.module.css";
 import { FaHome } from "react-icons/fa";
 import { IoNewspaper } from "react-icons/io5";
 import { FaUsers } from "react-icons/fa6";
 import { RiCustomerServiceFill } from "react-icons/ri";
 import { AiOutlineProduct } from "react-icons/ai";
-import { Link } from "react-router-dom";
+import { Link, useLocation } from "react-router-dom";
 import { FaRegMessage } from "react-icons/fa6";
 import profilepic from "../../../assets/pp.png";
 import { FaMoneyCheckDollar } from "react-icons/fa6";
 import { FaMoneyBillAlt } from "react-icons/fa";
+import { IoMdSettings } from "react-icons/io";
+import { useGlobalContext } from "@/contexts/Context";
+import { MdOutlineCategory } from "react-icons/md";
+import { GiCargoShip } from "react-icons/gi";
 
 function Sidebar() {
-  const role = "admin";
+  const location = useLocation();
+  const { user } = useGlobalContext();
+  const role = user.role;
+  
+  const isActive = (path) =>
+    location.pathname === path
+      ? "bg-muted text-primary"
+      : "";
+      
+  const initials = `${user.first_name?.[0] || ""}${user.last_name?.[0] || ""}`.toUpperCase();
+
   return (
-    <div className={CSS.sidebar}>
-      <div className={CSS.profile}>
-        <h4>
+    <div className="w-3/5 text-xs md:text-[15px] h-full fixed top-0 left-0 z-10000 overflow-y-auto bg-[#253036] text-white pb-5 md:w-1/5">
+      <div className="flex flex-col items-center bg-[#1C2428] text-beige py-2.5">
+        {role == "admin" ? (
+          <img 
+            src={profilepic} 
+            alt="Admin Logo" 
+            className="w-22 h-22 rounded-full border-muted-200 border-2"
+          />
+        ) : (
+          <div className="w-20 h-20 rounded-full text-foreground bg-accent flex items-center justify-center text-3xl font-black shadow-md select-none">
+            {initials}
+          </div>
+        )}
+        <p className="text-md font-bold mt-2">{`${user.first_name} ${user.last_name}`}</p>
+        <p className="text-xs opacity-80 mt-1">{user.email}</p>
+        <p className="inline-flex items-center gap-1 px-2 py-1 rounded-full text-xs font-medium bg-muted text-muted-foreground my-2">
           {role === "admin"
             ? "ADMIN"
             : role === "manager"
@@ -24,55 +50,110 @@ function Sidebar() {
             : role === "employee"
             ? "EMPLOYEE"
             : "MR. X"}
-        </h4>
-        <img src={profilepic} alt="Iftu Tilahun" />
-        <p className={CSS.pp_title}>Iftu Tilahun</p>
-        <p className={CSS.pp_subtitle}>CEO Oli's</p>
+        </p>
       </div>
-      <div className={CSS.routes}>
+      
+      <div className="flex flex-col">
         <Link to="/dashboard/">
-          <div className={CSS.single}>
+          <div
+            className={`flex gap-2.5 items-center py-2.5 px-5 pl-7 cursor-pointer transition-colors duration-200 ${isActive("/dashboard/")}`}
+          >
             <FaHome />
             <p>Dashboard</p>
           </div>
         </Link>
-        <span className="border-y-2 border-black py-15 bg-accent-foreground text-xl font-bungee">
-          Automation
-        </span>
+
         <Link to="/dashboard/orders">
-          <div className={CSS.single}>
+          <div
+            className={`flex gap-2.5 items-center py-2.5 px-5 pl-7 cursor-pointer transition-colors duration-200 ${isActive("/dashboard/orders")}`}
+          >
             <IoNewspaper />
             <p>Orders</p>
           </div>
         </Link>
+
         <Link to="/dashboard/customers">
-          <div className={CSS.single}>
+          <div
+            className={`flex gap-2.5 items-center py-2.5 px-5 pl-7 cursor-pointer transition-colors duration-200 ${isActive("/dashboard/customers")}`}
+          >
             <RiCustomerServiceFill />
             <p>Customers</p>
           </div>
         </Link>
+
         <Link to="/dashboard/products">
-          <div className={CSS.single}>
+          <div
+            className={`flex gap-2.5 items-center py-2.5 px-5 pl-7 cursor-pointer transition-colors duration-200 ${isActive("/dashboard/products")}`}
+          >
             <AiOutlineProduct />
             <p>Products</p>
           </div>
         </Link>
-        <Link to="/dashboard/revenue">
-          <div className={CSS.single}>
-            <FaMoneyCheckDollar />
-            <p>Revenue</p>
+        
+        <Link to="/dashboard/category">
+          <div
+            className={`flex gap-2.5 items-center py-2.5 px-5 pl-7 cursor-pointer transition-colors duration-200 ${isActive("/dashboard/category")}`}
+          >
+            <MdOutlineCategory />
+            <p>Category</p>
           </div>
         </Link>
+        {
+          role == "admin" && 
+          <Link to="/dashboard/revenue">
+            <div
+              className={`flex gap-2.5 items-center py-2.5 px-5 pl-7 cursor-pointer transition-colors duration-200 ${isActive("/dashboard/revenue")}`}
+            >
+              <FaMoneyCheckDollar />
+              <p>Revenue</p>
+            </div>
+          </Link>
+        }
+
         <Link to="/dashboard/messages">
-          <div className={CSS.single}>
+          <div
+            className={`flex gap-2.5 items-center py-2.5 px-5 pl-7 cursor-pointer transition-colors duration-200 ${isActive("/dashboard/messages")}`}
+          >
             <FaRegMessage />
             <p>Messages</p>
           </div>
         </Link>
+
         <Link to="/dashboard/currency">
-          <div className={CSS.single}>
+          <div
+            className={`flex gap-2.5 items-center py-2.5 px-5 pl-7 cursor-pointer transition-colors duration-200 ${isActive("/dashboard/currency")}`}
+          >
             <FaMoneyBillAlt />
             <p>Currency Rate</p>
+          </div>
+        </Link>
+        
+        <Link to="/dashboard/shipping">
+          <div
+            className={`flex gap-2.5 items-center py-2.5 px-5 pl-7 cursor-pointer transition-colors duration-200 ${isActive("/dashboard/shipping")}`}
+          >
+            <GiCargoShip />
+            <p>Shipping</p>
+          </div>
+        </Link>
+        {
+          role == "admin" && 
+            <Link to="/dashboard/staff">
+              <div
+                className={`flex gap-2.5 items-center py-2.5 px-5 pl-7 cursor-pointer transition-colors duration-200 ${isActive("/dashboard/staff")}`}
+              >
+                <FaUsers />
+                <p>Staff</p>
+              </div>
+            </Link>
+        }
+        
+        <Link to="/dashboard/setting">
+          <div
+            className={`flex gap-2.5 items-center py-2.5 px-5 pl-7 cursor-pointer transition-colors duration-200 ${isActive("/dashboard/setting")}`}
+          >
+            <IoMdSettings />
+            <p>Setting</p>
           </div>
         </Link>
       </div>

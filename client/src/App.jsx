@@ -1,11 +1,16 @@
-import React from 'react'
-import Router from './Router'
+import React from "react";
+import Router from "./Router";
+import { ContextProvider } from "./contexts/Context";
+import { Toaster } from "@/components/ui/sonner";
 function App() {
   return (
     <>
-      <Router />
+      <ContextProvider>
+        <Toaster />
+        <Router />
+      </ContextProvider>
     </>
-  )
+  );
 }
 
-export default App
+export default App;

@@ -1,4 +1,4 @@
-@import url("https://fonts.googleapis.com/css2?family=Bungee&family=Space+Grotesk:wght@300..700&display=swap");
+@import url('https://fonts.googleapis.com/css2?family=Momo+Trust+Display&family=Space+Grotesk:wght@300..700&display=swap');
 
 @import "tailwindcss";
 @import "tw-animate-css";
@@ -77,7 +77,7 @@
 @theme inline {
   --font-sans: "Space Grotesk", "Space Grotesk Fallback";
   --font-mono: "Space Grotesk", "Space Grotesk Fallback";
-  --font-bungee: "Bungee", sans-serif;
+  --font-bungee: "Momo Trust Display", sans-serif;
   --color-background: var(--background);
   --color-foreground: var(--foreground);
   --color-card: var(--card);
@@ -114,4 +114,28 @@
   --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
   --color-sidebar-border: var(--sidebar-border);
   --color-sidebar-ring: var(--sidebar-ring);
+}
+
+::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+
+/* Track */
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+/* Thumb (the draggable part) */
+::-webkit-scrollbar-thumb {
+  background-color: rgb(204, 204, 204);
+  border-radius: 10px;
+  border: 2px solid transparent;
+  background-clip: padding-box;
+  transition: background-color 0.3s ease;
+}
+
+/* On hover */
+::-webkit-scrollbar-thumb:hover {
+  background-color: rgba(100, 100, 100, 0.5);
 }

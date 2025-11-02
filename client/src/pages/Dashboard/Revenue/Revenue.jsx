@@ -1,134 +1,162 @@
-import React from 'react';
-import CSS from './Revenue.module.css';
+import React, { useEffect, useState } from "react";
+import axios from "@/utils/axios.instance";
+import {
+  BarChart,
+  Bar,
+  XAxis,
+  YAxis,
+  Tooltip,
+  ResponsiveContainer,
+  CartesianGrid,
+} from "recharts";
+import { toast } from "sonner";
 
 const Revenue = () => {
-  // Mock revenue data
-  const revenueData = {
-    totalRevenue: 125430,
-    monthlyGrowth: 12.5,
-    activeCustomers: 2847,
-    averageOrderValue: 156.75,
-    revenueStreams: [
-      { category: 'Product Sales', amount: 89450, percentage: 71.3 },
-      { category: 'Subscriptions', amount: 28750, percentage: 22.9 },
-      { category: 'Services', amount: 5620, percentage: 4.5 },
-      { category: 'Other', amount: 1610, percentage: 1.3 }
-    ],
-    monthlyTrend: [
-      { month: 'Jan', revenue: 112000 },
-      { month: 'Feb', revenue: 118500 },
-      { month: 'Mar', revenue: 121200 },
-      { month: 'Apr', revenue: 119800 },
-      { month: 'May', revenue: 124300 },
-      { month: 'Jun', revenue: 125430 }
-    ]
+    useEffect(() => {
+    window.scrollTo({
+      top: 0,
+      left: 0,
+      behavior: 'smooth'
+    });
+  },[]);
+  const [revenueData, setRevenueData] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [updating, setUpdating] = useState(false);
+  const token = localStorage.getItem("token")
+  // Fetch revenue from backend
+  const fetchRevenue = async () => {
+    try {
+      setLoading(true);
+      const res = await axios.get("/revenue/revenue", {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      setRevenueData(res.data.data);
+    } catch (err) {
+      console.error(err);
+    } finally {
+      setLoading(false);
+    }
   };
 
-  const formatCurrency = (amount) => {
-    return new Intl.NumberFormat('en-US', {
-      style: 'currency',
-      currency: 'USD'
-    }).format(amount);
+  useEffect(() => {
+    fetchRevenue();
+  }, []);
+
+  const handleUpdate = async () => {
+    try {
+      setUpdating(true);
+      await axios.post("/revenue/revenue",{},{
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      await fetchRevenue(); // Refresh data after updating
+      toast.success("Revenue data refreshed succesfully")
+    } catch (err) {
+      toast.error("Unable to refresh revenue data")
+      console.error(err);
+    } finally {
+      setUpdating(false);
+    }
   };
+
+  const formatCurrency = (amount) =>
+    new Intl.NumberFormat("en-US", {
+      style: "currency",
+      currency: "USD",
+    }).format(amount);
+
+  if (loading || !revenueData)
+    return (
+      <div className="flex items-center justify-center h-64 text-muted-foreground">
+        Loading revenue data...
+      </div>
+    );
+
+  // Prepare data for Recharts
+  const monthlyTrendEntries = Object.entries(revenueData.monthly_trend || {});
+  const chartData = monthlyTrendEntries.map(([month, value]) => ({
+    month,
+    revenue: parseFloat(value),
+  }));
 
   return (
-    <div className={CSS.revenueContainer}>
-      <header className={CSS.header}>
-        <h1 className={CSS.title}>Revenue Dashboard</h1>
-        <p className={CSS.subtitle}>Financial performance overview</p>
+    <div className="p-6 max-w-6xl mx-auto space-y-8 font-sans">
+      {/* Header */}
+      <header className="text-center space-y-1">
+        <h1 className="text-3xl font-bold text-primary">Revenue Dashboard</h1>
+        <p className="text-muted-foreground text-sm">
+          Financial performance overview
+        </p>
       </header>
 
-      {/* Key Metrics Cards */}
-      <div className={CSS.metricsGrid}>
-        <div className={CSS.metricCard}>
-          <div className={CSS.metricIcon}>💰</div>
-          <div className={CSS.metricContent}>
-            <h3 className={CSS.metricLabel}>Total Revenue</h3>
-            <p className={CSS.metricValue}>{formatCurrency(revenueData.totalRevenue)}</p>
-            <div className={CSS.growthIndicator}>
-              <span className={CSS.growthPositive}>↑ {revenueData.monthlyGrowth}% this month</span>
+      {/* Key Metrics */}
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-6">
+        <div className="bg-card border border-border rounded-xl p-6 shadow-sm">
+          <div className="flex items-center gap-4">
+            <div className="text-3xl">💰</div>
+            <div>
+              <p className="text-muted-foreground text-sm">Total Revenue</p>
+              <p className="text-2xl font-bold">{formatCurrency(revenueData.total_revenue)}</p>
+              <p className="text-green-600 text-sm mt-1">
+                ↑ {((revenueData.month_revenue / (revenueData.previous_month_revenue || 1) - 1) * 100).toFixed(2)}% this month
+              </p>
             </div>
           </div>
         </div>
 
-        <div className={CSS.metricCard}>
-          <div className={CSS.metricIcon}>👥</div>
-          <div className={CSS.metricContent}>
-            <h3 className={CSS.metricLabel}>Active Customers</h3>
-            <p className={CSS.metricValue}>{revenueData.activeCustomers.toLocaleString()}</p>
-            <div className={CSS.growthIndicator}>
-              <span className={CSS.growthPositive}>↑ 8.2% growth</span>
+        <div className="bg-card border border-border rounded-xl p-6 shadow-sm">
+          <div className="flex items-center gap-4">
+            <div className="text-3xl">📈</div>
+            <div>
+              <p className="text-muted-foreground text-sm">Monthly Revenue</p>
+              <p className="text-2xl font-bold">{formatCurrency(revenueData.month_revenue)}</p>
+              <p className="text-green-600 text-sm mt-1">
+                {revenueData.previous_month_revenue > 0
+                  ? `↑ ${((revenueData.month_revenue / revenueData.previous_month_revenue - 1) * 100).toFixed(2)}% vs last month`
+                  : "New month"}
+              </p>
             </div>
           </div>
         </div>
 
-        <div className={CSS.metricCard}>
-          <div className={CSS.metricIcon}>🛒</div>
-          <div className={CSS.metricContent}>
-            <h3 className={CSS.metricLabel}>Avg Order Value</h3>
-            <p className={CSS.metricValue}>{formatCurrency(revenueData.averageOrderValue)}</p>
-            <div className={CSS.growthIndicator}>
-              <span className={CSS.growthPositive}>↑ 3.1% increase</span>
+        <div className="bg-card border border-border rounded-xl p-6 shadow-sm">
+          <div className="flex items-center gap-4">
+            <div className="text-3xl">🛒</div>
+            <div>
+              <p className="text-muted-foreground text-sm">Weekly Revenue</p>
+              <p className="text-2xl font-bold">{formatCurrency(revenueData.week_revenue)}</p>
+              <p className="text-green-600 text-sm mt-1">This week</p>
             </div>
           </div>
         </div>
       </div>
 
-      {/* Revenue Streams */}
-      <div className={CSS.revenueStreams}>
-        <h2 className={CSS.sectionTitle}>Revenue Streams</h2>
-        <div className={CSS.streamsGrid}>
-          {revenueData.revenueStreams.map((stream, index) => (
-            <div key={index} className={CSS.streamCard}>
-              <div className={CSS.streamHeader}>
-                <h3 className={CSS.streamCategory}>{stream.category}</h3>
-                <span className={CSS.streamPercentage}>{stream.percentage}%</span>
-              </div>
-              <p className={CSS.streamAmount}>{formatCurrency(stream.amount)}</p>
-              <div className={CSS.progressBar}>
-                <div 
-                  className={CSS.progressFill}
-                  style={{ width: `${stream.percentage}%` }}
-                ></div>
-              </div>
-            </div>
-          ))}
-        </div>
+      {/* Update Button */}
+      <div className="flex justify-end">
+        <button
+          onClick={handleUpdate}
+          disabled={updating}
+          className="bg-accent text-foreground px-4 py-2 rounded-md font-medium hover:opacity-90 transition"
+        >
+          {updating ? "Updating..." : "Update Revenue"}
+        </button>
       </div>
 
       {/* Monthly Trend */}
-      <div className={CSS.trendSection}>
-        <h2 className={CSS.sectionTitle}>Monthly Revenue Trend</h2>
-        <div className={CSS.trendChart}>
-          {revenueData.monthlyTrend.map((month) => (
-            <div key={month.month} className={CSS.trendBar}>
-              <div 
-                className={CSS.barFill}
-                style={{ 
-                  height: `${(month.revenue / revenueData.monthlyTrend.reduce((max, m) => Math.max(max, m.revenue), 0)) * 100}%` 
-                }}
-              ></div>
-              <span className={CSS.barLabel}>{month.month}</span>
-              <span className={CSS.barValue}>{formatCurrency(month.revenue)}</span>
-            </div>
-          ))}
-        </div>
-      </div>
-
-      {/* Quick Stats */}
-      <div className={CSS.quickStats}>
-        <div className={CSS.statItem}>
-          <span className={CSS.statNumber}>98%</span>
-          <span className={CSS.statLabel}>Customer Retention</span>
-        </div>
-        <div className={CSS.statItem}>
-          <span className={CSS.statNumber}>24h</span>
-          <span className={CSS.statLabel}>Avg Payment Time</span>
-        </div>
-        <div className={CSS.statItem}>
-          <span className={CSS.statNumber}>12.8%</span>
-          <span className={CSS.statLabel}>YoY Growth</span>
-        </div>
+      <div className="bg-card border border-border rounded-xl p-6 shadow-sm">
+        <h2 className="text-lg font-semibold mb-5">Monthly Revenue Trend</h2>
+        {chartData.length > 0 ? (
+          <ResponsiveContainer width="100%" height={250}>
+            <BarChart data={chartData} margin={{ top: 10, right: 20, left: 0, bottom: 5 }}>
+              <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />
+              <XAxis dataKey="month" tick={{ fill: "#6b7280" }} />
+              <YAxis tickFormatter={(value) => `$${value}`} tick={{ fill: "#6b7280" }} />
+              <Tooltip formatter={(value) => formatCurrency(value)} />
+              <Bar dataKey="revenue" fill="#d4c5b0" radius={[6, 6, 0, 0]} />
+            </BarChart>
+          </ResponsiveContainer>
+        ) : (
+          <p className="text-muted-foreground text-center">No monthly trend data yet.</p>
+        )}
       </div>
     </div>
   );

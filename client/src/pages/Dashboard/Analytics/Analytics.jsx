@@ -1,93 +1,171 @@
-import React from 'react'
-import CSS from './Analytics.module.css';
-import {  PieChart, Pie, Cell, Legend, BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer } from "recharts";
-import { Link } from 'react-router-dom';
-function Analytics() {
-   const COLORS = ["#A67C52", "#D6B893", "#EBDDC7", "#BFA98E", "#8B6E4B"];
+import React, { useEffect, useState } from "react";
+import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, PieChart, Pie, Cell, Legend } from "recharts";
+import { RefreshCcw } from "lucide-react";
+import { toast } from "sonner";
+import axios from "@/utils/axios.instance"; // assuming you have this setup
+import { Link } from "react-router-dom";
 
-   const salesdata = [
-      { productName: "Sweater", sales: 340 },
-      { productName: "Scarf", sales: 280 },
-      { productName: "Gloves", sales: 210 },
-      { productName: "Socks", sales: 150 }
-    ];
+const COLORS = ["#A67C52", "#D6B893", "#EBDDC7", "#BFA98E", "#8B6E4B"];
 
-  const revenueData = [
-      { category: "Sweaters", revenue: 12400 },
-      { category: "Scarves", revenue: 8900 },
-      { category: "Socks", revenue: 5200 },
-      { category: "Gloves", revenue: 4100 },
-      { category: "Hats", revenue: 3000 },
-    ];
+export default function Analytics() {
+  useEffect(() => {
+    window.scrollTo({
+      top: 0,
+      left: 0,
+      behavior: 'smooth'
+    });
+  },[]);
+  const [analytics, setAnalytics] = useState(null);
+  const [loading, setLoading] = useState(false);
+  const token = localStorage.getItem("token")
+  // ---- Fetch Analytics Data ----
+  const fetchAnalytics = async () => {
+    try {
+      setLoading(true);
+      const res = await axios.get("/analytics/analytics",{
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      setAnalytics(res.data.analytics);
+    } catch (error) {
+      console.error(error);
+      toast.error("Failed to fetch analytics data");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // ---- Update Analytics ----
+  const refreshAnalytics = async () => {
+    try {
+      setLoading(true);
+      await axios.post("/analytics/analytics",{},{
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      toast.success("Analytics updated successfully");
+      await fetchAnalytics();
+    } catch (error) {
+      console.error(error);
+      toast.error("Failed to update analytics");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchAnalytics();
+  }, []);
+
+  if (!analytics)
+    return (
+      <div className="flex items-center justify-center h-96 text-muted-foreground animate-pulse">
+        Loading analytics...
+      </div>
+    );
 
   const stats = [
-    { label: "Customers", value: 340, suffix: "+", color: "#1C2428", path : "customers" },
-    { label: "Products in Stock", value: 450, suffix: "+", color: "#A67C52", path : "products"  },
-    { label: "Total Orders", value: 127, suffix: "+", color: "#D6C6B8", path : "orders"  },
-    { label: "Revenue", value: "$15,600", suffix: "", color: "#F5DEB3", path : "revenue"  },
+    { label: "Customers", value: analytics.total_customers, color: "#1C2428", path: "customers" },
+    { label: "Products", value: analytics.total_products, color: "#A67C52", path: "products" },
+    { label: "Total Orders", value: analytics.total_orders, color: "#D6C6B8", path: "orders" },
+    { label: "Revenue", value: `$${analytics.total_revenue}`, color: "#D6B893", path: "revenue" },
   ];
-  
+
+  const salesData = analytics.sales_data || [];
+  const revenueData = analytics.revenue_data || [];
+
   return (
-    <div className={CSS.analytics}>
+    <div className="p-6 w-full flex flex-col gap-8">
+      {/* Header */}
+      <div className="flex items-center justify-between">
+        <h1 className="text-2xl font-semibold text-foreground">Business Analytics</h1>
+        <button
+          onClick={refreshAnalytics}
+          disabled={loading}
+          className="flex items-center gap-2 px-4 py-2 bg-accent text-foreground rounded-lg hover:opacity-90 transition disabled:opacity-60"
+        >
+          <RefreshCcw className={`w-4 h-4 ${loading ? "animate-spin" : ""}`} />
+          {loading ? "Refreshing..." : "Refresh"}
+        </button>
+      </div>
 
-      <div className={CSS.statsContainer}>
-      {stats.map((item, index) => (
-        <Link key={index} to={`/dashboard/${item?.path}`} className={CSS.statBox}>
-          <h2 style={{ color: item.color }}>
-            {item.value}
-            <span className={CSS.suffix}>{item.suffix}</span>
-          </h2>
-          <p>{item.label}</p>
-        </Link>
-      ))}
+      {/* Stats Section */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
+        {stats.map((stat, idx) => (
+          <Link
+            key={idx}
+            to={`/dashboard/${stat.path}`}
+            className="p-5 rounded-xl bg-card border border-border shadow-sm hover:shadow-md transition group"
+          >
+            <h2 className="text-3xl font-bold" style={{ color: stat.color }}>
+              {stat.value}
+            </h2>
+            <p className="text-muted-foreground mt-2 group-hover:text-foreground transition">
+              {stat.label}
+            </p>
+          </Link>
+        ))}
+      </div>
+
+      {/* Graphs Section */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+        {/* Sales Bar Chart */}
+        <div className="bg-card border border-border rounded-xl p-6 shadow-sm">
+          <h2 className="text-lg font-semibold mb-5 text-foreground">Top Selling Products</h2>
+          {salesData.length > 0 ? (
+            <ResponsiveContainer width="100%" height={300}>
+              <BarChart data={salesData}>
+                <XAxis dataKey="productName" tick={{ fontSize: 12 }} />
+                <YAxis />
+                <Tooltip contentStyle={{ borderRadius: "10px" }} />
+                <Bar dataKey="sales" fill="#EED5B7" radius={[6, 6, 0, 0]} />
+              </BarChart>
+            </ResponsiveContainer>
+          ) : (
+            <p className="text-center text-sm text-muted-foreground">No sales data available</p>
+          )}
+        </div>
+
+        {/* Revenue Pie Chart */}
+        <div className="bg-card border border-border rounded-xl p-6 shadow-sm">
+          <h2 className="text-lg font-semibold mb-5 text-foreground">Revenue by Category</h2>
+          {revenueData.length > 0 ? (
+            <ResponsiveContainer width="100%" height={300}>
+              <PieChart>
+                <Pie
+                  data={revenueData?.map(item => ({
+                      ...item,
+                      revenue: parseFloat(item.revenue)
+                    }))}
+                  dataKey="revenue"
+                  nameKey="category"
+                  cx="50%"
+                  cy="50%"
+                  outerRadius={90}
+                  label={({ name, percent }) => `${name} ${(percent * 100).toFixed(0)}%`}
+                >
+                  {revenueData.map((_, i) => (
+                    <Cell key={i} fill={COLORS[i % COLORS.length]} />
+                  ))}
+                </Pie>
+                <Tooltip
+                  contentStyle={{
+                    backgroundColor: "#fff",
+                    borderRadius: "10px",
+                  }}
+                  formatter={(val) => `$${Number(val).toLocaleString()}`}
+                />
+                <Legend verticalAlign="bottom" height={36} />
+              </PieChart>
+            </ResponsiveContainer>
+          ) : (
+            <p className="text-center text-sm text-muted-foreground">No revenue data available</p>
+          )}
+        </div>
+      </div>
+
+      {/* Footer */}
+      <div className="text-sm text-muted-foreground text-center mt-4">
+        Last updated: {new Date(analytics.updated_at).toLocaleString()}
+      </div>
     </div>
-
-      <div className={CSS.graphs}>
-      <div className={CSS.bargraph}>
-      <ResponsiveContainer width="100%" height={250}>
-            <BarChart data={salesdata}>
-              <XAxis dataKey="productName" />
-              <YAxis />
-              <Tooltip />
-              <Bar dataKey="sales" fill="#EED5B7" radius={[5, 5, 0, 0]} />
-            </BarChart>
-          </ResponsiveContainer>
-      </div>
-
-      <div className={CSS.piegraph}>
-        <ResponsiveContainer width="100%" height={250}>
-            <PieChart>
-              <Pie
-                data={revenueData}
-                dataKey="revenue"
-                nameKey="category"
-                cx="50%"
-                cy="50%"
-                outerRadius={80}
-                label
-              >
-                {revenueData.map((entry, index) => (
-                  <Cell
-                    key={`cell-${index}`}
-                    fill={COLORS[index % COLORS.length]}
-                  />
-                ))}
-              </Pie>
-              <Tooltip
-                contentStyle={{
-                  backgroundColor: "#fff",
-                  borderRadius: "10px",
-                }}
-                formatter={(value) => `$${value.toLocaleString()}`}
-              />
-              <Legend verticalAlign="bottom" height={36} />
-            </PieChart>
-          </ResponsiveContainer>
-      </div>
-
-      </div>
-    </div>
-  )
+  );
 }
-
-export default Analytics

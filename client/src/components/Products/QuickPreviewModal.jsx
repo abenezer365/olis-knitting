@@ -7,14 +7,22 @@ import {
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { ShoppingCart } from "lucide-react";
-import { useCart } from "@/contexts/CartContext";
 import { FaWhatsapp, FaTelegramPlane } from "react-icons/fa";
 
-function QuickPreviewModal({ product, currency, onClose }) {
-  const [selectedColor, setSelectedColor] = useState(product.colors[0]);
-  const [selectedSize, setSelectedSize] = useState(product.sizes[0]);
+function QuickPreviewModal({
+  product,
+  onAddToCart,
+  currency,
+  currencyRate,
+  onClose,
+}) {
+  const [selectedColor, setSelectedColor] = useState(
+    product.available_colors?.[0] || product.colors?.[0] || ""
+  );
+  const [selectedSize, setSelectedSize] = useState(
+    product.available_sizes?.[0] || product.sizes?.[0] || ""
+  );
   const [quantity, setQuantity] = useState(1);
-  const { addItem } = useCart();
 
   const [zoom, setZoom] = useState(false);
   const [position, setPosition] = useState({ x: 0, y: 0 });
@@ -30,22 +38,40 @@ function QuickPreviewModal({ product, currency, onClose }) {
   };
 
   const formatPrice = (price) => {
+    const numericPrice = parseFloat(price);
     if (currency === "ETB") {
-      return `${(price * 50).toFixed(0)} ${currency}`;
+      return `${(numericPrice * currencyRate).toFixed(0)} ${currency}`;
     }
-    return `$${price}`;
+    return `$${numericPrice.toFixed(2)}`;
   };
 
-  const handleAddToCart = (product) => {
-    addItem({
-      id: product.id.toString(),
+  const handleAddToCart = () => {
+    const payload = {
+      id: product.id,
       name: product.name,
-      price: product.price,
+      price: parseFloat(product.price),
+      category: product.category_name || product.category,
       image: product.image,
-      quantity: 1,
-    });
-    onClose();
+      rating: product.rating ? parseFloat(product.rating) : 4.0,
+      quantity: quantity,
+      color: selectedColor,
+      size: selectedSize,
+    };
+    onAddToCart(payload);
+    if (typeof onClose === "function") onClose();
   };
+
+  // Get all images including main image and other_images
+  const allImages = [
+    product.image,
+    ...(product.other_images || product.images || []),
+  ].filter(Boolean);
+
+  const mainImage = allImages[0] || "/placeholder.svg";
+
+  // Get available colors and sizes from API data
+  const availableColors = product.available_colors || product.colors || [];
+  const availableSizes = product.available_sizes || product.sizes || [];
 
   return (
     <Dialog open={true} onOpenChange={onClose}>
@@ -63,7 +89,7 @@ function QuickPreviewModal({ product, currency, onClose }) {
             onMouseMove={handleMouseMove}
           >
             <img
-              src={product.image || "/placeholder.svg"}
+              src={mainImage}
               alt={product.name}
               className={`object-contain w-full h-full transition-transform duration-200 ${
                 zoom ? "scale-150" : "scale-100"
@@ -88,48 +114,52 @@ function QuickPreviewModal({ product, currency, onClose }) {
             </p>
 
             {/* Color Selection */}
-            <div>
-              <label className="text-sm font-semibold text-foreground">
-                Color
-              </label>
-              <div className="flex gap-2 mt-2 flex-wrap">
-                {product.colors.map((color) => (
-                  <button
-                    key={color}
-                    onClick={() => setSelectedColor(color)}
-                    className={`px-3 py-1 text-sm rounded-lg border-2 transition-all ${
-                      selectedColor === color
-                        ? "border-primary bg-primary text-primary-foreground"
-                        : "border-border hover:border-primary"
-                    }`}
-                  >
-                    {color}
-                  </button>
-                ))}
+            {availableColors.length > 0 && (
+              <div>
+                <label className="text-sm font-semibold text-foreground">
+                  Color
+                </label>
+                <div className="flex gap-2 mt-2 flex-wrap">
+                  {availableColors.map((color) => (
+                    <button
+                      key={color}
+                      onClick={() => setSelectedColor(color)}
+                      className={`px-3 py-1 text-sm rounded-lg border-2 transition-all ${
+                        selectedColor === color
+                          ? "border-primary bg-primary text-primary-foreground"
+                          : "border-border hover:border-primary"
+                      }`}
+                    >
+                      {color}
+                    </button>
+                  ))}
+                </div>
               </div>
-            </div>
+            )}
 
             {/* Size Selection */}
-            <div>
-              <label className="text-sm font-semibold text-foreground">
-                Size
-              </label>
-              <div className="flex gap-2 mt-2 flex-wrap">
-                {product.sizes.map((size) => (
-                  <button
-                    key={size}
-                    onClick={() => setSelectedSize(size)}
-                    className={`px-3 py-1 text-sm rounded-lg border-2 transition-all ${
-                      selectedSize === size
-                        ? "border-primary bg-primary text-primary-foreground"
-                        : "border-border hover:border-primary"
-                    }`}
-                  >
-                    {size}
-                  </button>
-                ))}
+            {availableSizes.length > 0 && (
+              <div>
+                <label className="text-sm font-semibold text-foreground">
+                  Size
+                </label>
+                <div className="flex gap-2 mt-2 flex-wrap">
+                  {availableSizes.map((size) => (
+                    <button
+                      key={size}
+                      onClick={() => setSelectedSize(size)}
+                      className={`px-3 py-1 text-sm rounded-lg border-2 transition-all ${
+                        selectedSize === size
+                          ? "border-primary bg-primary text-primary-foreground"
+                          : "border-border hover:border-primary"
+                      }`}
+                    >
+                      {size}
+                    </button>
+                  ))}
+                </div>
               </div>
-            </div>
+            )}
 
             {/* Quantity */}
             <div>
@@ -157,7 +187,7 @@ function QuickPreviewModal({ product, currency, onClose }) {
 
             {/* Add to Cart */}
             <Button
-              onClick={() => handleAddToCart(product)}
+              onClick={handleAddToCart}
               className="w-full gap-2 mt-4 py-6"
               size="sm"
             >
@@ -172,7 +202,7 @@ function QuickPreviewModal({ product, currency, onClose }) {
                 href="https://wa.me/251911234567"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="group flex items-center gap-3 bg-gradient-to-r from-green-500 to-green-600 text-white px-6 py-3 rounded-2xl shadow-md hover:shadow-lg transition-all duration-300 font-medium"
+                className="group flex items-center gap-3 bg-linear-to-r from-green-500 to-green-600 text-white px-6 py-3 rounded-2xl shadow-md hover:shadow-lg transition-all duration-300 font-medium"
               >
                 <FaWhatsapp
                   size={22}
@@ -181,7 +211,7 @@ function QuickPreviewModal({ product, currency, onClose }) {
                 <span className="relative">
                   WhatsApp
                   {/* Animated underline */}
-                  <span className="absolute left-0 bottom-0 w-0 h-[1px] bg-white transition-all duration-300 group-hover:w-full"></span>
+                  <span className="absolute left-0 bottom-0 w-0 h-px bg-white transition-all duration-300 group-hover:w-full"></span>
                 </span>
               </a>
 
@@ -190,7 +220,7 @@ function QuickPreviewModal({ product, currency, onClose }) {
                 href="https://t.me/olifashion"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="group flex items-center gap-3 bg-gradient-to-r from-sky-500 to-blue-600 text-white px-6 py-3 rounded-2xl shadow-md hover:shadow-lg transition-all duration-300 font-medium"
+                className="group flex items-center gap-3 bg-linear-to-r from-sky-500 to-blue-600 text-white px-6 py-3 rounded-2xl shadow-md hover:shadow-lg transition-all duration-300 font-medium"
               >
                 <FaTelegramPlane
                   size={22}
@@ -199,7 +229,7 @@ function QuickPreviewModal({ product, currency, onClose }) {
                 <span className="relative">
                   Telegram
                   {/* Animated underline */}
-                  <span className="absolute left-0 bottom-0 w-0 h-[1px] bg-white transition-all duration-300 group-hover:w-full"></span>
+                  <span className="absolute left-0 bottom-0 w-0 h-px bg-white transition-all duration-300 group-hover:w-full"></span>
                 </span>
               </a>
             </div>

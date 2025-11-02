@@ -1,15 +1,85 @@
-import { useState } from "react";
-import { Link, NavLink } from "react-router-dom";
-import { ShoppingCart, LogIn, Menu, X, Trash2 } from "lucide-react";
-import { useCart } from "@/contexts/CartContext";
+import { useContext, useEffect, useState } from "react";
+import { Link, NavLink, useNavigate } from "react-router-dom";
+import { ShoppingCart, LogIn, Menu, X, Trash2, LayoutDashboard  } from "lucide-react";
+import { GlobalContext, useGlobalContext } from "@/contexts/Context";
+import axios from "@/utils/axios.instance";
+import { toast } from "sonner";
+import logo from "/logo_complement.png"
 
 function Header() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isCartOpen, setIsCartOpen] = useState(false);
   const [isLoginOpen, setIsLoginOpen] = useState(false);
-  const { items, removeItem, updateQuantity, total } = useCart();
+  const [email, setEmail] = useState("")
+  const [password, setPassword] = useState("")
+  const [loading, setLoading] = useState(false)
+  const [error, setError] = useState("")
+  const navigate = useNavigate()
+  const { cart, updateQuantity, removeFromCart, total, itemCount } = useGlobalContext();
+  const {setUser, clearUser, user} = useContext(GlobalContext)
+
 
   const formatPrice = (price) => `$${price.toFixed(2)}`;
+
+  const removeItem = (idOrPayload) => {
+    removeFromCart(idOrPayload);
+  };
+
+  const handleUpdateQuantity = (id, newAmount, color, size) => {
+    if (newAmount <= 0) {
+      removeFromCart({ id, color, size });
+    } else {
+      updateQuantity(id, newAmount, color, size);
+    }
+  };
+  
+  const handleLogin = async (e) => {
+    e.preventDefault()
+    setError("")
+    setLoading(true)
+
+    try {
+      const res = await axios.post('/user/signin',
+        { email, password }
+      )
+      if (res.data.success) {
+        const token = res.data.token;
+
+        localStorage.setItem('token', token);
+
+        const res2 = await axios.get('/user/check', {
+            headers: { Authorization: `Bearer ${token}` },
+          });
+
+        if (res2.data.success) {
+          setUser(res2.data.user)
+        } else {
+          localStorage.removeItem('token');
+          clearUser()
+        }
+        setIsLoginOpen(false)
+        navigate("/dashboard/")
+        toast.success("Login successfull")
+      } else {
+        setError(res.data.message || "Invalid credentials")
+      }
+    } catch (err) {
+      setError(err.response?.data?.message || "Login failed. Try again.")
+      toast.error("Error occured")
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  useEffect(() => {
+    if (!error) return; // only run if there’s an error message
+    const timer = setTimeout(() => {
+      setError(null)
+    }, 3000);
+
+    return () => clearTimeout(timer); // cleanup when error changes or component unmounts
+  }, [error]);
+
 
   return (
     <>
@@ -18,10 +88,8 @@ function Header() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 ">
           <div className="flex items-center justify-between h-20">
             {/* Logo */}
-            <Link to="/" className="flex-shrink-0">
-              <div className="text-2xl font-bold font-bungee text-foreground">
-                OLI
-              </div>
+            <Link to="/" className="shrink-0">
+              <img src={logo} alt="" className="h-10"/>
             </Link>
 
             {/* Desktop Navigation */}
@@ -46,18 +114,8 @@ function Header() {
               >
                 Products
               </NavLink>
-              {/* <NavLink
-                to="/dashboard"
-                className={({ isActive }) =>
-                  `text-foreground transition-colors hover:text-[#f8a532]  ${
-                    isActive ? "text-[#f8a532] border-b border-black" : ""
-                  }`
-                }
-              >
-                Dashboard
-              </NavLink> */}
               <NavLink
-                to="/order"
+                to="/place_order"
                 className={({ isActive }) =>
                   `text-foreground transition-colors hover:text-[#f8a532]  ${
                     isActive ? "text-[#f8a532] border-b border-black" : ""
@@ -86,20 +144,31 @@ function Header() {
                 aria-label="Shopping cart"
               >
                 <ShoppingCart size={20} />
-                {items.length > 0 && (
+                {itemCount > 0 && (
                   <span className="absolute top-0 right-0 bg-primary text-primary-foreground text-xs rounded-full w-5 h-5 flex items-center justify-center">
-                    {items.length}
+                    {itemCount}
                   </span>
                 )}
               </button>
-
-              <button
-                onClick={() => setIsLoginOpen(!isLoginOpen)}
-                className="p-2 hover:bg-secondary rounded-lg transition-colors"
-                aria-label="Login"
-              >
-                <LogIn size={20} />
-              </button>
+                {
+                  user ? 
+                  <Link to="/dashboard/">
+                    <button
+                      className="p-2 hover:bg-secondary rounded-lg transition-colors"
+                      aria-label="Login"
+                    >
+                      <LayoutDashboard  size={20} />
+                    </button>
+                  </Link>
+                  : 
+                  <button
+                    onClick={() => setIsLoginOpen(!isLoginOpen)}
+                    className="p-2 hover:bg-secondary rounded-lg transition-colors"
+                    aria-label="Login"
+                  >
+                    <LogIn size={20} />
+                  </button>
+                }
 
               {/* Mobile Menu Toggle */}
               <button
@@ -117,7 +186,7 @@ function Header() {
             <nav className="md:hidden pb-4 flex flex-col gap-4">
               <NavLink
                 to="/story"
-                onClick={() => setIsMenuOpen(!isMenuOpen)}
+                onClick={() => setIsMenuOpen(false)}
                 className={({ isActive }) =>
                   `text-foreground transition-colors hover:text-white hover:bg-muted-foreground p-4 ${
                     isActive ? "text-white bg-muted-foreground/60 " : ""
@@ -128,7 +197,7 @@ function Header() {
               </NavLink>
               <NavLink
                 to="/products"
-                onClick={() => setIsMenuOpen(!isMenuOpen)}
+                onClick={() => setIsMenuOpen(false)}
                 className={({ isActive }) =>
                   `text-foreground transition-colors hover:text-white  hover:bg-muted-foreground p-4 ${
                     isActive ? "text-white bg-muted-foreground/60" : ""
@@ -139,7 +208,7 @@ function Header() {
               </NavLink>
               <NavLink
                 to="/contact"
-                onClick={() => setIsMenuOpen(!isMenuOpen)}
+                onClick={() => setIsMenuOpen(false)}
                 className={({ isActive }) =>
                   `text-foreground transition-colors hover:text-white  hover:bg-muted-foreground p-4 ${
                     isActive ? "text-white bg-muted-foreground/60" : ""
@@ -172,7 +241,7 @@ function Header() {
                 </button>
               </div>
 
-              {items.length === 0 ? (
+              {cart.length === 0 ? (
                 <div className="text-center py-12 text-muted-foreground flex-1 flex items-center justify-center">
                   Your cart is empty
                 </div>
@@ -180,12 +249,14 @@ function Header() {
                 <>
                   {/* Cart Items */}
                   <div className="flex-1 space-y-4 mb-6 overflow-y-auto">
-                    {items.map((item) => (
+                    {cart.map((item) => (
                       <div
-                        key={item.id}
+                        key={`${item.id}-${item.color || "default"}-${
+                          item.size || "default"
+                        }`}
                         className="flex gap-4 bg-secondary p-4 rounded-lg"
                       >
-                        <div className="relative w-20 h-20 flex-shrink-0 rounded-lg overflow-hidden">
+                        <div className="relative w-20 h-20 shrink-0 rounded-lg overflow-hidden">
                           <img
                             src={item.image || "/placeholder.svg"}
                             alt={item.name}
@@ -195,6 +266,16 @@ function Header() {
 
                         <div className="flex-1">
                           <h3 className="font-semibold text-sm">{item.name}</h3>
+                          {item.color && (
+                            <p className="text-sm text-muted-foreground">
+                              Color: {item.color}
+                            </p>
+                          )}
+                          {item.size && (
+                            <p className="text-sm text-muted-foreground">
+                              Size: {item.size}
+                            </p>
+                          )}
                           <p className="text-primary font-bold">
                             {formatPrice(item.price)}
                           </p>
@@ -202,7 +283,12 @@ function Header() {
                           <div className="flex items-center gap-2 mt-2">
                             <button
                               onClick={() =>
-                                updateQuantity(item.id, item.quantity - 1)
+                                handleUpdateQuantity(
+                                  item.id,
+                                  item.quantity - 1,
+                                  item.color,
+                                  item.size
+                                )
                               }
                               className="px-2 py-1 bg-background rounded hover:bg-border transition-colors"
                             >
@@ -213,14 +299,25 @@ function Header() {
                             </span>
                             <button
                               onClick={() =>
-                                updateQuantity(item.id, item.quantity + 1)
+                                handleUpdateQuantity(
+                                  item.id,
+                                  item.quantity + 1,
+                                  item.color,
+                                  item.size
+                                )
                               }
                               className="px-2 py-1 bg-background rounded hover:bg-border transition-colors"
                             >
                               +
                             </button>
                             <button
-                              onClick={() => removeItem(item.id)}
+                              onClick={() =>
+                                removeItem({
+                                  id: item.id,
+                                  color: item.color,
+                                  size: item.size,
+                                })
+                              }
                               className="ml-auto p-1 hover:bg-red-100 rounded transition-colors"
                               aria-label="Remove item"
                             >
@@ -232,7 +329,7 @@ function Header() {
                     ))}
                   </div>
 
-                  {/* Total + Contact */}
+                  {/* Total + Checkout */}
                   <div className="border-t border-border pt-4 space-y-4">
                     <div className="flex items-center justify-between">
                       <span className="font-semibold">Total:</span>
@@ -240,30 +337,15 @@ function Header() {
                         {formatPrice(total)}
                       </span>
                     </div>
-                    <Link to="/order" className="block">
+                    <Link
+                      to="/place_order"
+                      className="block"
+                      onClick={() => setIsCartOpen(false)}
+                    >
                       <button className="w-full bg-primary text-primary-foreground py-2 rounded-lg hover:opacity-90 transition-opacity font-medium">
                         Place Order
                       </button>
                     </Link>
-
-                    {/* <div className="space-y-2">
-                      <a
-                        href="https://wa.me/1234567890"
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="block w-full bg-green-500 text-white py-2 rounded-lg hover:bg-green-600 transition-colors text-center font-medium"
-                      >
-                        Contact via WhatsApp
-                      </a>
-                      <a
-                        href="https://t.me/username"
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="block w-full bg-blue-500 text-white py-2 rounded-lg hover:bg-blue-600 transition-colors text-center font-medium"
-                      >
-                        Contact via Telegram
-                      </a>
-                    </div> */}
                   </div>
                 </>
               )}
@@ -290,11 +372,12 @@ function Header() {
               </button>
             </div>
 
-            <form className="space-y-4">
+            <form className="space-y-4" onSubmit={handleLogin}>
               <div>
                 <label className="block text-sm font-medium mb-2">Email</label>
                 <input
                   type="email"
+                  onChange={(e) => setEmail(e.target.value)}
                   className="w-full px-4 py-2 border border-border rounded-lg bg-secondary focus:outline-none focus:ring-2 focus:ring-accent"
                   placeholder="admin@example.com"
                 />
@@ -306,6 +389,7 @@ function Header() {
                 </label>
                 <input
                   type="password"
+                  onChange={(e) => setPassword(e.target.value)}
                   className="w-full px-4 py-2 border border-border rounded-lg bg-secondary focus:outline-none focus:ring-2 focus:ring-accent"
                   placeholder="••••••••"
                 />
@@ -313,10 +397,12 @@ function Header() {
 
               <button
                 type="submit"
+                disabled={loading}
                 className="w-full bg-primary text-primary-foreground py-2 rounded-lg hover:opacity-90 transition-opacity font-medium"
               >
-                Login
+                {loading ? "Logging in..." : "Login"}
               </button>
+              {error && <p className="text-red-500 font- text-center">{error}</p>}
             </form>
           </div>
         </div>
