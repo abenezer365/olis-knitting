@@ -11,13 +11,18 @@ const Currency = () => {
   const [newRate, setNewRate] = useState("");
   const [changeReason, setChangeReason] = useState("");
   const [submitting, setSubmitting] = useState(false);
+  const token = localStorage.getItem("token")
 
   const fetchData = async () => {
     try {
 
       setLoading(true);
-      const rateRes = await axios.get('/currency/rate')
-       const historyRes = await axios.get('/currency/getRateHistory')
+      const rateRes = await axios.get('/currency/rate',{
+        headers: { Authorization: `Bearer ${token}` },
+      })
+       const historyRes = await axios.get('/currency/getRateHistory', {
+        headers: { Authorization: `Bearer ${token}` },
+      })
       setExchangeRate(rateRes.data);
       setRateHistory(historyRes.data.data || []);
     } catch (error) {
@@ -26,7 +31,14 @@ const Currency = () => {
       setLoading(false);
     }
   };
-
+  useEffect(() => {
+    window.scrollTo({
+      top: 0,
+      left: 0,
+      behavior: 'smooth'
+    });
+  },[]);
+  
   useEffect(() => {
     fetchData();
   }, []);
@@ -39,6 +51,8 @@ const Currency = () => {
       await axios.patch("/currency/updateRate", {
         current_rate: parseFloat(newRate),
         reason: changeReason,
+      },{
+        headers: { Authorization: `Bearer ${token}` },
       });
       toast.success("Exchange rate updated successfully!");
       setNewRate("");

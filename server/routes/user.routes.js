@@ -9,8 +9,8 @@ router.post("/signin", signin);
 router.post("/signup", authenticate,authorize('admin'), signup);
 router.patch("/edit",authenticate , editProfile)
 router.get("/check", authenticate, checkUser )
-router.get("/getUsers",authenticate, getAllUsers )
 router.get("/get/:id",authenticate, getSingleUser )
+router.get("/getUsers",authenticate, authorize('admin'),getAllUsers )
 router.patch("/deactivate/:id",authenticate, authorize('admin'),deactivate )
 router.patch("/activate/:id",authenticate,authorize('admin'), activate )
 router.patch("/suspend/:id",authenticate,authorize('admin'), suspend )

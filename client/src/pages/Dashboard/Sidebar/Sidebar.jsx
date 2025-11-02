@@ -12,6 +12,7 @@ import { FaMoneyBillAlt } from "react-icons/fa";
 import { IoMdSettings } from "react-icons/io";
 import { useGlobalContext } from "@/contexts/Context";
 import { MdOutlineCategory } from "react-icons/md";
+import { GiCargoShip } from "react-icons/gi";
 
 function Sidebar() {
   const location = useLocation();
@@ -26,7 +27,7 @@ function Sidebar() {
   const initials = `${user.first_name?.[0] || ""}${user.last_name?.[0] || ""}`.toUpperCase();
 
   return (
-    <div className="w-1/2 h-full fixed top-0 left-0 z-10000 overflow-y-auto bg-[#253036] text-white pb-5 md:w-1/5 md:text-xs">
+    <div className="w-3/5 text-xs md:text-[15px] h-full fixed top-0 left-0 z-10000 overflow-y-auto bg-[#253036] text-white pb-5 md:w-1/5">
       <div className="flex flex-col items-center bg-[#1C2428] text-beige py-2.5">
         {role == "admin" ? (
           <img 
@@ -39,7 +40,7 @@ function Sidebar() {
             {initials}
           </div>
         )}
-        <p className="text-sm mt-2">{`${user.first_name} ${user.last_name}`}</p>
+        <p className="text-md font-bold mt-2">{`${user.first_name} ${user.last_name}`}</p>
         <p className="text-xs opacity-80 mt-1">{user.email}</p>
         <p className="inline-flex items-center gap-1 px-2 py-1 rounded-full text-xs font-medium bg-muted text-muted-foreground my-2">
           {role === "admin"
@@ -97,15 +98,17 @@ function Sidebar() {
             <p>Category</p>
           </div>
         </Link>
-
-        <Link to="/dashboard/revenue">
-          <div
-            className={`flex gap-2.5 items-center py-2.5 px-5 pl-7 cursor-pointer transition-colors duration-200 ${isActive("/dashboard/revenue")}`}
-          >
-            <FaMoneyCheckDollar />
-            <p>Revenue</p>
-          </div>
-        </Link>
+        {
+          role == "admin" && 
+          <Link to="/dashboard/revenue">
+            <div
+              className={`flex gap-2.5 items-center py-2.5 px-5 pl-7 cursor-pointer transition-colors duration-200 ${isActive("/dashboard/revenue")}`}
+            >
+              <FaMoneyCheckDollar />
+              <p>Revenue</p>
+            </div>
+          </Link>
+        }
 
         <Link to="/dashboard/messages">
           <div
@@ -125,14 +128,25 @@ function Sidebar() {
           </div>
         </Link>
         
-        <Link to="/dashboard/staff">
+        <Link to="/dashboard/shipping">
           <div
-            className={`flex gap-2.5 items-center py-2.5 px-5 pl-7 cursor-pointer transition-colors duration-200 ${isActive("/dashboard/staff")}`}
+            className={`flex gap-2.5 items-center py-2.5 px-5 pl-7 cursor-pointer transition-colors duration-200 ${isActive("/dashboard/shipping")}`}
           >
-            <FaUsers />
-            <p>Staff</p>
+            <GiCargoShip />
+            <p>Shipping</p>
           </div>
         </Link>
+        {
+          role == "admin" && 
+            <Link to="/dashboard/staff">
+              <div
+                className={`flex gap-2.5 items-center py-2.5 px-5 pl-7 cursor-pointer transition-colors duration-200 ${isActive("/dashboard/staff")}`}
+              >
+                <FaUsers />
+                <p>Staff</p>
+              </div>
+            </Link>
+        }
         
         <Link to="/dashboard/setting">
           <div

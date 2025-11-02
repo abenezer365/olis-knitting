@@ -1,7 +1,14 @@
 import TimelineDemo from "@/components/ui/TimelineDemo";
-import React from "react";
+import React, { useEffect } from "react";
 
 function Story() {
+ useEffect(() => {
+    window.scrollTo({
+      top: 0,
+      left: 0,
+      behavior: 'smooth'
+    });
+  });
   return (
     <div>
       <section className="py-20 px-4 border-b border-border bg-background">

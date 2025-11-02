@@ -34,7 +34,7 @@ CREATE TABLE customers (
   uuid CHAR(36) NOT NULL UNIQUE,
   first_name VARCHAR(100) NOT NULL,
   last_name VARCHAR(100) NOT NULL,
-  email VARCHAR(150) NOT NULL UNIQUE,
+  email VARCHAR(150) NOT NULL,
   phone VARCHAR(20),
   status ENUM('active', 'inactive', 'banned') DEFAULT 'active',
   registered_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
@@ -43,11 +43,26 @@ CREATE TABLE customers (
   INDEX (status)
 );
 
+CREATE TABLE shipping_fee (
+  id INT AUTO_INCREMENT PRIMARY KEY,
+  uuid CHAR(36) NOT NULL UNIQUE,
+  country_name VARCHAR(100) NOT NULL,
+  country_code VARCHAR(10) NOT NULL,
+  starting_price DECIMAL(10,2) NOT NULL,
+  maximum_price DECIMAL(10,2) NOT NULL,
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  INDEX (country_name),
+  INDEX (country_code)
+);
+
+
 CREATE TABLE orders (
   id INT AUTO_INCREMENT PRIMARY KEY,
   uuid CHAR(36) NOT NULL UNIQUE,
   
   customer_id INT NOT NULL,
+  shipping_fee_id INT NOT NULL,
   
   payment_status ENUM('pending', 'paid', 'failed', 'refunded') DEFAULT 'pending',
   order_status ENUM('pending', 'processing', 'completed', 'cancelled') DEFAULT 'pending',
@@ -67,6 +82,7 @@ CREATE TABLE orders (
   INDEX (delivery_status),
   
   FOREIGN KEY (customer_id) REFERENCES customers(id) ON DELETE CASCADE
+  FOREIGN KEY (shipping_fee_id) REFERENCES shipping_fee(id) ON DELETE SET NULL;
 );
 
 CREATE TABLE ordered_items (
@@ -198,3 +214,4 @@ CREATE TABLE analytics (
   recorded_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
   updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
 );
+

@@ -4,6 +4,7 @@ import authorize from "../middlewares/authorize.js";
 import authenticate from "../middlewares/authenticate.js";
 import { addCategory, deleteCategory, editCategory, getAllCategory, getAllCategoryFast, getSingleCategory } from "../controller/category.controller.js";
 
+
 const router = express.Router();
 
 router.post("/addCategory", authenticate, authorize("admin"), addCategory);

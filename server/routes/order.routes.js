@@ -5,7 +5,6 @@ import authenticate from "../middlewares/authenticate.js";
 import { deleteOrder, deliveryStatus, getAllOrders, getSingleOrder, getSingleOrderByUuid, orderStatus, paymentStatus, placeOrder } from "../controller/order.controller.js";
 const router = express.Router();
 
-
 router.post("/placeOrder", placeOrder);
 router.get("/orders", authenticate,getAllOrders);
 router.get("/get_by_id/:id", getSingleOrder);

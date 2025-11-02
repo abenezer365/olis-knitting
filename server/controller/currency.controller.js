@@ -62,7 +62,6 @@ export async function updateRate(req, res) {
 }
 
 export async function getRateHistory(req, res) {
-  const limit = Math.min(Math.max(parseInt(req.query.limit) || 10, 1), 100);
 
   try {
     const [rows] = await connection.execute(
@@ -74,8 +73,7 @@ export async function getRateHistory(req, res) {
        FROM currency_rates 
        WHERE previous_rate IS NOT NULL
        ORDER BY change_time DESC 
-       LIMIT ?`,
-      [limit]
+       LIMIT 7`,
     );
 
     const history = rows.map(row => {

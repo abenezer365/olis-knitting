@@ -8,14 +8,23 @@ import { Link } from "react-router-dom";
 const COLORS = ["#A67C52", "#D6B893", "#EBDDC7", "#BFA98E", "#8B6E4B"];
 
 export default function Analytics() {
+  useEffect(() => {
+    window.scrollTo({
+      top: 0,
+      left: 0,
+      behavior: 'smooth'
+    });
+  },[]);
   const [analytics, setAnalytics] = useState(null);
   const [loading, setLoading] = useState(false);
-
+  const token = localStorage.getItem("token")
   // ---- Fetch Analytics Data ----
   const fetchAnalytics = async () => {
     try {
       setLoading(true);
-      const res = await axios.get("/analytics/analytics");
+      const res = await axios.get("/analytics/analytics",{
+        headers: { Authorization: `Bearer ${token}` },
+      });
       setAnalytics(res.data.analytics);
     } catch (error) {
       console.error(error);
@@ -29,7 +38,9 @@ export default function Analytics() {
   const refreshAnalytics = async () => {
     try {
       setLoading(true);
-      await axios.post("/analytics/analytics");
+      await axios.post("/analytics/analytics",{},{
+        headers: { Authorization: `Bearer ${token}` },
+      });
       toast.success("Analytics updated successfully");
       await fetchAnalytics();
     } catch (error) {
@@ -53,9 +64,9 @@ export default function Analytics() {
 
   const stats = [
     { label: "Customers", value: analytics.total_customers, color: "#1C2428", path: "customers" },
-    { label: "Products in Stock", value: analytics.total_products, color: "#A67C52", path: "products" },
+    { label: "Products", value: analytics.total_products, color: "#A67C52", path: "products" },
     { label: "Total Orders", value: analytics.total_orders, color: "#D6C6B8", path: "orders" },
-    { label: "Revenue", value: `$${analytics.total_revenue}`, color: "#F5DEB3", path: "revenue" },
+    { label: "Revenue", value: `$${analytics.total_revenue}`, color: "#D6B893", path: "revenue" },
   ];
 
   const salesData = analytics.sales_data || [];
@@ -120,7 +131,10 @@ export default function Analytics() {
             <ResponsiveContainer width="100%" height={300}>
               <PieChart>
                 <Pie
-                  data={revenueData}
+                  data={revenueData?.map(item => ({
+                      ...item,
+                      revenue: parseFloat(item.revenue)
+                    }))}
                   dataKey="revenue"
                   nameKey="category"
                   cx="50%"

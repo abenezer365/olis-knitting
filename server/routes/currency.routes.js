@@ -6,7 +6,7 @@ import { getCurrentRate, getRateHistory, updateRate } from "../controller/curren
 const router = express.Router();
 
 router.get("/rate", getCurrentRate);
-router.patch("/updateRate/", updateRate)
-router.get("/getRateHistory/", getRateHistory);
+router.patch("/updateRate/", authenticate, authorize("admin"),updateRate)
+router.get("/getRateHistory/",  authenticate,getRateHistory);
 
 export default router;

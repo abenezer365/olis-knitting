@@ -1,10 +1,17 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Mail, Phone, MapPin } from "lucide-react";
 import { FaWhatsapp, FaTelegramPlane } from "react-icons/fa";
 import axios from "@/utils/axios.instance";
 import { toast } from "sonner";
 
 export default function ContactUs() {
+  useEffect(() => {
+    window.scrollTo({
+      top: 0,
+      left: 0,
+      behavior: 'smooth'
+    });
+  },[]);
   const [formData, setFormData] = useState({
     first_name: "",
     last_name: "",

@@ -9,6 +9,13 @@ import { FaWhatsapp, FaTelegramPlane } from "react-icons/fa";
 import axiosInstance from "@/utils/axios.instance";
 
 function ProductsDetail() {
+  useEffect(() => {
+    window.scrollTo({
+      top: 0,
+      left: 0,
+      behavior: 'smooth'
+    });
+  });
   const { id } = useParams();
   const navigate = useNavigate();
   const { addToCart, clearCart } = useGlobalContext();

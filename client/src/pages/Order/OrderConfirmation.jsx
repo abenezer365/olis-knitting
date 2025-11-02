@@ -8,6 +8,13 @@ import { Copy, CheckCheck, Calendar, User, Package ,Truck, MapPin} from "lucide-
 import { FaWhatsapp, FaTelegramPlane, FaInstagram } from "react-icons/fa";
 
 function OrderConfirmation() {
+    useEffect(() => {
+    window.scrollTo({
+      top: 0,
+      left: 0,
+      behavior: 'smooth'
+    });
+  },[]);
   const { uuid } = useParams();
   const [orderData, setOrderData] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -192,50 +199,83 @@ function OrderConfirmation() {
         <div className="grid lg:grid-cols-3 gap-8">
           {/* Main Content */}
           <div className="lg:col-span-2 space-y-6">
-            {/* Order Items */}
-            <Card>
-              <CardHeader className="pb-4">
-                <CardTitle className="flex items-center gap-2">
-                  <Package className="h-5 w-5" />
-                  Order Items ({items.length})
-                </CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                {items.map((item) => (
-                  <div
-                    key={`${item.id}-${item.quantity}`}
-                    className="flex gap-4 p-4 border rounded-lg"
-                  >
-                    <img
-                      src={item.image}
-                      alt={item.name}
-                      className="w-16 h-16 object-cover rounded-lg"
-                    />
-                    <div className="flex-1 min-w-0">
-                      <h4 className="font-semibold truncate">{item.name}</h4>
-                      <div className="flex items-center justify-between mt-2">
-                        <div className="text-sm text-muted-foreground space-y-1">
-                          <div>Quantity: {item.quantity}</div>
-                          <div>Price: ${parseFloat(item.price).toFixed(2)}</div>
-                        </div>
-                        <div className="font-semibold text-right">
-                          ${(item.quantity * parseFloat(item.price)).toFixed(2)}
-                        </div>
+           
+          {/* Order Items */}
+          <Card>
+            <CardHeader className="pb-4">
+              <CardTitle className="flex items-center gap-2">
+                <Package className="h-5 w-5" />
+                Order Items ({items.length})
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              {items.map((item) => (
+                <div
+                  key={`${item.id}-${item.quantity}`}
+                  className="flex gap-4 p-4 border rounded-lg"
+                >
+                  <img
+                    src={item.image}
+                    alt={item.name}
+                    className="w-16 h-16 object-cover rounded-lg"
+                  />
+                  <div className="flex-1 min-w-0">
+                    <h4 className="font-semibold truncate">{item.name}</h4>
+                    <div className="flex items-center justify-between mt-2">
+                      <div className="text-sm text-muted-foreground space-y-1">
+                        <div>Quantity: {item.quantity}</div>
+                        <div>Price: ${parseFloat(item.price).toFixed(2)}</div>
+                      </div>
+                      <div className="font-semibold text-right">
+                        ${(item.quantity * parseFloat(item.price)).toFixed(2)}
                       </div>
                     </div>
                   </div>
-                ))}
-                
-                {/* Order Total */}
-                <div className="border-t pt-4 mt-4">
-                  <div className="flex justify-between items-center text-lg font-semibold">
-                    <span>Total Amount:</span>
-                    <span>{getPrice(order.total_amount)}</span>
-                  </div>
                 </div>
-              </CardContent>
-            </Card>
-                        {/* Contact Actions */}
+              ))}
+              
+              {/* Order Total */}
+              <div className="border-t pt-4 mt-4 space-y-3">
+                <div className="flex justify-between items-center text-lg">
+                  <span className="text-muted-foreground">Order Total:</span>
+                  <span className="font-semibold">{getPrice(order.total_amount)}</span>
+                </div>
+                
+                {/* Shipping Fee */}
+                {order.shipping_fee_id && (
+                  <div className="flex justify-between items-center text-lg">
+                    <span className="text-muted-foreground">Shipping Fee:</span>
+                    <span className="font-semibold">
+                      {getPrice(order.shipping_start)}
+                    </span>
+                  </div>
+                )}
+                
+                {/* Shipping Address */}
+                {order.shipping_country && (
+                  <div className="mt-4 p-4 bg-muted rounded-lg">
+                    <div className="flex items-center gap-2 mb-2">
+                      <MapPin className="h-4 w-4 text-muted-foreground" />
+                      <h4 className="font-semibold text-sm">Shipping Destination</h4>
+                    </div>
+                    <div className="text-sm text-muted-foreground">
+                      <div>{order.shipping_country} ({order.shipping_code})</div>
+                      {order.shipping_start && (
+                        <div className="mt-1 text-xs">
+                          Starting from ${parseFloat(order.shipping_start).toFixed(2)} 
+                          {order.shipping_max && (
+                            <span> up to ${parseFloat(order.shipping_max).toFixed(2)}</span>
+                          )}
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                )}
+              </div>
+            </CardContent>
+          </Card>
+
+           {/* Contact Actions */}
             <Card>
               <CardHeader className="pb-4">
                 <CardTitle>Complete Your Order</CardTitle>
@@ -302,51 +342,54 @@ function OrderConfirmation() {
 
           {/* Sidebar */}
           <div className="space-y-6">
+            
             {/* Order Information */}
-            <Card>
-              <CardHeader className="pb-4">
-                <CardTitle className="flex items-center gap-2">
-                  <Calendar className="h-5 w-5" />
-                  Order Information
-                </CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                <div className="flex justify-between items-center">
-                  <span className="text-muted-foreground">Order ID:</span>
-                  <div className="flex items-center gap-2">
-                    <code className="text-sm font-mono">#{order.id}</code>
-                    <Button
-                      variant="ghost"
-                      size="icon"
-                      className="h-6 w-6"
-                      onClick={() => copyToClipboard(order.id.toString(), "Order ID")}
-                    >
-                      {copiedField === "Order ID" ? (
-                        <CheckCheck className="h-3 w-3 text-green-600" />
-                      ) : (
-                        <Copy className="h-3 w-3" />
-                      )}
-                    </Button>
-                  </div>
+          <Card>
+            <CardHeader className="pb-4">
+              <CardTitle className="flex items-center gap-2">
+                <Calendar className="h-5 w-5" />
+                Order Information
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div className="flex justify-between items-center">
+                <span className="text-muted-foreground">Order ID:</span>
+                <div className="flex items-center gap-2">
+                  <code className="text-sm font-mono">#{order.id}</code>
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    className="h-6 w-6"
+                    onClick={() => copyToClipboard(order.id.toString(), "Order ID")}
+                  >
+                    {copiedField === "Order ID" ? (
+                      <CheckCheck className="h-3 w-3 text-green-600" />
+                    ) : (
+                      <Copy className="h-3 w-3" />
+                    )}
+                  </Button>
                 </div>
+              </div>
+              <div className="flex justify-between">
+                <span className="text-muted-foreground">Order Date:</span>
+                <span className="font-medium">
+                  {new Date(order.created_at).toLocaleDateString('en-US', {
+                    year: 'numeric',
+                    month: 'long',
+                    day: 'numeric'
+                  })}
+                </span>
+              </div>
+              {order.shipping_country && (
                 <div className="flex justify-between">
-                  <span className="text-muted-foreground">Order Date:</span>
-                  <span className="font-medium">
-                    {new Date(order.created_at).toLocaleDateString('en-US', {
-                      year: 'numeric',
-                      month: 'long',
-                      day: 'numeric'
-                    })}
-                  </span>
-                </div>
-                <div className="flex justify-between">
-                  <span className="text-muted-foreground">Payment Method:</span>
+                  <span className="text-muted-foreground">Shipping Method:</span>
                   <span className="font-medium capitalize">
-                    {order.payment_method?.replace('_', ' ') || 'Not specified'}
+                    International ({order.shipping_code})
                   </span>
                 </div>
-              </CardContent>
-            </Card>
+              )}
+            </CardContent>
+          </Card>
 
             {/* Customer Information */}
             <Card>

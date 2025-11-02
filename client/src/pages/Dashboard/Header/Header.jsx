@@ -48,7 +48,7 @@ function Header({ value }) {
       <div className="flex justify-between items-center p-5 sticky top-2.5 z-10 bg-[#1C2428] w-[99%] mx-auto text-white md:w-[97%]">
         <div className="search">
           <div className="container">
-            <Link to="/"><FaHome /></Link>
+            <Link  to="/"><FaHome className='w-6 h-6'/></Link>
           </div>        
         </div>
         <div className="flex items-center gap-3 md:gap-2.5">

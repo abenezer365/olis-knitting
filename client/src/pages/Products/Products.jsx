@@ -11,6 +11,13 @@ import ProductGrid from "@/components/Products/ProductGrid";
 import ProductList from "@/components/Products/ProductsList";
 
 function Products() {
+    useEffect(() => {
+    window.scrollTo({
+      top: 0,
+      left: 0,
+      behavior: 'smooth'
+    });
+  },[]);
   const [viewMode, setViewMode] = useState("grid");
   const [sortBy, setSortBy] = useState("name-asc");
   const [selectedCategory, setSelectedCategory] = useState("All");
@@ -72,7 +79,6 @@ function Products() {
   const startIndex = (currentPage - 1) * itemsPerPage;
   const endIndex = startIndex + itemsPerPage;
   const displayedProducts = sortedProducts.slice(startIndex, endIndex);
-
   // Reset to first page when filters change
   useEffect(() => {
     setCurrentPage(1);

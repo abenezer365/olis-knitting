@@ -7,18 +7,18 @@ import authenticate from "../middlewares/authenticate.js";
 
 const router = express.Router();
 
-router.post("/addProduct", authenticate, uploadMultar.fields([
+router.post("/addProduct", authenticate, authorize("admin"),uploadMultar.fields([
   { name: "image", maxCount: 1 },
   { name: "other_images", maxCount: 3 }
 ]), uploadCloudinary, addProduct);
 
-router.post("/changeImage/", authenticate,uploadMultar.fields([
+router.post("/changeImage/", authenticate, authorize("admin"),uploadMultar.fields([
   { name: "image", maxCount: 1 }
 ]), uploadCloudinary, changeImage);
 
 router.get("/getProducts", getAllProducts);
 router.get("/get/:id", getSingleProduct);
-router.patch("/edit/:id", authenticate, uploadMultar.single("image"), uploadCloudinary, editProduct)
+router.patch("/edit/:id", authenticate, authorize("admin"), uploadMultar.single("image"), uploadCloudinary, editProduct)
 router.delete("/delete/:id", authenticate, authorize('admin'), deleteProduct)
 
 export default router;

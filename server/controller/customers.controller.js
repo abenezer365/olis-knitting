@@ -13,16 +13,6 @@ export async function addCustomer(req, res) {
     }
 
     try {
-    //check if customer email already exists(row, field)
-    const [row] = await connection.execute("SELECT * FROM customers where email = ?",[email]);
-    if (row.length > 0) {
-      if (row[0].email === email) {
-         return res.status(409).json({
-            message: "Customer Already exist",
-            success: false, 
-         });
-      }
-    }
     const uuid = uuidv4();
     const [result] = await connection.execute(
       "INSERT INTO customers (uuid, first_name, last_name, email, phone) VALUES (?,?,?,?,?)",
@@ -47,7 +37,7 @@ export async function addCustomer(req, res) {
 export async function getAllCustomers(req, res) {
   try {
     const [customers] = await connection.execute(
-      "SELECT * FROM customers LIMIT 10"
+     "SELECT * FROM customers ORDER BY registered_at DESC"
     );
 
     if (customers.length === 0) {

@@ -5,14 +5,22 @@ import { toast } from "sonner";
 import axios from "./../../../utils/axios.instance";
 import { useGlobalContext } from "@/contexts/Context";
 import { useLocation, useNavigate } from "react-router-dom";
+import profilepic from "../../../assets/pp.png";
 
 export default function Settings() {
-  const [user, setUser] = useState(null);
+   useEffect(() => {
+    window.scrollTo({
+      top: 0,
+      left: 0,
+      behavior: 'smooth'
+    });
+  },[]);
+  const [user, setUserInfo] = useState(null);
   const [loading, setLoading] = useState(true);
   const [isEditing, setIsEditing] = useState(false);
   const [formData, setFormData] = useState({});
   const token = localStorage.getItem("token");
-  const { clearUser } = useGlobalContext();
+  const { clearUser, setUser } = useGlobalContext();
   const navigate = useNavigate();
 
   const handleEdit = () => setIsEditing(true);
@@ -24,7 +32,7 @@ export default function Settings() {
       const res = await axios.get("/user/check", {
         headers: { Authorization: `Bearer ${token}` },
       });
-      setUser(res.data.user);
+      setUserInfo(res.data.user);
       setFormData(res.data.user);
     } catch (error) {
       toast.error("Failed to fetch user info");
@@ -50,8 +58,13 @@ export default function Settings() {
           headers: { Authorization: `Bearer ${token}` },
         }
       );
-      setUser(res.data.user);
+      setUserInfo(res.data.user);
+
       await fetchUser();
+      const res2 = await axios.get("/user/check", {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      setUser(res2.data.user)
       toast.success("Profile updated successfully");
       setIsEditing(false);
     } catch (err) {
@@ -62,9 +75,9 @@ export default function Settings() {
   };
 
   const handleLogout = () => {
+    navigate("/");
     clearUser();
     toast.success("Logged out successfully!");
-    navigate("/");
   };
  console.log(user)
   if (loading) {
@@ -96,9 +109,18 @@ export default function Settings() {
         {/* Profile Header */}
         <div className="flex flex-col items-center mb-8 text-center">
           <div className="relative mb-4">
-            <div className="w-28 h-28 rounded-full text-white bg-accent flex items-center justify-center text-5xl font-black shadow-md select-none">
-              {initials}
-            </div>
+            {
+              user.role == "admin" ?
+              <img src={profilepic} 
+              alt="" 
+              className="w-42 h-42 rounded-full border-muted"
+              />
+               :
+              <div className="w-28 h-28 rounded-full text-white bg-accent flex items-center justify-center text-5xl font-black shadow-md select-none">
+                {initials}
+              </div>
+
+            }
           </div>
           <h2 className="text-3xl font-bold font-bungee tracking-wide">
             {user.first_name} {user.last_name}

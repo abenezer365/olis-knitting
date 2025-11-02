@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import { toast } from "sonner";
 import axios from "@/utils/axios.instance";
@@ -23,14 +23,15 @@ import {
   Instagram,
 } from "lucide-react";
 import { useGlobalContext } from "@/contexts/Context";
-
+import { useProducts } from "@/hooks/useProducts";
 function PlaceOrder() {
   const { cart, updateQuantity, removeFromCart, total, clearCart } = useGlobalContext();
   const navigate = useNavigate();
   const [isPlacingOrder, setIsPlacingOrder] = useState(false);
-
+  const [shippingFees, setShippingFees] = useState([]);
+  const [selectedCountry, setSelectedCountry] = useState("none");
+  const [selectedShippingFee, setSelectedShippingFee] = useState(null);
   const [currency, setCurrency] = useState("USD");
-  const [paymentMethod, setPaymentMethod] = useState("whatsapp");
   const [subscribeNewsletter, setSubscribeNewsletter] = useState(false);
   const [customerInfo, setCustomerInfo] = useState({
     fullName: "",
@@ -47,115 +48,137 @@ function PlaceOrder() {
     phone_number: "",
     additional_info: "",
   });
-
-  const exchangeRate = 160;
+  const { currencyRate} = useProducts();
 
   const getPrice = (price) =>
     currency === "ETB"
-      ? `${(price * exchangeRate).toFixed(2)} ETB`
+      ? `${(price * currencyRate).toFixed(2)} ETB`
       : `$${price.toFixed(2)}`;
   
   const totalPrice = total;
 
-  const handlePlaceOrder = async () => {
-    if (isPlacingOrder) return;
 
-    try {
-      // ✅ Validation
-      if (!customerInfo.fullName || !customerInfo.email || !customerInfo.phone) {
-        toast.error("Please fill all customer information");
-        return;
+  useEffect(() => {
+      fetchShippingFees();
+    }, []);
+
+    const fetchShippingFees = async () => {
+      try {
+        const response = await axios.get("/shippingFee/all");
+        setShippingFees(response.data || []);
+      } catch (error) {
+        console.error("Error fetching shipping fees:", error);
+        toast.error("Failed to load shipping fees");
       }
-      if (!shippingInfo.city || !shippingInfo.street) {
-        toast.error("Please fill all required shipping information");
-        return;
-      }
+};
+  useEffect(() => {
+    window.scrollTo({
+      top: 0,
+      left: 0,
+      behavior: 'smooth'
+    });
+  },[]);
 
-      setIsPlacingOrder(true);
-      toast.loading("Placing order...");
+ const handlePlaceOrder = async () => {
+  if (isPlacingOrder) return;
 
-      // ✅ Step 1: Create customer and capture ID
-      const [first_name, ...rest] = customerInfo.fullName.split(" ");
-      const last_name = rest.join(" ") || "Unknown";
-      
-      const customerRes = await axios.post("/customer/addCustomer", {
-        first_name,
-        last_name,
-        email: customerInfo.email,
-        phone: customerInfo.phone,
-      });
-      
-      // Dynamic ID extraction
-      const customer_id = customerRes.data.id;
-      
-      if (!customer_id) {
-        throw new Error("Failed to get customer ID");
-      }
-
-      // ✅ Step 2: Create order and capture order ID
-      const orderRes = await axios.post("/order/placeOrder", {
-        customer_id,
-        total_amount: totalPrice,
-      });
-      
-      // Dynamic order ID extraction
-      const order_id = orderRes.data.order_id;
-      const order_uuid = orderRes.data.uuid;
-      
-      if (!order_id) {
-        throw new Error("Failed to get order ID");
-      }
-
-      // ✅ Step 3: Create shipping with captured IDs
-      await axios.post("/shipping/addShipping", {
-        order_id,
-        customer_id,
-        country: shippingInfo.country,
-        city: shippingInfo.city,
-        sub_city: shippingInfo.sub_city,
-        street: shippingInfo.street,
-        house_number: shippingInfo.house_number,
-        postal_code: shippingInfo.postal_code,
-        phone_number: shippingInfo.phone_number || customerInfo.phone,
-        additional_info: shippingInfo.additional_info,
-      });
-
-      // ✅ Step 4: Create ordered items with captured order ID
-      const orderedItemsPromises = cart.map(item => {
-        console.log('Sending product_id:', item.id);
-        axios.post("/orderedItems/add", {
-          order_id,
-          product_id: item.id,
-          quantity: item.quantity,
-          price: item.price,
-        })}
-      );
-
-      await Promise.all(orderedItemsPromises);
-
-      toast.success("Order placed successfully!");
-
-      // ✅ Redirect to confirmation
-      navigate(`/order_confirmation/${order_uuid}`, {
-        state: {
-          customerInfo,
-          shippingInfo,
-          items: cart,
-          total: totalPrice,
-          currency,
-          paymentMethod,
-          subscribeNewsletter,
-        },
-      });
-      clearCart()
-    } catch (error) {
-      console.error("Order placement failed:", error);
-      toast.error("Something went wrong while placing your order");
-    } finally {
-      setIsPlacingOrder(false);
-      toast.dismiss();
+  try {
+    // ✅ Validation
+    if (!customerInfo.fullName || !customerInfo.email || !customerInfo.phone) {
+      toast.error("Please fill all customer information");
+      return;
     }
-  };
+    if (!shippingInfo.city || !shippingInfo.street) {
+      toast.error("Please fill all required shipping information");
+      return;
+    }
+
+    setIsPlacingOrder(true);
+    toast.loading("Placing order...");
+
+    // ✅ Step 1: Create customer and capture ID
+    const [first_name, ...rest] = customerInfo.fullName.split(" ");
+    const last_name = rest.join(" ") || "Unknown";
+    
+    const customerRes = await axios.post("/customer/addCustomer", {
+      first_name,
+      last_name,
+      email: customerInfo.email,
+      phone: customerInfo.phone,
+    });
+    
+    // Dynamic ID extraction
+    const customer_id = customerRes.data.id;
+    
+    if (!customer_id) {
+      throw new Error("Failed to get customer ID");
+    }
+
+    // ✅ Step 2: Create order and capture order ID
+  const orderRes = await axios.post("/order/placeOrder", {
+      customer_id,
+      total_amount: totalPrice,
+      shipping_fee_id: selectedShippingFee ? selectedShippingFee.id : null,
+    });
+    
+    // Dynamic order ID extraction
+    const order_id = orderRes.data.order_id;
+    const order_uuid = orderRes.data.uuid;
+    
+    if (!order_id) {
+      throw new Error("Failed to get order ID");
+    }
+
+    // ✅ Step 3: Create shipping with captured IDs
+    await axios.post("/shipping/addShipping", {
+      order_id,
+      customer_id,
+      country: shippingInfo.country,
+      city: shippingInfo.city,
+      sub_city: shippingInfo.sub_city,
+      street: shippingInfo.street,
+      house_number: shippingInfo.house_number,
+      postal_code: shippingInfo.postal_code,
+      phone_number: shippingInfo.phone_number || customerInfo.phone,
+      additional_info: shippingInfo.additional_info,
+    });
+
+    // ✅ Step 4: Create ordered items with captured order ID
+    const orderedItemsPromises = cart.map(item => {
+      console.log('Sending product_id:', item.id);
+      axios.post("/orderedItems/add", {
+        order_id,
+        product_id: item.id,
+        quantity: item.quantity,
+        price: item.price,
+      });
+    });
+
+    await Promise.all(orderedItemsPromises);
+
+    toast.success("Order placed successfully!");
+
+    // ✅ Redirect to confirmation
+    navigate(`/order_confirmation/${order_uuid}`, {
+      state: {
+        customerInfo,
+        shippingInfo,
+        items: cart,
+        total: totalPrice,
+        currency,
+        selectedShippingFee,
+        subscribeNewsletter,
+      },
+    });
+    clearCart();
+  } catch (error) {
+    console.error("Order placement failed:", error);
+    toast.error("Something went wrong while placing your order");
+  } finally {
+    setIsPlacingOrder(false);
+    toast.dismiss();
+  }
+};
 
   if (cart.length === 0) {
     return (
@@ -469,49 +492,64 @@ function PlaceOrder() {
               <CardContent className="space-y-6">
                 <div className="space-y-2">
                   <div className="flex justify-between text-lg">
-                    <span>Subtotal:</span>
+                    <span>Order Total:</span>
                     <span className="font-semibold">
-                      {getPrice(totalPrice)}
+                      {getPrice(total)}
                     </span>
                   </div>
+                  
+                  {/* Shipping Fee Section */}
+                  <div className="border-t pt-4">
+                    <Label className="mb-3 block">Shipping Destination</Label>
+                    <Select
+                      value={selectedCountry}
+                      onValueChange={(value) => {
+                        setSelectedCountry(value);
+                        if (value !== "none") {
+                          const fee = shippingFees.find(fee => fee.country_code === value);
+                          setSelectedShippingFee(fee);
+                        } else {
+                          setSelectedShippingFee(null);
+                        }
+                      }}
+                    >
+                      <SelectTrigger>
+                        <SelectValue placeholder="Select shipping country" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="none">No shipping (Local pickup)</SelectItem>
+                        {shippingFees.map((fee) => (
+                          <SelectItem key={fee.id} value={fee.country_code}>
+                            {fee.country_name} ({fee.country_code})
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                    
+                    {selectedShippingFee && (
+                      <div className="mt-3 p-3 bg-muted rounded-lg">
+                        <div className="flex justify-between items-center text-sm">
+                          <span className="text-muted-foreground">Shipping Fee:</span>
+                          <span className="font-semibold">
+                            {currency === "ETB" 
+                              ? `${(parseFloat(selectedShippingFee.starting_price) * currencyRate).toFixed(2)} ETB`
+                              : `$${parseFloat(selectedShippingFee.starting_price).toFixed(2)}`
+                            }
+                          </span>
+                        </div>
+                        <p className="text-xs text-muted-foreground mt-1">
+                          Starting price for {selectedShippingFee.country_name}
+                        </p>
+                      </div>
+                    )}
+                  </div>
+
                   <div className="flex justify-between text-sm text-muted-foreground">
                     <span>Items:</span>
                     <span>
                       {cart.reduce((sum, item) => sum + item.quantity, 0)}
                     </span>
                   </div>
-                </div>
-
-                <div className="border-t pt-4">
-                  <Label className="mb-3 block">Contact Seller Via:</Label>
-                  <Select
-                    value={paymentMethod}
-                    onValueChange={setPaymentMethod}
-                  >
-                    <SelectTrigger>
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="whatsapp">
-                        <div className="flex items-center">
-                          <MessageCircle className="mr-2 h-4 w-4" /> WhatsApp
-                        </div>
-                      </SelectItem>
-                      <SelectItem value="telegram">
-                        <div className="flex items-center">
-                          <Send className="mr-2 h-4 w-4" /> Telegram
-                        </div>
-                      </SelectItem>
-                      <SelectItem value="instagram">
-                        <div className="flex items-center">
-                          <Instagram className="mr-2 h-4 w-4" /> Instagram
-                        </div>
-                      </SelectItem>
-                    </SelectContent>
-                  </Select>
-                  <p className="text-xs text-muted-foreground mt-2">
-                    Payment will be arranged through your selected platform
-                  </p>
                 </div>
 
                 <div className="flex items-center space-x-2">

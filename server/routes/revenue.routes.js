@@ -5,7 +5,7 @@ import { getRevenue, updateRevenue } from "../controller/revenue.controller.js";
 
 const router = express.Router();
 
-router.post("/revenue", updateRevenue);
-router.get("/revenue", getRevenue);
+router.post("/revenue",authenticate, updateRevenue);
+router.get("/revenue", authenticate,getRevenue);
 
 export default router;

@@ -15,6 +15,8 @@ import messageRouter from './routes/messages.routes.js'
 import revenueRouter from './routes/revenue.routes.js'
 import anayticsRouter from './routes/analytics.routes.js'
 import shippingRoutes from "./routes/shipping.routes.js";
+import shippingfeeRouter from './routes/shippingfee.routes.js'
+import authRouter from './routes/auth.routes.js'
 
 // Configuration
 dotenv.config()
@@ -40,6 +42,8 @@ app.use("/api/message", messageRouter);
 app.use("/api/revenue", revenueRouter);
 app.use("/api/analytics", anayticsRouter);
 app.use("/api/shipping", shippingRoutes);
+app.use("/api/shippingFee", shippingfeeRouter);
+app.use("/api/auth", authRouter);
 
 
 // Successful connection message on get request to root

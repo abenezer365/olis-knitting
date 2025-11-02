@@ -4,8 +4,16 @@ import FAQSection from "@/components/Home/FAQSection";
 import ImageBackground from "@/components/Home/ImageBackground";
 import FeaturedProducts from "@/components/Home/FeaturedProducts";
 import AppleCardsCarouselDemo from "@/components/Home/AppleCardsCarouselDemo";
+import { useEffect } from "react";
 
 export default function Home() {
+  useEffect(() => {
+    window.scrollTo({
+      top: 0,
+      left: 0,
+      behavior: 'smooth'
+    });
+  });
   return (
     <main>
       <ImageBackground />

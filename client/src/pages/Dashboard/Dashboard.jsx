@@ -1,4 +1,4 @@
-import React from 'react'
+import React, { useEffect } from 'react'
 import Analytics from './Analytics/Analytics'
 import Orders from './Orders/Orders'
 import Customers from './Customers/Customers'
@@ -14,8 +14,17 @@ import Revenue from './Revenue/Revenue'
 import Setting from './Setting/Setting'
 import Currency from './Currency/Currency'
 import Category from './Category/Category'
+import Shipping from './Shipping/Shipping'
+import Unavailable from '../Unavailable/Unavailable'
 
 function Dashboard() {
+    useEffect(() => {
+    window.scrollTo({
+      top: 0,
+      left: 0,
+      behavior: 'smooth'
+    });
+  },[]);
     const width = useWidth()
    const [showSidebar, setShowSidebar] = useState(true)   
   return (
@@ -42,6 +51,8 @@ function Dashboard() {
           <Route path="/revenue" element={<Revenue />} />
           <Route path="/currency" element={<Currency />} />
           <Route path="/setting" element={<Setting />} />
+          <Route path="/shipping" element={<Shipping />} />
+          <Route path="/*" element={<Unavailable />} />
         </Routes>
         </div>
       </div>

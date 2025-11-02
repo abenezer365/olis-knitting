@@ -190,7 +190,7 @@ export async function checkUser(req, res) {
 
   try {
     const [user] = await connection.execute(
-      "SELECT * FROM users WHERE id = ?",
+      "SELECT * FROM users WHERE id = ? ORDER BY created_at DESC",
       [userId]
     );
 
@@ -399,7 +399,7 @@ export async function deleteUser(req, res) {
     }
        // Perform deletion
     await connection.execute(
-      "DELETE FROM users WHERE user_id = ?",
+      "DELETE FROM users WHERE id = ?",
       [id]
     );
 

@@ -6,4 +6,5 @@ const router = express.Router();
 router.post("/addShipping", addShipping);
 router.get("/getShipping/:uuid", getShippingByUuid);
 
+
 export default router;

@@ -7,6 +7,14 @@ function Unauthorized() {
   const [displayText, setDisplayText] = useState("");
   const fullText = "Access Denied";
   const [isVisible, setIsVisible] = useState(false);
+  
+  useEffect(() => {
+    window.scrollTo({
+      top: 0,
+      left: 0,
+      behavior: 'smooth'
+    });
+  });
 
   useEffect(() => {
     setIsVisible(true);

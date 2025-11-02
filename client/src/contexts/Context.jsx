@@ -1,6 +1,7 @@
-import React, { createContext, useContext, useReducer } from "react";
+import React, { createContext, useContext, useReducer, useEffect } from "react";
 import { InitialState, Reducer } from "@/utils/reducer";
 import { Type } from "@/utils/action.type";
+import axios from "@/utils/axios.instance";
 
 export const GlobalContext = createContext();
 
@@ -43,6 +44,38 @@ export const ContextProvider = ({ children }) => {
     total,
     itemCount,
   };
+
+  useEffect(() => {
+    const token = localStorage.getItem("token");
+    if (!token) return;
+
+    async function validateToken() {
+      try {
+        const res = await axios.get("/auth/validate-token", {
+          headers: { Authorization: `Bearer ${token}` },
+        });
+
+        if (res.data.valid) {
+          // token valid → update user in context
+          setUser(res.data.user);
+        } else {
+          // invalid token → clear everything
+          localStorage.removeItem("token");
+          clearUser();
+        }
+      } catch {
+        localStorage.removeItem("token");
+        clearUser();
+      }
+    }
+
+    // Check immediately
+    validateToken();
+
+    // Check again every 24 hours
+    const interval = setInterval(validateToken, 24 * 60 * 60 * 1000);
+    return () => clearInterval(interval);
+  }, []);
 
   return (
     <GlobalContext.Provider value={value}>{children}</GlobalContext.Provider>

@@ -13,7 +13,13 @@ const CategoryPage = () => {
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [selectedCategory, setSelectedCategory] = useState(null);
   const [formData, setFormData] = useState({ name: '' });
-
+  useEffect(() => {
+    window.scrollTo({
+      top: 0,
+      left: 0,
+      behavior: 'smooth'
+    });
+  },[]);
   // Fetch categories
   const fetchCategories = async () => {
     setLoading(true);

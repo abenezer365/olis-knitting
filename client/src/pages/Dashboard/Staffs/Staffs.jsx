@@ -40,6 +40,13 @@ import {
 import { Label } from "@/components/ui/label";
 
 function Staffs() {
+    useEffect(() => {
+    window.scrollTo({
+      top: 0,
+      left: 0,
+      behavior: 'smooth'
+    });
+  },[]);
   const [users, setUsers] = useState([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState("");
@@ -164,8 +171,7 @@ function Staffs() {
     try {  
       await axios.delete(`/user/delete/${selectedUser.id}`, {
         headers: { 
-          Authorization: `Bearer ${token}`,
-          'Content-Type': 'application/json'
+          Authorization: `Bearer ${token}`
         }
       });
       
@@ -173,7 +179,7 @@ function Staffs() {
       setDeleteModalOpen(false);
       fetchUsers();
     } catch (error) {
-      console.error("Error deleting staff member:", error);
+      console.log("Error deleting staff member:", error);
       
       if (error.response?.status === 403) {
         toast.error("You don't have permission to delete staff members");

@@ -17,7 +17,9 @@ import {
   Shield,
   Ban,
   CheckCircle,
-  XCircle
+  XCircle,
+  ChevronLeft,
+  ChevronRight
 } from "lucide-react";
 import {
   Dialog,
@@ -35,6 +37,13 @@ import {
 } from "@/components/ui/select";
 
 function Customers() {
+  useEffect(() => {
+    window.scrollTo({
+      top: 0,
+      left: 0,
+      behavior: 'smooth'
+    });
+  },[]);
   const [customers, setCustomers] = useState([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState("");
@@ -49,6 +58,11 @@ function Customers() {
     email: "",
     phone: ""
   });
+  
+  // Pagination state - ADDED THESE LINES
+  const [currentPage, setCurrentPage] = useState(1);
+  const [itemsPerPage] = useState(8);
+
   const token = localStorage.getItem("token");
 
   useEffect(() => {
@@ -85,6 +99,16 @@ function Customers() {
     return matchesSearch && matchesStatus;
   });
 
+  // Pagination calculations - ADDED THIS SECTION
+  const totalPages = Math.ceil(filteredCustomers.length / itemsPerPage);
+  const startIndex = (currentPage - 1) * itemsPerPage;
+  const paginatedCustomers = filteredCustomers.slice(startIndex, startIndex + itemsPerPage);
+
+  // Reset to first page when filters change - ADDED THIS
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [searchTerm, statusFilter]);
+
   const handleEdit = (customer) => {
     setSelectedCustomer(customer);
     setEditForm({
@@ -114,6 +138,7 @@ function Customers() {
     setSelectedCustomer(customer);
     setDeleteModalOpen(true);
   };
+
 const confirmDelete = async () => {
   try {  
     await axios.delete(`/customer/delete/${selectedCustomer.id}`, {
@@ -211,35 +236,35 @@ const confirmDelete = async () => {
         </div>
 
         {/* Filters */}
-            <div className="flex flex-col sm:flex-row gap-4 my-5 ">
-              <div className="relative flex-1 bg-muted rounded-sm">
-                <Search className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
-                <Input
-                  placeholder="Search customers by name, email, or phone..."
-                  value={searchTerm}
-                  onChange={(e) => setSearchTerm(e.target.value)}
-                  className="pl-10"
-                />
-              </div>
-              <Select value={statusFilter} onValueChange={setStatusFilter}>
-                <SelectTrigger className="w-[180px]">
-                  <Filter className="h-4 w-4 mr-2" />
-                  <SelectValue placeholder="Filter by status" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="all">All Status</SelectItem>
-                  <SelectItem value="active">Active</SelectItem>
-                  <SelectItem value="vip">VIP</SelectItem>
-                  <SelectItem value="premium">Premium</SelectItem>
-                  <SelectItem value="inactive">Inactive</SelectItem>
-                  <SelectItem value="banned">Banned</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
+        <div className="flex flex-col sm:flex-row gap-4 my-5 ">
+          <div className="relative flex-1 bg-muted rounded-sm">
+            <Search className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
+            <Input
+              placeholder="Search customers by name, email, or phone..."
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              className="pl-10"
+            />
+          </div>
+          <Select value={statusFilter} onValueChange={setStatusFilter}>
+            <SelectTrigger className="w-[180px]">
+              <Filter className="h-4 w-4 mr-2" />
+              <SelectValue placeholder="Filter by status" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">All Status</SelectItem>
+              <SelectItem value="active">Active</SelectItem>
+              <SelectItem value="vip">VIP</SelectItem>
+              <SelectItem value="premium">Premium</SelectItem>
+              <SelectItem value="inactive">Inactive</SelectItem>
+              <SelectItem value="banned">Banned</SelectItem>
+            </SelectContent>
+          </Select>
+        </div>
 
         {/* Customers Grid */}
         <div className="grid gap-4">
-          {filteredCustomers.map((customer) => (
+          {paginatedCustomers.map((customer) => ( // CHANGED: filteredCustomers to paginatedCustomers
             <Card key={customer.id} className="hover:shadow-lg transition-shadow">
               <CardContent className="p-6">
                 <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
@@ -325,7 +350,53 @@ const confirmDelete = async () => {
           ))}
         </div>
 
-        {filteredCustomers.length === 0 && (
+        {/* Pagination Section - ADDED THIS ENTIRE SECTION */}
+        {totalPages > 1 && (
+          <div className="flex items-center justify-between mt-8">
+            <div className="text-sm text-muted-foreground">
+              Showing {startIndex + 1} to {Math.min(startIndex + itemsPerPage, filteredCustomers.length)} of {filteredCustomers.length} customers
+            </div>
+            <div className="flex items-center gap-2">
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))}
+                disabled={currentPage === 1}
+                className="flex items-center gap-2"
+              >
+                <ChevronLeft className="h-4 w-4" />
+                Previous
+              </Button>
+              
+              <div className="flex gap-1">
+                {Array.from({ length: totalPages }, (_, i) => i + 1).map(page => (
+                  <Button
+                    key={page}
+                    variant={currentPage === page ? "default" : "outline"}
+                    size="sm"
+                    onClick={() => setCurrentPage(page)}
+                    className="w-10 h-10"
+                  >
+                    {page}
+                  </Button>
+                ))}
+              </div>
+
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => setCurrentPage(prev => Math.min(prev + 1, totalPages))}
+                disabled={currentPage === totalPages}
+                className="flex items-center gap-2"
+              >
+                Next
+                <ChevronRight className="h-4 w-4" />
+              </Button>
+            </div>
+          </div>
+        )}
+
+        {paginatedCustomers.length === 0 && ( // CHANGED: filteredCustomers to paginatedCustomers
           <Card>
             <CardContent className="p-8 text-center">
               <User className="h-12 w-12 text-muted-foreground mx-auto mb-4" />

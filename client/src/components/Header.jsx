@@ -4,6 +4,7 @@ import { ShoppingCart, LogIn, Menu, X, Trash2, LayoutDashboard  } from "lucide-r
 import { GlobalContext, useGlobalContext } from "@/contexts/Context";
 import axios from "@/utils/axios.instance";
 import { toast } from "sonner";
+import logo from "/logo_complement.png"
 
 function Header() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -57,7 +58,7 @@ function Header() {
           clearUser()
         }
         setIsLoginOpen(false)
-        navigate("/dashboard")
+        navigate("/dashboard/")
         toast.success("Login successfull")
       } else {
         setError(res.data.message || "Invalid credentials")
@@ -88,9 +89,7 @@ function Header() {
           <div className="flex items-center justify-between h-20">
             {/* Logo */}
             <Link to="/" className="shrink-0">
-              <div className="text-2xl font-bold font-bungee text-foreground">
-                OLI
-              </div>
+              <img src={logo} alt="" className="h-10"/>
             </Link>
 
             {/* Desktop Navigation */}

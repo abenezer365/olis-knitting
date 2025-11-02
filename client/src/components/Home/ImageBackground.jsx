@@ -6,7 +6,7 @@ const ImageBackground = () => {
       {/* Content */}
       <div className="relative z-20 flex flex-col items-center justify-center text-center text-accent h-full gap-4 px-4">
         <p className="text-lg sm:text-xl md:text-2xl uppercase  tracking-widest">
-          Your Next Move Starts Here
+          You Knit me together.
         </p>
         <h1 className="text-6xl sm:text-6xl md:text-8xl lg:text-9xl hero-text text-accent">
           Oli's

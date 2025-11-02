@@ -7,12 +7,12 @@ const router = express.Router();
 
 
 router.post("/addCustomer", addCustomer);
-router.get("/getCustomers", authenticate,getAllCustomers);
+router.get("/getCustomers",authenticate,getAllCustomers);
 router.patch("/edit/:id", authenticate,editCustomer)
 router.get("/get/:id", getSingleCustomer);
 router.patch("/deactivate/:id",authenticate, deactivate )
 router.patch("/ban/:id",authenticate, ban )
 router.patch("/activate/:id",authenticate, activate )
-router.delete("/delete/:id", authenticate,deleteCustomer )
+router.delete("/delete/:id", authenticate,authorize("admin"),deleteCustomer )
 
 export default router;

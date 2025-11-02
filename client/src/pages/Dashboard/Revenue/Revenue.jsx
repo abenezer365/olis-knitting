@@ -9,17 +9,27 @@ import {
   ResponsiveContainer,
   CartesianGrid,
 } from "recharts";
+import { toast } from "sonner";
 
 const Revenue = () => {
+    useEffect(() => {
+    window.scrollTo({
+      top: 0,
+      left: 0,
+      behavior: 'smooth'
+    });
+  },[]);
   const [revenueData, setRevenueData] = useState(null);
   const [loading, setLoading] = useState(true);
   const [updating, setUpdating] = useState(false);
-
+  const token = localStorage.getItem("token")
   // Fetch revenue from backend
   const fetchRevenue = async () => {
     try {
       setLoading(true);
-      const res = await axios.get("/revenue/revenue");
+      const res = await axios.get("/revenue/revenue", {
+        headers: { Authorization: `Bearer ${token}` },
+      });
       setRevenueData(res.data.data);
     } catch (err) {
       console.error(err);
@@ -35,9 +45,13 @@ const Revenue = () => {
   const handleUpdate = async () => {
     try {
       setUpdating(true);
-      await axios.post("/revenue/revenue");
+      await axios.post("/revenue/revenue",{},{
+        headers: { Authorization: `Bearer ${token}` },
+      });
       await fetchRevenue(); // Refresh data after updating
+      toast.success("Revenue data refreshed succesfully")
     } catch (err) {
+      toast.error("Unable to refresh revenue data")
       console.error(err);
     } finally {
       setUpdating(false);
