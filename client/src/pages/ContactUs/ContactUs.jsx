@@ -9,9 +9,9 @@ export default function ContactUs() {
     window.scrollTo({
       top: 0,
       left: 0,
-      behavior: 'smooth'
+      behavior: "smooth",
     });
-  },[]);
+  }, []);
   const [formData, setFormData] = useState({
     first_name: "",
     last_name: "",
@@ -19,33 +19,32 @@ export default function ContactUs() {
     subject: "",
     message: "",
   });
-  const [submitted,setSubmitted] = useState(false)
+  const [submitted, setSubmitted] = useState(false);
   const handleChange = (e) => {
     const { name, value } = e.target;
     setFormData((prev) => ({ ...prev, [name]: value }));
   };
 
-const handleSubmit = async (e) => {
-  e.preventDefault();
-  try {
-    const res = await axios.post("/message/writeMessage", formData);
-    console.log("Message sent:", res.data);
-    setSubmitted(true);
-    setFormData({
-      first_name: "",
-      last_name: "",
-      email: "",
-      subject: "",
-      message: "",
-    });
-    setTimeout(() => setSubmitted(false), 3000);
-    toast.success("Message sent successfully!");
-  } catch (error) {
-    console.error("Error sending message:", error);
-    toast.error("Failed to send message.");
-  }
-};
-
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    try {
+      const res = await axios.post("/message/writeMessage", formData);
+      console.log("Message sent:", res.data);
+      setSubmitted(true);
+      setFormData({
+        first_name: "",
+        last_name: "",
+        email: "",
+        subject: "",
+        message: "",
+      });
+      setTimeout(() => setSubmitted(false), 3000);
+      toast.success("Message sent successfully!");
+    } catch (error) {
+      console.error("Error sending message:", error);
+      toast.error("Failed to send message.");
+    }
+  };
 
   return (
     <>
@@ -68,6 +67,10 @@ const handleSubmit = async (e) => {
                         Address
                       </h3>
                       <p className="text-muted-foreground">
+                        Alfoz Plaza, Gerji
+                      </p>
+                      <p className="text-muted-foreground">House No. 207</p>
+                      <p className="text-muted-foreground">
                         Addis Ababa, Ethiopia
                       </p>
                     </div>
@@ -79,8 +82,7 @@ const handleSubmit = async (e) => {
                       <h3 className="font-semibold text-foreground mb-1">
                         Phone
                       </h3>
-                      <p className="text-muted-foreground">+251 911 234 567</p>
-                      <p className="text-muted-foreground">+251 922 345 678</p>
+                      <p className="text-muted-foreground">+251 91 227 3435</p>
                     </div>
                   </div>
 
@@ -91,7 +93,7 @@ const handleSubmit = async (e) => {
                         Email
                       </h3>
                       <p className="text-muted-foreground">
-                        info@olifashion.com
+                        olis.knitting@gmail.com{" "}
                       </p>
                     </div>
                   </div>
@@ -105,14 +107,14 @@ const handleSubmit = async (e) => {
                 </h2>
                 <div className="w-full h-80 bg-secondary rounded-lg overflow-hidden border border-border">
                   <iframe
+                    src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d4823.610540961836!2d38.80089000837881!3d9.001019580970228!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x164b85fbd2ed7267%3A0xbb12a87bd17aa9aa!2sAlfoz%20Plaza%20%7C%20Gerji!5e0!3m2!1sen!2set!4v1762351981045!5m2!1sen!2set"
                     width="100%"
                     height="100%"
                     style={{ border: 0 }}
                     loading="lazy"
                     allowFullScreen
-                    referrerPolicy="no-referrer-when-downgrade"
-                    src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3940.6829271099!2d38.74677!3d9.03212!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x164b85cecc7c1d4d%3A0x1234567890!2sAddis%20Ababa%2C%20Ethiopia!5e0!3m2!1sen!2set!4v1234567890"
-                  />
+                    referrerpolicy="no-referrer-when-downgrade"
+                  ></iframe>
                 </div>
               </div>
             </div>
@@ -123,10 +125,11 @@ const handleSubmit = async (e) => {
                   Send us a Message
                 </h2>
                 <form onSubmit={handleSubmit} className="space-y-6">
-
                   {/* First Name */}
                   <div className="flex items-center gap-4">
-                    <label className="font-medium text-foreground text-nowrap">First Name</label>
+                    <label className="font-medium text-foreground text-nowrap">
+                      First Name
+                    </label>
                     <input
                       type="text"
                       name="first_name"
@@ -140,7 +143,9 @@ const handleSubmit = async (e) => {
 
                   {/* Last Name */}
                   <div className="flex items-center gap-4">
-                    <label className="font-medium text-foreground text-nowrap">Last Name</label>
+                    <label className="font-medium text-foreground text-nowrap">
+                      Last Name
+                    </label>
                     <input
                       type="text"
                       name="last_name"
@@ -154,7 +159,9 @@ const handleSubmit = async (e) => {
 
                   {/* Email */}
                   <div className="flex items-center gap-4">
-                    <label className="font-medium text-foreground text-nowrap">Email</label>
+                    <label className="font-medium text-foreground text-nowrap">
+                      Email
+                    </label>
                     <input
                       type="email"
                       name="email"
@@ -168,7 +175,9 @@ const handleSubmit = async (e) => {
 
                   {/* Subject */}
                   <div className="flex items-center gap-4">
-                    <label className="font-medium text-foreground text-nowrap">Subject</label>
+                    <label className="font-medium text-foreground text-nowrap">
+                      Subject
+                    </label>
                     <input
                       type="text"
                       name="subject"
@@ -182,7 +191,9 @@ const handleSubmit = async (e) => {
 
                   {/* Message */}
                   <div className="flex flex-col gap-2">
-                    <label className="block text-lg font-medium text-foreground mb-2">Message</label>
+                    <label className="block text-lg font-medium text-foreground mb-2">
+                      Message
+                    </label>
                     <textarea
                       name="message"
                       value={formData.message}
@@ -201,7 +212,6 @@ const handleSubmit = async (e) => {
                     Send Message
                   </button>
                 </form>
-
               </div>
               {/* Quick Contact Buttons */}
               <div className="">
@@ -211,7 +221,7 @@ const handleSubmit = async (e) => {
                 <div className="flex gap-4">
                   {/* WhatsApp Button */}
                   <a
-                    href="https://wa.me/251911234567"
+                    href="https://wa.me/251912273435"
                     target="_blank"
                     rel="noopener noreferrer"
                     className="group flex items-center gap-3 bg-linear-to-r from-green-500 to-green-600 text-white px-6 py-3 rounded-2xl shadow-md hover:shadow-lg transition-all duration-300 font-medium"
@@ -229,7 +239,7 @@ const handleSubmit = async (e) => {
 
                   {/* Telegram Button */}
                   <a
-                    href="https://t.me/olifashion"
+                    href="https://t.me/Olisknitting"
                     target="_blank"
                     rel="noopener noreferrer"
                     className="group flex items-center gap-3 bg-linear-to-r from-sky-500 to-blue-600 text-white px-6 py-3 rounded-2xl shadow-md hover:shadow-lg transition-all duration-300 font-medium"

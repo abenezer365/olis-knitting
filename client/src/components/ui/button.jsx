@@ -22,7 +22,7 @@ const buttonVariants = cva(
         luxury:
           "bg-gradient-to-r from-accent to-amber-400 text-foreground font-semibold hover:shadow-lg hover:-translate-y-0.5 transition-all",
         Transparent:
-          "border border-primary bg-white shadow-xs hover:bg-accent hover:text-accent-foreground",
+          "border border-primary bg-accent/50 shadow-xs hover:bg-accent hover:text-accent-foreground",
       },
       size: {
         default: "h-9 px-4 py-2 has-[>svg]:px-3",

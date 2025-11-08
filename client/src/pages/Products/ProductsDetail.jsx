@@ -13,7 +13,7 @@ function ProductsDetail() {
     window.scrollTo({
       top: 0,
       left: 0,
-      behavior: 'smooth'
+      behavior: "smooth",
     });
   });
   const { id } = useParams();
@@ -287,7 +287,7 @@ function ProductsDetail() {
               {/* Contact Buttons */}
               <div className="flex gap-3 mt-8">
                 <a
-                  href="https://wa.me/251911234567"
+                  href="https://wa.me/251912273435"
                   target="_blank"
                   rel="noopener noreferrer"
                   className="group flex items-center gap-3 bg-linear-to-r from-green-500 to-green-600 text-white px-6 py-3 rounded-2xl shadow-md hover:shadow-lg transition-all duration-300 font-medium"
@@ -297,7 +297,7 @@ function ProductsDetail() {
                 </a>
 
                 <a
-                  href="https://t.me/olifashion"
+                  href="https://t.me/Olisknitting"
                   target="_blank"
                   rel="noopener noreferrer"
                   className="group flex items-center gap-3 bg-linear-to-r from-sky-500 to-blue-600 text-white px-6 py-3 rounded-2xl shadow-md hover:shadow-lg transition-all duration-300 font-medium"

@@ -199,7 +199,7 @@ function QuickPreviewModal({
             <div className="flex gap-2 pt-2">
               {/* WhatsApp Button */}
               <a
-                href="https://wa.me/251911234567"
+                href="https://wa.me/2519112273435"
                 target="_blank"
                 rel="noopener noreferrer"
                 className="group flex items-center gap-3 bg-linear-to-r from-green-500 to-green-600 text-white px-6 py-3 rounded-2xl shadow-md hover:shadow-lg transition-all duration-300 font-medium"
@@ -217,7 +217,7 @@ function QuickPreviewModal({
 
               {/* Telegram Button */}
               <a
-                href="https://t.me/olifashion"
+                href="https://t.me/Olisknitting"
                 target="_blank"
                 rel="noopener noreferrer"
                 className="group flex items-center gap-3 bg-linear-to-r from-sky-500 to-blue-600 text-white px-6 py-3 rounded-2xl shadow-md hover:shadow-lg transition-all duration-300 font-medium"

@@ -1,23 +1,30 @@
 import { useContext, useEffect, useState } from "react";
 import { Link, NavLink, useNavigate } from "react-router-dom";
-import { ShoppingCart, LogIn, Menu, X, Trash2, LayoutDashboard  } from "lucide-react";
+import {
+  ShoppingCart,
+  LogIn,
+  Menu,
+  X,
+  Trash2,
+  LayoutDashboard,
+} from "lucide-react";
 import { GlobalContext, useGlobalContext } from "@/contexts/Context";
 import axios from "@/utils/axios.instance";
 import { toast } from "sonner";
-import logo from "/logo_complement.png"
+import logo from "/logo_complement.png";
 
 function Header() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isCartOpen, setIsCartOpen] = useState(false);
   const [isLoginOpen, setIsLoginOpen] = useState(false);
-  const [email, setEmail] = useState("")
-  const [password, setPassword] = useState("")
-  const [loading, setLoading] = useState(false)
-  const [error, setError] = useState("")
-  const navigate = useNavigate()
-  const { cart, updateQuantity, removeFromCart, total, itemCount } = useGlobalContext();
-  const {setUser, clearUser, user} = useContext(GlobalContext)
-
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState("");
+  const navigate = useNavigate();
+  const { cart, updateQuantity, removeFromCart, total, itemCount } =
+    useGlobalContext();
+  const { setUser, clearUser, user } = useContext(GlobalContext);
 
   const formatPrice = (price) => `$${price.toFixed(2)}`;
 
@@ -32,54 +39,51 @@ function Header() {
       updateQuantity(id, newAmount, color, size);
     }
   };
-  
+
   const handleLogin = async (e) => {
-    e.preventDefault()
-    setError("")
-    setLoading(true)
+    e.preventDefault();
+    setError("");
+    setLoading(true);
 
     try {
-      const res = await axios.post('/user/signin',
-        { email, password }
-      )
+      const res = await axios.post("/user/signin", { email, password });
       if (res.data.success) {
         const token = res.data.token;
 
-        localStorage.setItem('token', token);
+        localStorage.setItem("token", token);
 
-        const res2 = await axios.get('/user/check', {
-            headers: { Authorization: `Bearer ${token}` },
-          });
+        const res2 = await axios.get("/user/check", {
+          headers: { Authorization: `Bearer ${token}` },
+        });
 
         if (res2.data.success) {
-          setUser(res2.data.user)
+          setUser(res2.data.user);
         } else {
-          localStorage.removeItem('token');
-          clearUser()
+          localStorage.removeItem("token");
+          clearUser();
         }
-        setIsLoginOpen(false)
-        navigate("/dashboard/")
-        toast.success("Login successfull")
+        setIsLoginOpen(false);
+        navigate("/dashboard/");
+        toast.success("Login successfull");
       } else {
-        setError(res.data.message || "Invalid credentials")
+        setError(res.data.message || "Invalid credentials");
       }
     } catch (err) {
-      setError(err.response?.data?.message || "Login failed. Try again.")
-      toast.error("Error occured")
+      setError(err.response?.data?.message || "Login failed. Try again.");
+      toast.error("Error occured");
     } finally {
-      setLoading(false)
+      setLoading(false);
     }
-  }
+  };
 
   useEffect(() => {
     if (!error) return; // only run if there’s an error message
     const timer = setTimeout(() => {
-      setError(null)
+      setError(null);
     }, 3000);
 
     return () => clearTimeout(timer); // cleanup when error changes or component unmounts
   }, [error]);
-
 
   return (
     <>
@@ -89,11 +93,21 @@ function Header() {
           <div className="flex items-center justify-between h-20">
             {/* Logo */}
             <Link to="/" className="shrink-0">
-              <img src={logo} alt="" className="h-10"/>
+              <img src={logo} alt="" className="h-10" />
             </Link>
 
             {/* Desktop Navigation */}
             <nav className="hidden md:flex items-center gap-8">
+              <NavLink
+                to="/"
+                className={({ isActive }) =>
+                  `text-foreground transition-colors hover:text-[#f8a532]  ${
+                    isActive ? "text-[#f8a532] border-b border-black" : ""
+                  }`
+                }
+              >
+                Home
+              </NavLink>
               <NavLink
                 to="/story"
                 className={({ isActive }) =>
@@ -150,25 +164,24 @@ function Header() {
                   </span>
                 )}
               </button>
-                {
-                  user ? 
-                  <Link to="/dashboard/">
-                    <button
-                      className="p-2 hover:bg-secondary rounded-lg transition-colors"
-                      aria-label="Login"
-                    >
-                      <LayoutDashboard  size={20} />
-                    </button>
-                  </Link>
-                  : 
+              {user ? (
+                <Link to="/dashboard/">
                   <button
-                    onClick={() => setIsLoginOpen(!isLoginOpen)}
                     className="p-2 hover:bg-secondary rounded-lg transition-colors"
                     aria-label="Login"
                   >
-                    <LogIn size={20} />
+                    <LayoutDashboard size={20} />
                   </button>
-                }
+                </Link>
+              ) : (
+                <button
+                  onClick={() => setIsLoginOpen(!isLoginOpen)}
+                  className="p-2 hover:bg-secondary rounded-lg transition-colors"
+                  aria-label="Login"
+                >
+                  <LogIn size={20} />
+                </button>
+              )}
 
               {/* Mobile Menu Toggle */}
               <button
@@ -184,6 +197,17 @@ function Header() {
           {/* Mobile Navigation */}
           {isMenuOpen && (
             <nav className="md:hidden pb-4 flex flex-col gap-4">
+              <NavLink
+                to="/"
+                onClick={() => setIsMenuOpen(false)}
+                className={({ isActive }) =>
+                  `text-foreground transition-colors hover:text-white hover:bg-muted-foreground p-4 ${
+                    isActive ? "text-white bg-muted-foreground/60 " : ""
+                  }`
+                }
+              >
+                Home
+              </NavLink>
               <NavLink
                 to="/story"
                 onClick={() => setIsMenuOpen(false)}
@@ -402,7 +426,9 @@ function Header() {
               >
                 {loading ? "Logging in..." : "Login"}
               </button>
-              {error && <p className="text-red-500 font- text-center">{error}</p>}
+              {error && (
+                <p className="text-red-500 font- text-center">{error}</p>
+              )}
             </form>
           </div>
         </div>

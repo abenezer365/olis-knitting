@@ -3,29 +3,32 @@ import { ChevronDown } from "lucide-react";
 
 const faqs = [
   {
-    question: "What products does Oli's offer?",
+    question: "Do you ship worldwide?",
     answer:
-      "We specialize in handmade knitwear including sweaters, scarves, hats, and other luxury fashion items.",
+      "Yes! We ship internationally via DHL. Please note that shipping costs are covered by our clients.",
+  },
+  {
+    question: "How do I provide my measurements?",
+    answer:
+      "We’ve made it simple — just refer to the size chart available under each product in our store and choose your size accordingly.",
+  },
+  {
+    question: "Are your products pre-order or ready to purchase?",
+    answer: "All our products are available as pre-orders.",
+  },
+  {
+    question: "How long does it take to prepare my order?",
+    answer: "Our team carefully prepares each order within 5 working days.",
+  },
+  {
+    question: "Are your products Habesha tilet?",
+    answer:
+      "Our pieces are primarily knitted, though we sometimes incorporate woven fabrics and other materials for unique designs.",
   },
   {
     question: "How can I place an order?",
     answer:
       "Currently, orders can be placed via WhatsApp or Telegram by contacting us directly through the product detail page.",
-  },
-  {
-    question: "Does Oli's deliver outside Ethiopia?",
-    answer:
-      "Not at this time, but international delivery will be added in the future.",
-  },
-  {
-    question: "Are the products handmade?",
-    answer:
-      "Yes, each piece is carefully handcrafted by skilled women artisans.",
-  },
-  {
-    question: "Can I request custom designs or colors?",
-    answer:
-      "Yes, custom orders can be discussed through our WhatsApp or Telegram support.",
   },
 ];
 

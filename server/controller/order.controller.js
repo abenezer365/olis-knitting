@@ -1,14 +1,15 @@
 import { v4 as uuidv4 } from "uuid";
-import connection from "../config/database.config.js"
-import nodemailer from "nodemailer"
+import connection from "../config/database.config.js";
+import nodemailer from "nodemailer";
 
 // Place order controller
 export const placeOrder = async (req, res) => {
   const { customer_id, total_amount, shipping_fee_id } = req.body;
   try {
-
     if (!customer_id || !total_amount) {
-      return res.status(400).json({ message: "Customer ID and total amount are required" });
+      return res
+        .status(400)
+        .json({ message: "Customer ID and total amount are required" });
     }
 
     const newOrder = {
@@ -21,7 +22,12 @@ export const placeOrder = async (req, res) => {
     const [result] = await connection.execute(
       `INSERT INTO orders (uuid, customer_id, total_amount, shipping_fee_id)
       VALUES (?, ?, ?, ?)`,
-      [newOrder.uuid, newOrder.customer_id, newOrder.total_amount, newOrder.shipping_fee_id]
+      [
+        newOrder.uuid,
+        newOrder.customer_id,
+        newOrder.total_amount,
+        newOrder.shipping_fee_id,
+      ]
     );
 
     const orderId = result.insertId;
@@ -31,7 +37,7 @@ export const placeOrder = async (req, res) => {
       "SELECT first_name, last_name, email, phone FROM customers WHERE id = ?",
       [customer_id]
     );
-    
+
     if (customerRows.length === 0) {
       return res.status(404).json({ message: "Customer not found" });
     }
@@ -48,19 +54,19 @@ export const placeOrder = async (req, res) => {
     });
 
     const now = new Date().getFullYear();
-    const currentDate = new Date().toLocaleDateString('en-US', { 
-      weekday: 'long', 
-      year: 'numeric', 
-      month: 'long', 
-      day: 'numeric' 
+    const currentDate = new Date().toLocaleDateString("en-US", {
+      weekday: "long",
+      year: "numeric",
+      month: "long",
+      day: "numeric",
     });
 
     const mailOptions = {
       from: `"Oli's Knitwear" <${process.env.EMAIL}>`,
       to: customer.email,
       subject: `Order Received #${orderId} – Oli's Knitwear`,
-      html: `
-<!DOCTYPE html>
+
+      html: `<!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
@@ -129,34 +135,38 @@ export const placeOrder = async (req, res) => {
       <!-- Order Information -->
       <div class="order-info">
         <div class="info-row">
-          <span class="info-label">Order Number: </span>
+          <span class="info-label">Order Number:&nbsp; </span>
           <span class="info-value">#${orderId}</span>
         </div>
         <div class="info-row">
-          <span class="info-label">Order Date: </span>
+          <span class="info-label">Order Date:&nbsp; </span>
           <span class="info-value">${currentDate}</span>
         </div>
         <div class="info-row">
-          <span class="info-label">Customer: </span>
+          <span class="info-label">Customer:&nbsp; </span>
           <span class="info-value">${customerName}</span>
         </div>
         <div class="info-row">
-          <span class="info-label">Email: </span>
+          <span class="info-label">Email:&nbsp; </span>
           <span class="info-value">${customer.email}</span>
         </div>
         <div class="info-row">
-          <span class="info-label">Phone: </span>
+          <span class="info-label">Phone: &nbsp;</span>
           <span class="info-value">${customer.phone}</span>
         </div>
         <div class="info-row">
-          <span class="info-label total-amount">Order Total: </span>
-          <span class="info-value total-amount">$${parseFloat(total_amount).toFixed(2)}</span>
+          <span class="info-label total-amount">Order Total: &nbsp;</span>
+          <span class="info-value total-amount">$${parseFloat(
+            total_amount
+          ).toFixed(2)}</span>
         </div>
       </div>
 
       <!-- Tracking Section -->
       <div class="tracking-section">
-        <a style="color:white;" href="http://localhost:5173/order/${newOrder.uuid}" class="track-btn" target="_blank">
+        <a style="color:white;" href="https://olisknitwear.com/order/${
+          newOrder.uuid
+        }" class="track-btn" target="_blank">
           Track Your Order
         </a>
         <p style="margin-top: 15px; color: #666666; font-size: 14px;">
@@ -169,30 +179,19 @@ export const placeOrder = async (req, res) => {
         <div class="payment-title">💳 Complete Your Payment</div>
         <p>To proceed with your order, please complete the payment via bank transfer and share the proof with us:</p>
         <div class="contact-details">
-          📧 payments@olisknitwear.com<br>
-          📱 +251 911 234 567
+          📧 olis.knitting@gmail.com<br>
+          📱 +251 91 227 3435
         </div>
       </div>
-
-      <!-- Brand Story -->
-      <div class="story-section">
-        <p class="story-text">
-          "Every stitch tells a story of empowerment. Oli's Knitwear began as a mother's love for her family, 
-          weaving warmth and comfort into every piece. Today, it's a movement supporting women artisans in Ethiopia, 
-          creating sustainable fashion that makes a difference."
-        </p>
-      </div>
-
-      <p>We appreciate your trust in us and look forward to delivering exceptional craftsmanship to you.</p>
-    </div>
+   </div>
 
     <!-- Footer -->
     <div class="footer">
       <div class="footer-content">
         <div class="brand" style="color: #FAF8F3; font-size: 24px;">Oli's Knitwear</div>
         <div class="footer-links">
-          <a style="color:white;" href="mailto:info@olisknitwear.com" class="footer-link">Contact Us</a>
-          <a style="color:white;" href="https://olisknitting.netlify.app" class="footer-link" target="_blank">Visit Website</a>
+          <a style="color:white;" href="mailto:olis.knitting@gmail.com" class="footer-link">Contact Us</a>
+          <a style="color:white;" href="https://olisknitwear.com" class="footer-link" target="_blank">Visit Website</a>
         </div>
         <div class="signature">
           <p>&copy; ${now} Oli's Knitwear. All rights reserved.</p>
@@ -204,8 +203,7 @@ export const placeOrder = async (req, res) => {
     </div>
   </div>
 </body>
-</html>
-      `,
+</html>`,
     };
 
     await transporter.sendMail(mailOptions);
@@ -217,7 +215,9 @@ export const placeOrder = async (req, res) => {
     });
   } catch (error) {
     console.error("Error placing order:", error);
-    res.status(500).json({ message: "Failed to place order", error: error.message });
+    res
+      .status(500)
+      .json({ message: "Failed to place order", error: error.message });
   }
 };
 
@@ -256,10 +256,10 @@ export const getAllOrders = async (req, res) => {
     );
 
     // Step 3: Group products under each order
-    const formattedOrders = orders.map(order => {
+    const formattedOrders = orders.map((order) => {
       const products = orderedItems
-        .filter(item => item.order_id === order.id)
-        .map(item => ({
+        .filter((item) => item.order_id === order.id)
+        .map((item) => ({
           id: item.product_id,
           name: item.product_name,
           image: item.product_image,
@@ -267,11 +267,11 @@ export const getAllOrders = async (req, res) => {
           quantity: item.quantity,
           subtotal: item.subtotal,
           shipping_fee: {
-              country: order.shipping_country,
-              code: order.shipping_code,
-              starting_price: order.shipping_start,
-              maximum_price: order.shipping_max
-        },
+            country: order.shipping_country,
+            code: order.shipping_code,
+            starting_price: order.shipping_start,
+            maximum_price: order.shipping_max,
+          },
         }));
 
       return {
@@ -281,9 +281,9 @@ export const getAllOrders = async (req, res) => {
           fname: order.customer_fname,
           lname: order.customer_lname,
           email: order.customer_email,
-          phone: order.customer_phone
+          phone: order.customer_phone,
         },
-        products
+        products,
       };
     });
 
@@ -339,7 +339,7 @@ export const getSingleOrder = async (req, res) => {
       [id]
     );
 
-    const products = items.map(item => ({
+    const products = items.map((item) => ({
       id: item.product_id,
       name: item.product_name,
       image: item.product_image,
@@ -347,10 +347,10 @@ export const getSingleOrder = async (req, res) => {
       quantity: item.quantity,
       subtotal: item.subtotal,
       shipping_fee: {
-          country: order.shipping_country,
-          code: order.shipping_code,
-          starting_price: order.shipping_start,
-          maximum_price: order.shipping_max
+        country: order.shipping_country,
+        code: order.shipping_code,
+        starting_price: order.shipping_start,
+        maximum_price: order.shipping_max,
       },
     }));
 
@@ -361,9 +361,9 @@ export const getSingleOrder = async (req, res) => {
         fname: order.customer_fname,
         lname: order.customer_lname,
         email: order.customer_email,
-        phone: order.customer_phone
+        phone: order.customer_phone,
       },
-      products
+      products,
     };
 
     res.status(200).json(formattedOrder);
@@ -418,7 +418,7 @@ export const getSingleOrderByUuid = async (req, res) => {
       [order.id]
     );
 
-    const products = items.map(item => ({
+    const products = items.map((item) => ({
       id: item.product_id,
       name: item.product_name,
       image: item.product_image,
@@ -426,11 +426,11 @@ export const getSingleOrderByUuid = async (req, res) => {
       quantity: item.quantity,
       subtotal: item.subtotal,
       shipping_fee: {
-          country: order.shipping_country,
-          code: order.shipping_code,
-          starting_price: order.shipping_start,
-          maximum_price: order.shipping_max
-    },
+        country: order.shipping_country,
+        code: order.shipping_code,
+        starting_price: order.shipping_start,
+        maximum_price: order.shipping_max,
+      },
     }));
 
     const formattedOrder = {
@@ -440,9 +440,9 @@ export const getSingleOrderByUuid = async (req, res) => {
         fname: order.customer_fname,
         lname: order.customer_lname,
         email: order.customer_email,
-        phone: order.customer_phone
+        phone: order.customer_phone,
       },
-      products
+      products,
     };
 
     res.status(200).json(formattedOrder);
@@ -451,7 +451,6 @@ export const getSingleOrderByUuid = async (req, res) => {
     res.status(500).json({ message: "Failed to fetch order" });
   }
 };
-
 
 // Update order status controller
 export const orderStatus = async (req, res) => {
@@ -465,18 +464,19 @@ export const orderStatus = async (req, res) => {
       return res.status(400).json({ message: "Invalid order status" });
     }
 
-    await connection.execute(`UPDATE orders SET order_status = ? WHERE id = ?`, [order_status, id]);
+    await connection.execute(
+      `UPDATE orders SET order_status = ? WHERE id = ?`,
+      [order_status, id]
+    );
 
-    return res.status(200).json({ 
-        message: "Order status updated successfully" 
+    return res.status(200).json({
+      message: "Order status updated successfully",
     });
-
   } catch (error) {
-
     console.error("Error updating order status:", error);
     return res.status(500).json({
-         message: "Failed to update order status" 
-        });
+      message: "Failed to update order status",
+    });
   }
 };
 
@@ -486,7 +486,12 @@ export const deliveryStatus = async (req, res) => {
     const { id } = req.params;
     const { delivery_status } = req.body;
 
-    const validStatuses = ["not_shipped", "in_transit", "delivered", "returned"];
+    const validStatuses = [
+      "not_shipped",
+      "in_transit",
+      "delivered",
+      "returned",
+    ];
 
     if (!validStatuses.includes(delivery_status)) {
       return res.status(400).json({ message: "Invalid delivery status" });
@@ -509,12 +514,12 @@ export const deliveryStatus = async (req, res) => {
     const customerName = `${order.first_name} ${order.last_name}`;
 
     await connection.execute(
-      `UPDATE orders SET delivery_status = ? WHERE id = ?`, 
+      `UPDATE orders SET delivery_status = ? WHERE id = ?`,
       [delivery_status, id]
     );
 
     // Send delivery confirmation email if status is 'delivered'
-    if (delivery_status === 'delivered') {
+    if (delivery_status === "delivered") {
       const transporter = nodemailer.createTransport({
         service: "gmail",
         auth: {
@@ -524,11 +529,11 @@ export const deliveryStatus = async (req, res) => {
       });
 
       const now = new Date().getFullYear();
-      const deliveryDate = new Date().toLocaleDateString('en-US', { 
-        weekday: 'long', 
-        year: 'numeric', 
-        month: 'long', 
-        day: 'numeric' 
+      const deliveryDate = new Date().toLocaleDateString("en-US", {
+        weekday: "long",
+        year: "numeric",
+        month: "long",
+        day: "numeric",
       });
 
       const mailOptions = {
@@ -605,7 +610,9 @@ export const deliveryStatus = async (req, res) => {
       <div class="celebration-card">
         <div class="celebration-icon">🎁</div>
         <div class="celebration-title">Successfully Delivered!</div>
-        <p>Your order #${order.id} was delivered on ${deliveryDate}. We hope you love your new handcrafted pieces!</p>
+        <p>Your order #${
+          order.id
+        } was delivered on ${deliveryDate}. We hope you love your new handcrafted pieces!</p>
       </div>
 
       <!-- Delivery Information -->
@@ -621,7 +628,9 @@ export const deliveryStatus = async (req, res) => {
           </div>
           <div class="info-item">
             <div class="info-label">Order Total</div>
-            <div class="info-value">$${parseFloat(order.total_amount).toFixed(2)}</div>
+            <div class="info-value">$${parseFloat(order.total_amount).toFixed(
+              2
+            )}</div>
           </div>
           <div class="info-item">
             <div class="info-label">Status</div>
@@ -639,17 +648,6 @@ export const deliveryStatus = async (req, res) => {
           Share Your Experience
         </a>
       </div>
-
-      <!-- Brand Story -->
-      <div class="story-section">
-        <p class="story-text">
-          "Every thread in your new knitwear carries the story of Ethiopian women artisans, their skills passed through generations, and their dreams woven into each stitch. Thank you for being part of this beautiful journey."
-        </p>
-      </div>
-
-      <p style="text-align: center; margin-top: 30px;">
-        Thank you for choosing Oli's Knitwear. We're honored to be part of your story and look forward to crafting for you again soon!
-      </p>
     </div>
 
     <!-- Footer -->
@@ -657,9 +655,8 @@ export const deliveryStatus = async (req, res) => {
       <div class="footer-content">
         <div class="brand" style="color: #FAF8F3; font-size: 24px;">Oli's Knitwear</div>
         <div class="footer-links">
-          <a href="mailto:care@olisknitwear.com" class="footer-link">Care Instructions</a>
-          <a href="https://olisknitting.netlify.app" class="footer-link" target="_blank">Shop Again</a>
-          <a href="mailto:support@olisknitwear.com" class="footer-link">Support</a>
+          <a style="color:white;" href="https://olisknitwear.com" class="footer-link" target="_blank">Shop Again</a>
+          <a style="color:white;" href="mailto:olis.knitting@gmail.com" class="footer-link">Support</a>
         </div>
         <div class="signature">
           <p>&copy; ${now} Oli's Knitwear. All rights reserved.</p>
@@ -678,11 +675,14 @@ export const deliveryStatus = async (req, res) => {
       await transporter.sendMail(mailOptions);
     }
 
-    return res.status(200).json({ message: "Delivery status updated successfully" });
-
+    return res
+      .status(200)
+      .json({ message: "Delivery status updated successfully" });
   } catch (error) {
     console.error("Error updating delivery status:", error);
-    return res.status(500).json({ message: "Failed to update delivery status" });
+    return res
+      .status(500)
+      .json({ message: "Failed to update delivery status" });
   }
 };
 
@@ -715,12 +715,12 @@ export const paymentStatus = async (req, res) => {
     const customerName = `${order.first_name} ${order.last_name}`;
 
     await connection.execute(
-      `UPDATE orders SET payment_status = ? WHERE id = ?`, 
+      `UPDATE orders SET payment_status = ? WHERE id = ?`,
       [payment_status, id]
     );
 
     // Send payment confirmation email if status is 'paid'
-    if (payment_status === 'paid') {
+    if (payment_status === "paid") {
       const transporter = nodemailer.createTransport({
         service: "gmail",
         auth: {
@@ -730,11 +730,11 @@ export const paymentStatus = async (req, res) => {
       });
 
       const now = new Date().getFullYear();
-      const currentDate = new Date().toLocaleDateString('en-US', { 
-        weekday: 'long', 
-        year: 'numeric', 
-        month: 'long', 
-        day: 'numeric' 
+      const currentDate = new Date().toLocaleDateString("en-US", {
+        weekday: "long",
+        year: "numeric",
+        month: "long",
+        day: "numeric",
       });
 
       const mailOptions = {
@@ -808,7 +808,9 @@ export const paymentStatus = async (req, res) => {
       <div class="status-card">
         <div class="status-icon">✅</div>
         <div class="status-title">Payment Confirmed</div>
-        <p>Your payment of $${parseFloat(order.total_amount).toFixed(2)} has been successfully processed. Thank you for your trust in Oli's Knitwear.</p>
+        <p>Your payment of $${parseFloat(order.total_amount).toFixed(
+          2
+        )} has been successfully processed. Thank you for your trust in Oli's Knitwear.</p>
       </div>
 
       <!-- Order Information -->
@@ -823,7 +825,9 @@ export const paymentStatus = async (req, res) => {
         </div>
         <div class="info-row">
           <span class="info-label">Amount Paid: &nbsp;</span>
-          <span class="info-value total-amount">$${parseFloat(order.total_amount).toFixed(2)}</span>
+          <span class="info-value total-amount">$${parseFloat(
+            order.total_amount
+          ).toFixed(2)}</span>
         </div>
         <div class="info-row">
           <span class="info-label">Payment Status: &nbsp;</span>
@@ -834,7 +838,9 @@ export const paymentStatus = async (req, res) => {
 
       <!-- Tracking Section -->
       <div class="tracking-section">
-        <a style="color:white;" href="http://localhost:5173/order/${order.uuid}" class="track-btn" target="_blank">
+        <a style="color:white;" href="https://olisknitwear.com/order/${
+          order.uuid
+        }" class="track-btn" target="_blank">
           Track Your Order
         </a>
         <p style="margin-top: 15px; color: #666666; font-size: 14px;">
@@ -842,14 +848,7 @@ export const paymentStatus = async (req, res) => {
         </p>
       </div>
 
-      <!-- Brand Story -->
-      <div class="story-section">
-        <p class="story-text">
-          "Your support empowers women artisans in Ethiopia, creating sustainable fashion that tells a story of hope, dignity, and craftsmanship passed down through generations."
-        </p>
-      </div>
 
-      <p>We appreciate your business and look forward to delivering exceptional quality to you. If you have any questions, feel free to reach out to our customer care team.</p>
     </div>
 
     <!-- Footer -->
@@ -857,8 +856,8 @@ export const paymentStatus = async (req, res) => {
       <div class="footer-content">
         <div class="brand" style="color: #FAF8F3; font-size: 24px;">Oli's Knitwear</div>
         <div class="footer-links">
-          <a href="mailto:support@olisknitwear.com" class="footer-link">Customer Support</a>
-          <a href="https://olisknitting.netlify.app" class="footer-link" target="_blank">Visit Website</a>
+          <a style="color:white;" href="mailto:olis.knitting@gmail.com" class="footer-link">Customer Support</a>
+          <a style="color:white;" href="https://olisknitwear.com/" class="footer-link" target="_blank">Visit Website</a>
         </div>
         <div class="signature">
           <p>&copy; ${now} Oli's Knitwear. All rights reserved.</p>
@@ -877,8 +876,9 @@ export const paymentStatus = async (req, res) => {
       await transporter.sendMail(mailOptions);
     }
 
-    return res.status(200).json({ message: "Payment status updated successfully" });
-
+    return res
+      .status(200)
+      .json({ message: "Payment status updated successfully" });
   } catch (error) {
     console.error("Error updating payment status:", error);
     return res.status(500).json({ message: "Failed to update payment status" });
@@ -890,7 +890,10 @@ export const deleteOrder = async (req, res) => {
   try {
     const { id } = req.params;
 
-    const [result] = await connection.execute(`DELETE FROM orders WHERE id = ?`, [id]);
+    const [result] = await connection.execute(
+      `DELETE FROM orders WHERE id = ?`,
+      [id]
+    );
 
     if (result.affectedRows === 0) {
       return res.status(404).json({ message: "Order not found" });

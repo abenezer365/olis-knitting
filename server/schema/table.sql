@@ -136,7 +136,7 @@ CREATE TABLE messages (
   email VARCHAR(150) NOT NULL,
   subject VARCHAR(150),
   message TEXT NOT NULL,
-  reply TEXT NOT NULL,
+  reply TEXT,
   
   replied_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
   created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,

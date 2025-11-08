@@ -1,42 +1,47 @@
 import React from "react";
 import { AnimatedTestimonials } from "../ui/animated-testimonials";
+import testimonial_1 from "../../assets/testimonial-1.jpg";
+import testimonial_2 from "../../assets/testimonial-2.png";
+import testimonial_3 from "../../assets/testimonial-3.png";
+import testimonial_4 from "../../assets/testimonial-4.png";
+import testimonial_5 from "../../assets/testimonial-5.png";
 
 function TestimonialSection() {
   const testimonials = [
     {
       quote:
-        "The attention to detail and innovative features have completely transformed our workflow. This is exactly what we've been looking for.",
-      name: "Sarah Chen",
-      designation: "Product Manager at TechFlow",
-      src: "https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?q=80&w=3560&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
+        "Love Oli’s! Each piece is unique, beautifully made, and so versatile—I get compliments every time I wear them!",
+      name: "Nicole Rock",
+      designation: "Customer",
+      src: testimonial_1,
     },
     {
       quote:
-        "Implementation was seamless and the results exceeded our expectations. The platform's flexibility is remarkable.",
-      name: "Michael Rodriguez",
-      designation: "CTO at InnovateSphere",
-      src: "https://images.unsplash.com/photo-1438761681033-6461ffad8d80?q=80&w=3540&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
+        "I’m obsessed! Oli’s designs are elegant, cozy, and timeless. Truly handmade perfection.",
+      name: "Meti Tile",
+      designation: "Fashion Enthusiast",
+      src: testimonial_2,
     },
     {
       quote:
-        "This solution has significantly improved our team's productivity. The intuitive interface makes complex tasks simple.",
-      name: "Emily Watson",
-      designation: "Operations Director at CloudScale",
-      src: "https://images.unsplash.com/photo-1623582854588-d60de57fa33f?q=80&w=3540&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
+        "Oli made our family matching outfits that we’ll treasure forever warm, beautiful, and full of love!",
+      name: "Miki Family",
+      designation: "Happy Knitwear Family",
+      src: testimonial_3,
     },
     {
       quote:
-        "Outstanding support and robust features. It's rare to find a product that delivers on all its promises.",
-      name: "James Kim",
-      designation: "Engineering Lead at DataPro",
-      src: "https://images.unsplash.com/photo-1636041293178-808a6762ab39?q=80&w=3464&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
+        "Oli’s knitwear hits all the right notes — stylish, soulful, and made with passion.Outstanding support and robust features. It's rare to find a product that delivers on all its promises.",
+      name: "Robel Bzuayehu",
+      designation: "Musician & Knitwear Admirer",
+      src: testimonial_4,
     },
     {
       quote:
-        "The scalability and performance have been game-changing for our organization. Highly recommend to any growing business.",
-      name: "Lisa Thompson",
-      designation: "VP of Technology at FutureNet",
-      src: "https://images.unsplash.com/photo-1624561172888-ac93c696e10c?q=80&w=2592&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
+        "Oli’s designs are made to shine — every outfit tells a story of beauty and creativity.",
+      name: "Miss Leyu",
+      designation: "TikToker & Fashion Influencer",
+      src: testimonial_5,
     },
   ];
   return (

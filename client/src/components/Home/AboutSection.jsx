@@ -1,4 +1,5 @@
-import image from "../../assets/3.webp";
+// import image from "../../assets/3.webp";
+import image from "../../assets/aboutUs-1.jpg";
 function AboutSection() {
   return (
     <section className="py-20 bg-secondary">
@@ -9,18 +10,22 @@ function AboutSection() {
               About Us
             </h2>
             <p className="text-lg text-muted-foreground mb-4 leading-relaxed">
-              Oli's Knitting & Fashion was founded with a passion for creating
-              timeless pieces that celebrate craftsmanship and quality. Each
-              garment is carefully designed and produced to ensure the highest
-              standards.
+              Oli’s is Ethiopia’s knitwear brand dedicated to blending knitted
+              garments with modern design. our collections offer versatile,
+              contemporary knitwear for both women and men pieces that
+              effortlessly transition from casual to elegant, from day to night.
             </p>
+
             <p className="text-lg text-muted-foreground leading-relaxed">
-              We believe in sustainable fashion and ethical production
-              practices. Our commitment to excellence is reflected in every
-              stitch and every piece we create.
+              Our garments are designed to inspire confidence and
+              self-expression. With structured paneling, draping, and ruching,
+              each piece celebrates individuality and strength, while
+              versatility ensures that every item adapts to the wearer’s
+              lifestyle. At Oli’s, fashion is not just about style; it’s about
+              culture, empowerment, and craftsmanship.
             </p>
           </div>
-          <div className="rounded-lg overflow-hidden bg-muted h-96">
+          <div className="rounded-lg overflow-hidden bg-muted h-146 ">
             <img
               src={image}
               alt="Our studio"

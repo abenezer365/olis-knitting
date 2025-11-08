@@ -1,17 +1,12 @@
 import bgImage from "../../assets/3a.webp"; // your image file
+import heroImg from "/hero-logo.png";
 
 const ImageBackground = () => {
   return (
     <div className="relative w-full h-screen overflow-hidden">
       {/* Content */}
       <div className="relative z-20 flex flex-col items-center justify-center text-center text-accent h-full gap-4 px-4">
-        <p className="text-lg sm:text-xl md:text-2xl uppercase  tracking-widest">
-          You Knit me together.
-        </p>
-        <h1 className="text-6xl sm:text-6xl md:text-8xl lg:text-9xl hero-text text-accent">
-          Oli's
-        </h1>
-        <p className="text-lg sm:text-xl md:text-2xl">Addis Ababa, Ethiopia</p>
+        <img src={heroImg} alt="Hero Logo" className="w-3/4 max-w-2xl" />
       </div>
 
       {/* Replace video with image */}
