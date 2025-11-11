@@ -164,7 +164,7 @@ function Header() {
                   </span>
                 )}
               </button>
-              {user ? (
+              {/* {user ? (
                 <Link to="/dashboard/">
                   <button
                     className="p-2 hover:bg-secondary rounded-lg transition-colors"
@@ -181,7 +181,7 @@ function Header() {
                 >
                   <LogIn size={20} />
                 </button>
-              )}
+              )} */}
 
               {/* Mobile Menu Toggle */}
               <button
@@ -297,7 +297,7 @@ function Header() {
                           )}
                           {item.size && (
                             <p className="text-sm text-muted-foreground">
-                              Size: {item.size}
+                              Size: {item.size.toUpperCase()}
                             </p>
                           )}
                           <p className="text-primary font-bold">

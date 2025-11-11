@@ -25,7 +25,8 @@ import {
 import { useGlobalContext } from "@/contexts/Context";
 import { useProducts } from "@/hooks/useProducts";
 function PlaceOrder() {
-  const { cart, updateQuantity, removeFromCart, total, clearCart } = useGlobalContext();
+  const { cart, updateQuantity, removeFromCart, total, clearCart } =
+    useGlobalContext();
   const navigate = useNavigate();
   const [isPlacingOrder, setIsPlacingOrder] = useState(false);
   const [shippingFees, setShippingFees] = useState([]);
@@ -48,137 +49,140 @@ function PlaceOrder() {
     phone_number: "",
     additional_info: "",
   });
-  const { currencyRate} = useProducts();
+  const { currencyRate } = useProducts();
 
   const getPrice = (price) =>
     currency === "ETB"
       ? `${(price * currencyRate).toFixed(2)} ETB`
       : `$${price.toFixed(2)}`;
-  
+
   const totalPrice = total;
 
-
   useEffect(() => {
-      fetchShippingFees();
-    }, []);
+    fetchShippingFees();
+  }, []);
 
-    const fetchShippingFees = async () => {
-      try {
-        const response = await axios.get("/shippingFee/all");
-        setShippingFees(response.data || []);
-      } catch (error) {
-        console.error("Error fetching shipping fees:", error);
-        toast.error("Failed to load shipping fees");
-      }
-};
+  const fetchShippingFees = async () => {
+    try {
+      const response = await axios.get("/shippingFee/all");
+      setShippingFees(response.data || []);
+    } catch (error) {
+      console.error("Error fetching shipping fees:", error);
+      toast.error("Failed to load shipping fees");
+    }
+  };
   useEffect(() => {
     window.scrollTo({
       top: 0,
       left: 0,
-      behavior: 'smooth'
+      behavior: "smooth",
     });
-  },[]);
+  }, []);
 
- const handlePlaceOrder = async () => {
-  if (isPlacingOrder) return;
+  const handlePlaceOrder = async () => {
+    if (isPlacingOrder) return;
 
-  try {
-    // ✅ Validation
-    if (!customerInfo.fullName || !customerInfo.email || !customerInfo.phone) {
-      toast.error("Please fill all customer information");
-      return;
-    }
-    if (!shippingInfo.city || !shippingInfo.street) {
-      toast.error("Please fill all required shipping information");
-      return;
-    }
+    try {
+      // ✅ Validation
+      if (
+        !customerInfo.fullName ||
+        !customerInfo.email ||
+        !customerInfo.phone
+      ) {
+        toast.error("Please fill all customer information");
+        return;
+      }
+      if (!shippingInfo.city || !shippingInfo.street) {
+        toast.error("Please fill all required shipping information");
+        return;
+      }
 
-    setIsPlacingOrder(true);
-    toast.loading("Placing order...");
+      setIsPlacingOrder(true);
+      toast.loading("Placing order...");
 
-    // ✅ Step 1: Create customer and capture ID
-    const [first_name, ...rest] = customerInfo.fullName.split(" ");
-    const last_name = rest.join(" ") || "Unknown";
-    
-    const customerRes = await axios.post("/customer/addCustomer", {
-      first_name,
-      last_name,
-      email: customerInfo.email,
-      phone: customerInfo.phone,
-    });
-    
-    // Dynamic ID extraction
-    const customer_id = customerRes.data.id;
-    
-    if (!customer_id) {
-      throw new Error("Failed to get customer ID");
-    }
+      // ✅ Step 1: Create customer and capture ID
+      const [first_name, ...rest] = customerInfo.fullName.split(" ");
+      const last_name = rest.join(" ") || "Unknown";
 
-    // ✅ Step 2: Create order and capture order ID
-  const orderRes = await axios.post("/order/placeOrder", {
-      customer_id,
-      total_amount: totalPrice,
-      shipping_fee_id: selectedShippingFee ? selectedShippingFee.id : null,
-    });
-    
-    // Dynamic order ID extraction
-    const order_id = orderRes.data.order_id;
-    const order_uuid = orderRes.data.uuid;
-    
-    if (!order_id) {
-      throw new Error("Failed to get order ID");
-    }
-
-    // ✅ Step 3: Create shipping with captured IDs
-    await axios.post("/shipping/addShipping", {
-      order_id,
-      customer_id,
-      country: shippingInfo.country,
-      city: shippingInfo.city,
-      sub_city: shippingInfo.sub_city,
-      street: shippingInfo.street,
-      house_number: shippingInfo.house_number,
-      postal_code: shippingInfo.postal_code,
-      phone_number: shippingInfo.phone_number || customerInfo.phone,
-      additional_info: shippingInfo.additional_info,
-    });
-
-    // ✅ Step 4: Create ordered items with captured order ID
-    const orderedItemsPromises = cart.map(item => {
-      console.log('Sending product_id:', item.id);
-      axios.post("/orderedItems/add", {
-        order_id,
-        product_id: item.id,
-        quantity: item.quantity,
-        price: item.price,
+      const customerRes = await axios.post("/customer/addCustomer", {
+        first_name,
+        last_name,
+        email: customerInfo.email,
+        phone: customerInfo.phone,
       });
-    });
 
-    await Promise.all(orderedItemsPromises);
+      // Dynamic ID extraction
+      const customer_id = customerRes.data.id;
 
-    toast.success("Order placed successfully!");
+      if (!customer_id) {
+        throw new Error("Failed to get customer ID");
+      }
 
-    // ✅ Redirect to confirmation
-    navigate(`/order_confirmation/${order_uuid}`, {
-      state: {
-        customerInfo,
-        shippingInfo,
-        items: cart,
-        total: totalPrice,
-        currency,
-        selectedShippingFee,
-        subscribeNewsletter,
-      },
-    });
-    clearCart();
-  } catch (error) {
-    console.error("Order placement failed:", error);
-    toast.error("Something went wrong while placing your order");
-  } finally {
-    setIsPlacingOrder(false);
-    toast.dismiss();
-  }
-};
+      // ✅ Step 2: Create order and capture order ID
+      const orderRes = await axios.post("/order/placeOrder", {
+        customer_id,
+        total_amount: totalPrice,
+        shipping_fee_id: selectedShippingFee ? selectedShippingFee.id : null,
+      });
+
+      // Dynamic order ID extraction
+      const order_id = orderRes.data.order_id;
+      const order_uuid = orderRes.data.uuid;
+
+      if (!order_id) {
+        throw new Error("Failed to get order ID");
+      }
+
+      // ✅ Step 3: Create shipping with captured IDs
+      await axios.post("/shipping/addShipping", {
+        order_id,
+        customer_id,
+        country: shippingInfo.country,
+        city: shippingInfo.city,
+        sub_city: shippingInfo.sub_city,
+        street: shippingInfo.street,
+        house_number: shippingInfo.house_number,
+        postal_code: shippingInfo.postal_code,
+        phone_number: shippingInfo.phone_number || customerInfo.phone,
+        additional_info: shippingInfo.additional_info,
+      });
+
+      // ✅ Step 4: Create ordered items with captured order ID
+      const orderedItemsPromises = cart.map((item) => {
+        console.log("Sending product_id:", item.id);
+        axios.post("/orderedItems/add", {
+          order_id,
+          product_id: item.id,
+          quantity: item.quantity,
+          price: item.price,
+        });
+      });
+
+      await Promise.all(orderedItemsPromises);
+
+      toast.success("Order placed successfully!");
+
+      // ✅ Redirect to confirmation
+      navigate(`/order_confirmation/${order_uuid}`, {
+        state: {
+          customerInfo,
+          shippingInfo,
+          items: cart,
+          total: totalPrice,
+          currency,
+          selectedShippingFee,
+          subscribeNewsletter,
+        },
+      });
+      clearCart();
+    } catch (error) {
+      console.error("Order placement failed:", error);
+      toast.error("Something went wrong while placing your order");
+    } finally {
+      setIsPlacingOrder(false);
+      toast.dismiss();
+    }
+  };
 
   if (cart.length === 0) {
     return (
@@ -203,7 +207,7 @@ function PlaceOrder() {
 
         <div className="grid lg:grid-cols-3 gap-8">
           <div className="lg:col-span-2 space-y-8">
-               {/* Order Details */}
+            {/* Order Details */}
             <Card>
               <CardHeader>
                 <CardTitle className="text-2xl font-semibold">
@@ -464,7 +468,9 @@ function PlaceOrder() {
                   />
                 </div>
                 <div className="space-y-2 md:col-span-2">
-                  <Label htmlFor="additional_info">Additional Information</Label>
+                  <Label htmlFor="additional_info">
+                    Additional Information
+                  </Label>
                   <Input
                     id="additional_info"
                     value={shippingInfo.additional_info}
@@ -493,11 +499,9 @@ function PlaceOrder() {
                 <div className="space-y-2">
                   <div className="flex justify-between text-lg">
                     <span>Order Total:</span>
-                    <span className="font-semibold">
-                      {getPrice(total)}
-                    </span>
+                    <span className="font-semibold">{getPrice(total)}</span>
                   </div>
-                  
+
                   {/* Shipping Fee Section */}
                   <div className="border-t pt-4">
                     <Label className="mb-3 block">Shipping Destination</Label>
@@ -506,7 +510,9 @@ function PlaceOrder() {
                       onValueChange={(value) => {
                         setSelectedCountry(value);
                         if (value !== "none") {
-                          const fee = shippingFees.find(fee => fee.country_code === value);
+                          const fee = shippingFees.find(
+                            (fee) => fee.country_code === value
+                          );
                           setSelectedShippingFee(fee);
                         } else {
                           setSelectedShippingFee(null);
@@ -517,7 +523,9 @@ function PlaceOrder() {
                         <SelectValue placeholder="Select shipping country" />
                       </SelectTrigger>
                       <SelectContent>
-                        <SelectItem value="none">No shipping (Local pickup)</SelectItem>
+                        <SelectItem value="none">
+                          No shipping (Local pickup)
+                        </SelectItem>
                         {shippingFees.map((fee) => (
                           <SelectItem key={fee.id} value={fee.country_code}>
                             {fee.country_name} ({fee.country_code})
@@ -525,20 +533,28 @@ function PlaceOrder() {
                         ))}
                       </SelectContent>
                     </Select>
-                    
+
                     {selectedShippingFee && (
                       <div className="mt-3 p-3 bg-muted rounded-lg">
                         <div className="flex justify-between items-center text-sm">
-                          <span className="text-muted-foreground">Shipping Fee:</span>
+                          <span className="text-muted-foreground">
+                            Shipping Fee (per 1 kg):
+                          </span>
                           <span className="font-semibold">
-                            {currency === "ETB" 
-                              ? `${(parseFloat(selectedShippingFee.starting_price) * currencyRate).toFixed(2)} ETB`
-                              : `$${parseFloat(selectedShippingFee.starting_price).toFixed(2)}`
-                            }
+                            {currency === "ETB"
+                              ? `${(
+                                  parseFloat(
+                                    selectedShippingFee.starting_price
+                                  ) * currencyRate
+                                ).toFixed(2)} ETB`
+                              : `$${parseFloat(
+                                  selectedShippingFee.starting_price
+                                ).toFixed(2)}`}
                           </span>
                         </div>
                         <p className="text-xs text-muted-foreground mt-1">
-                          Starting price for {selectedShippingFee.country_name}
+                          Starting price for {selectedShippingFee.country_name}{" "}
+                          per 1 kg
                         </p>
                       </div>
                     )}

@@ -228,19 +228,21 @@ function ProductsDetail() {
                   Available Sizes
                 </label>
                 <div className="flex gap-3 flex-wrap">
-                  {currentProduct.sizes.map((size) => (
-                    <button
-                      key={size}
-                      onClick={() => setSelectedSize(size)}
-                      className={`px-4 py-2 rounded-lg border-2 transition-all ${
-                        selectedSize === size
-                          ? "border-primary bg-primary text-primary-foreground"
-                          : "border-border hover:border-primary"
-                      }`}
-                    >
-                      {size}
-                    </button>
-                  ))}
+                  {currentProduct.sizes
+                    .map((size) => size.toUpperCase())
+                    .map((size) => (
+                      <button
+                        key={size}
+                        onClick={() => setSelectedSize(size)}
+                        className={`px-4 py-2 rounded-lg border-2 transition-all ${
+                          selectedSize === size
+                            ? "border-primary bg-primary text-primary-foreground"
+                            : "border-border hover:border-primary"
+                        }`}
+                      >
+                        {size}
+                      </button>
+                    ))}
                 </div>
               </div>
             )}

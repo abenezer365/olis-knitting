@@ -62,7 +62,7 @@ CREATE TABLE orders (
   uuid CHAR(36) NOT NULL UNIQUE,
   
   customer_id INT NOT NULL,
-  shipping_fee_id INT NOT NULL,
+  shipping_fee_id INT NULL,
   
   payment_status ENUM('pending', 'paid', 'failed', 'refunded') DEFAULT 'pending',
   order_status ENUM('pending', 'processing', 'completed', 'cancelled') DEFAULT 'pending',
@@ -81,9 +81,8 @@ CREATE TABLE orders (
   INDEX (order_status),
   INDEX (delivery_status),
   
-  FOREIGN KEY (customer_id) REFERENCES customers(id) ON DELETE CASCADE
-  FOREIGN KEY (shipping_fee_id) REFERENCES shipping_fee(id) ON DELETE SET NULL;
-);
+  FOREIGN KEY (customer_id) REFERENCES customers(id) ON DELETE CASCADE,
+  FOREIGN KEY (shipping_fee_id) REFERENCES shipping_fee(id) ON DELETE SET NULL);
 
 CREATE TABLE ordered_items (
   id INT AUTO_INCREMENT PRIMARY KEY,
@@ -214,4 +213,3 @@ CREATE TABLE analytics (
   recorded_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
   updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
 );
-

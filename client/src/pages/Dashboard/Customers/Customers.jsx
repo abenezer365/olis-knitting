@@ -5,21 +5,21 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { 
-  Search, 
-  Filter, 
-  Edit, 
-  Trash2, 
-  User, 
-  Mail, 
-  Phone, 
+import {
+  Search,
+  Filter,
+  Edit,
+  Trash2,
+  User,
+  Mail,
+  Phone,
   Calendar,
   Shield,
   Ban,
   CheckCircle,
   XCircle,
   ChevronLeft,
-  ChevronRight
+  ChevronRight,
 } from "lucide-react";
 import {
   Dialog,
@@ -41,9 +41,9 @@ function Customers() {
     window.scrollTo({
       top: 0,
       left: 0,
-      behavior: 'smooth'
+      behavior: "smooth",
     });
-  },[]);
+  }, []);
   const [customers, setCustomers] = useState([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState("");
@@ -56,9 +56,9 @@ function Customers() {
     first_name: "",
     last_name: "",
     email: "",
-    phone: ""
+    phone: "",
   });
-  
+
   // Pagination state - ADDED THESE LINES
   const [currentPage, setCurrentPage] = useState(1);
   const [itemsPerPage] = useState(8);
@@ -73,9 +73,14 @@ function Customers() {
     try {
       setLoading(true);
       const response = await axios.get("/customer/getCustomers", {
-          headers: { Authorization: `Bearer ${token}` },
-        });
-      setCustomers(response.data.customers || response.data);
+        headers: { Authorization: `Bearer ${token}` },
+      });
+
+      // ✅ Safely handle any response shape
+      const data = response.data.customers || response.data;
+      const normalized = Array.isArray(data) ? data : [];
+
+      setCustomers(normalized);
     } catch (error) {
       console.error("Error fetching customers:", error);
       toast.error("Failed to load customers");
@@ -86,23 +91,25 @@ function Customers() {
 
   const filteredCustomers = customers.filter((customer) => {
     const searchLower = searchTerm.toLowerCase();
-    const matchesSearch = 
+    const matchesSearch =
       customer.first_name?.toLowerCase().includes(searchLower) ||
       customer.last_name?.toLowerCase().includes(searchLower) ||
       customer.email?.toLowerCase().includes(searchLower) ||
       customer.phone?.includes(searchTerm);
-    
-    const matchesStatus = 
-      statusFilter === "all" || 
-      customer.status?.toLowerCase() === statusFilter;
-    
+
+    const matchesStatus =
+      statusFilter === "all" || customer.status?.toLowerCase() === statusFilter;
+
     return matchesSearch && matchesStatus;
   });
 
   // Pagination calculations - ADDED THIS SECTION
   const totalPages = Math.ceil(filteredCustomers.length / itemsPerPage);
   const startIndex = (currentPage - 1) * itemsPerPage;
-  const paginatedCustomers = filteredCustomers.slice(startIndex, startIndex + itemsPerPage);
+  const paginatedCustomers = filteredCustomers.slice(
+    startIndex,
+    startIndex + itemsPerPage
+  );
 
   // Reset to first page when filters change - ADDED THIS
   useEffect(() => {
@@ -115,16 +122,16 @@ function Customers() {
       first_name: customer.first_name || "",
       last_name: customer.last_name || "",
       email: customer.email || "",
-      phone: customer.phone || ""
+      phone: customer.phone || "",
     });
     setEditModalOpen(true);
   };
 
   const handleSaveEdit = async () => {
     try {
-      await axios.patch(`/customer/edit/${selectedCustomer.id}`, editForm,{
-          headers: { Authorization: `Bearer ${token}` },
-        } );
+      await axios.patch(`/customer/edit/${selectedCustomer.id}`, editForm, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
       toast.success("Customer updated successfully");
       setEditModalOpen(false);
       fetchCustomers();
@@ -139,39 +146,39 @@ function Customers() {
     setDeleteModalOpen(true);
   };
 
-const confirmDelete = async () => {
-  try {  
-    await axios.delete(`/customer/delete/${selectedCustomer.id}`, {
-      headers: { 
-        Authorization: `Bearer ${token}`,
-        'Content-Type': 'application/json'
+  const confirmDelete = async () => {
+    try {
+      await axios.delete(`/customer/delete/${selectedCustomer.id}`, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "application/json",
+        },
+      });
+
+      toast.success("Customer deleted successfully");
+      setDeleteModalOpen(false);
+      fetchCustomers();
+    } catch (error) {
+      console.error("Error deleting customer:", error);
+
+      // Check the specific error
+      if (error.response?.status === 403) {
+        toast.error("You don't have permission to delete customers");
+      } else if (error.response?.status === 401) {
+        toast.error("Please log in again");
+      } else {
+        toast.error("Failed to delete customer");
       }
-    });
-    
-    toast.success("Customer deleted successfully");
-    setDeleteModalOpen(false);
-    fetchCustomers();
-  } catch (error) {
-    console.error("Error deleting customer:", error);
-    
-    // Check the specific error
-    if (error.response?.status === 403) {
-      toast.error("You don't have permission to delete customers");
-    } else if (error.response?.status === 401) {
-      toast.error("Please log in again");
-    } else {
-      toast.error("Failed to delete customer");
     }
-  }
-};
+  };
 
   const handleStatusAction = async (action, customer) => {
     setSelectedCustomer(customer);
-    
+
     try {
       let endpoint = "";
       let successMessage = "";
-      
+
       switch (action) {
         case "activate":
           endpoint = `/customer/activate/${customer.id}`;
@@ -188,10 +195,14 @@ const confirmDelete = async () => {
         default:
           return;
       }
-      
-      await axios.patch(endpoint,{},{
+
+      await axios.patch(
+        endpoint,
+        {},
+        {
           headers: { Authorization: `Bearer ${token}` },
-        });
+        }
+      );
       toast.success(successMessage);
       fetchCustomers();
     } catch (error) {
@@ -202,12 +213,18 @@ const confirmDelete = async () => {
 
   const getStatusVariant = (status) => {
     switch (status?.toLowerCase()) {
-      case "active": return "default";
-      case "vip": return "default";
-      case "premium": return "secondary";
-      case "banned": return "destructive";
-      case "inactive": return "inactive";
-      default: return "outline";
+      case "active":
+        return "default";
+      case "vip":
+        return "default";
+      case "premium":
+        return "secondary";
+      case "banned":
+        return "destructive";
+      case "inactive":
+        return "inactive";
+      default:
+        return "outline";
     }
   };
 
@@ -264,128 +281,146 @@ const confirmDelete = async () => {
 
         {/* Customers Grid */}
         <div className="grid gap-4">
-          {paginatedCustomers.map((customer) => ( // CHANGED: filteredCustomers to paginatedCustomers
-            <Card key={customer.id} className="hover:shadow-lg transition-shadow">
-              <CardContent className="p-6">
-                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-                  {/* Customer Info */}
-                  <div className="flex items-start gap-4 flex-1">
-                    <div className="w-12 h-12 bg-secondary rounded-full flex items-center justify-center">
-                      <User className="h-6 w-6 text-muted-foreground" />
-                    </div>
-                    <div className="flex-1">
-                      <div className="flex items-center gap-2 mb-1">
-                        <h3 className="font-semibold text-lg">
-                          {customer.first_name} {customer.last_name}
-                        </h3>
-                        <Badge variant={getStatusVariant(customer.status)}>
-                          {customer.status || "Unknown"}
-                        </Badge>
+          {paginatedCustomers.map(
+            (
+              customer // CHANGED: filteredCustomers to paginatedCustomers
+            ) => (
+              <Card
+                key={customer.id}
+                className="hover:shadow-lg transition-shadow"
+              >
+                <CardContent className="p-6">
+                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                    {/* Customer Info */}
+                    <div className="flex items-start gap-4 flex-1">
+                      <div className="w-12 h-12 bg-secondary rounded-full flex items-center justify-center">
+                        <User className="h-6 w-6 text-muted-foreground" />
                       </div>
-                      <div className="space-y-1 text-sm text-muted-foreground">
-                        <div className="flex items-center gap-2">
-                          <Mail className="h-3 w-3" />
-                          {customer.email}
+                      <div className="flex-1">
+                        <div className="flex items-center gap-2 mb-1">
+                          <h3 className="font-semibold text-lg">
+                            {customer.first_name} {customer.last_name}
+                          </h3>
+                          <Badge variant={getStatusVariant(customer.status)}>
+                            {customer.status || "Unknown"}
+                          </Badge>
                         </div>
-                        <div className="flex items-center gap-2">
-                          <Phone className="h-3 w-3" />
-                          {customer.phone}
-                        </div>
-                        {customer.created_at && (
+                        <div className="space-y-1 text-sm text-muted-foreground">
                           <div className="flex items-center gap-2">
-                            <Calendar className="h-3 w-3" />
-                            Joined {new Date(customer.created_at).toLocaleDateString()}
+                            <Mail className="h-3 w-3" />
+                            {customer.email}
                           </div>
-                        )}
+                          <div className="flex items-center gap-2">
+                            <Phone className="h-3 w-3" />
+                            {customer.phone}
+                          </div>
+                          {customer.created_at && (
+                            <div className="flex items-center gap-2">
+                              <Calendar className="h-3 w-3" />
+                              Joined{" "}
+                              {new Date(
+                                customer.created_at
+                              ).toLocaleDateString()}
+                            </div>
+                          )}
+                        </div>
                       </div>
                     </div>
-                  </div>
 
-                  {/* Actions */}
-                  <div className="flex flex-wrap gap-2">
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      onClick={() => handleEdit(customer)}
-                    >
-                      <Edit className="h-4 w-4 mr-1" />
-                      Edit
-                    </Button>
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      onClick={() => handleStatusAction("activate", customer)}
-                    >
-                      <CheckCircle className="h-4 w-4 mr-1" />
-                      Activate
-                    </Button>
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      onClick={() => handleStatusAction("deactivate", customer)}
-                    >
-                      <XCircle className="h-4 w-4 mr-1" />
-                      Deactivate
-                    </Button>
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      onClick={() => handleStatusAction("ban", customer)}
-                    >
-                      <Ban className="h-4 w-4 mr-1" />
-                      Ban
-                    </Button>
-                    <Button
-                      variant="destructive"
-                      size="sm"
-                      onClick={() => handleDelete(customer)}
-                    >
-                      <Trash2 className="h-4 w-4 mr-1" />
-                      Delete
-                    </Button>
+                    {/* Actions */}
+                    <div className="flex flex-wrap gap-2">
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => handleEdit(customer)}
+                      >
+                        <Edit className="h-4 w-4 mr-1" />
+                        Edit
+                      </Button>
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => handleStatusAction("activate", customer)}
+                      >
+                        <CheckCircle className="h-4 w-4 mr-1" />
+                        Activate
+                      </Button>
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() =>
+                          handleStatusAction("deactivate", customer)
+                        }
+                      >
+                        <XCircle className="h-4 w-4 mr-1" />
+                        Deactivate
+                      </Button>
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => handleStatusAction("ban", customer)}
+                      >
+                        <Ban className="h-4 w-4 mr-1" />
+                        Ban
+                      </Button>
+                      <Button
+                        variant="destructive"
+                        size="sm"
+                        onClick={() => handleDelete(customer)}
+                      >
+                        <Trash2 className="h-4 w-4 mr-1" />
+                        Delete
+                      </Button>
+                    </div>
                   </div>
-                </div>
-              </CardContent>
-            </Card>
-          ))}
+                </CardContent>
+              </Card>
+            )
+          )}
         </div>
 
         {/* Pagination Section - ADDED THIS ENTIRE SECTION */}
         {totalPages > 1 && (
           <div className="flex items-center justify-between mt-8">
             <div className="text-sm text-muted-foreground">
-              Showing {startIndex + 1} to {Math.min(startIndex + itemsPerPage, filteredCustomers.length)} of {filteredCustomers.length} customers
+              Showing {startIndex + 1} to{" "}
+              {Math.min(startIndex + itemsPerPage, filteredCustomers.length)} of{" "}
+              {filteredCustomers.length} customers
             </div>
             <div className="flex items-center gap-2">
               <Button
                 variant="outline"
                 size="sm"
-                onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))}
+                onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
                 disabled={currentPage === 1}
                 className="flex items-center gap-2"
               >
                 <ChevronLeft className="h-4 w-4" />
                 Previous
               </Button>
-              
+
               <div className="flex gap-1">
-                {Array.from({ length: totalPages }, (_, i) => i + 1).map(page => (
-                  <Button
-                    key={page}
-                    variant={currentPage === page ? "default" : "outline"}
-                    size="sm"
-                    onClick={() => setCurrentPage(page)}
-                    className="w-10 h-10"
-                  >
-                    {page}
-                  </Button>
-                ))}
+                {Array.from({ length: totalPages }, (_, i) => i + 1).map(
+                  (page) => (
+                    <Button
+                      key={page}
+                      variant={currentPage === page ? "default" : "outline"}
+                      size="sm"
+                      onClick={() => setCurrentPage(page)}
+                      className="w-10 h-10"
+                    >
+                      {page}
+                    </Button>
+                  )
+                )}
               </div>
 
               <Button
                 variant="outline"
                 size="sm"
-                onClick={() => setCurrentPage(prev => Math.min(prev + 1, totalPages))}
+                onClick={() =>
+                  setCurrentPage((prev) => Math.min(prev + 1, totalPages))
+                }
                 disabled={currentPage === totalPages}
                 className="flex items-center gap-2"
               >
@@ -402,10 +437,9 @@ const confirmDelete = async () => {
               <User className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
               <h3 className="text-lg font-semibold mb-2">No customers found</h3>
               <p className="text-muted-foreground">
-                {searchTerm || statusFilter !== "all" 
+                {searchTerm || statusFilter !== "all"
                   ? "Try adjusting your search or filters"
-                  : "No customers in the system yet"
-                }
+                  : "No customers in the system yet"}
               </p>
             </CardContent>
           </Card>
@@ -423,14 +457,18 @@ const confirmDelete = async () => {
                   <label className="text-sm font-medium">First Name</label>
                   <Input
                     value={editForm.first_name}
-                    onChange={(e) => setEditForm({...editForm, first_name: e.target.value})}
+                    onChange={(e) =>
+                      setEditForm({ ...editForm, first_name: e.target.value })
+                    }
                   />
                 </div>
                 <div className="space-y-2">
                   <label className="text-sm font-medium">Last Name</label>
                   <Input
                     value={editForm.last_name}
-                    onChange={(e) => setEditForm({...editForm, last_name: e.target.value})}
+                    onChange={(e) =>
+                      setEditForm({ ...editForm, last_name: e.target.value })
+                    }
                   />
                 </div>
               </div>
@@ -439,14 +477,18 @@ const confirmDelete = async () => {
                 <Input
                   type="email"
                   value={editForm.email}
-                  onChange={(e) => setEditForm({...editForm, email: e.target.value})}
+                  onChange={(e) =>
+                    setEditForm({ ...editForm, email: e.target.value })
+                  }
                 />
               </div>
               <div className="space-y-2">
                 <label className="text-sm font-medium">Phone</label>
                 <Input
                   value={editForm.phone}
-                  onChange={(e) => setEditForm({...editForm, phone: e.target.value})}
+                  onChange={(e) =>
+                    setEditForm({ ...editForm, phone: e.target.value })
+                  }
                 />
               </div>
             </div>
@@ -454,9 +496,7 @@ const confirmDelete = async () => {
               <Button variant="outline" onClick={() => setEditModalOpen(false)}>
                 Cancel
               </Button>
-              <Button onClick={handleSaveEdit}>
-                Save Changes
-              </Button>
+              <Button onClick={handleSaveEdit}>Save Changes</Button>
             </DialogFooter>
           </DialogContent>
         </Dialog>
@@ -470,12 +510,17 @@ const confirmDelete = async () => {
             <div className="py-4">
               <p className="text-muted-foreground">
                 Are you sure you want to delete{" "}
-                <strong>{selectedCustomer?.first_name} {selectedCustomer?.last_name}</strong>?
-                This action cannot be undone.
+                <strong>
+                  {selectedCustomer?.first_name} {selectedCustomer?.last_name}
+                </strong>
+                ? This action cannot be undone.
               </p>
             </div>
             <DialogFooter>
-              <Button variant="outline" onClick={() => setDeleteModalOpen(false)}>
+              <Button
+                variant="outline"
+                onClick={() => setDeleteModalOpen(false)}
+              >
                 Cancel
               </Button>
               <Button variant="destructive" onClick={confirmDelete}>

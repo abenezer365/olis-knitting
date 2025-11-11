@@ -34,7 +34,7 @@ function ProductImageZoom({ images }) {
         <img
           src={mainImage || "/placeholder.svg"}
           alt="Product"
-          className={`object-cover w-full h-full transition-transform duration-200 ${
+          className={`object-contain w-full h-full transition-transform duration-200 ${
             zoom ? "scale-150" : "scale-100"
           }`}
           style={

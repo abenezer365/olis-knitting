@@ -43,7 +43,7 @@ export const updateAnalytics = async (req, res) => {
       SELECT COUNT(*) AS totalProducts FROM products
     `);
     const [[{ totalCustomers }]] = await connection.execute(`
-      SELECT COUNT(*) AS totalCustomers FROM users
+      SELECT COUNT(*) AS totalCustomers FROM customers
     `);
 
     // 2️⃣ Build sales data — most sold products
@@ -61,7 +61,7 @@ export const updateAnalytics = async (req, res) => {
     `);
 
     // 3️⃣ Build revenue data — total revenue per product category
-      const [revenueDataRows] = await connection.execute(`
+    const [revenueDataRows] = await connection.execute(`
         SELECT 
             c.name AS category,
             SUM(oi.quantity * oi.price) AS revenue

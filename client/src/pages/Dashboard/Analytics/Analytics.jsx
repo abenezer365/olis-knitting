@@ -1,5 +1,16 @@
 import React, { useEffect, useState } from "react";
-import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, PieChart, Pie, Cell, Legend } from "recharts";
+import {
+  BarChart,
+  Bar,
+  XAxis,
+  YAxis,
+  Tooltip,
+  ResponsiveContainer,
+  PieChart,
+  Pie,
+  Cell,
+  Legend,
+} from "recharts";
 import { RefreshCcw } from "lucide-react";
 import { toast } from "sonner";
 import axios from "@/utils/axios.instance"; // assuming you have this setup
@@ -12,17 +23,17 @@ export default function Analytics() {
     window.scrollTo({
       top: 0,
       left: 0,
-      behavior: 'smooth'
+      behavior: "smooth",
     });
-  },[]);
+  }, []);
   const [analytics, setAnalytics] = useState(null);
   const [loading, setLoading] = useState(false);
-  const token = localStorage.getItem("token")
+  const token = localStorage.getItem("token");
   // ---- Fetch Analytics Data ----
   const fetchAnalytics = async () => {
     try {
       setLoading(true);
-      const res = await axios.get("/analytics/analytics",{
+      const res = await axios.get("/analytics/analytics", {
         headers: { Authorization: `Bearer ${token}` },
       });
       setAnalytics(res.data.analytics);
@@ -38,9 +49,13 @@ export default function Analytics() {
   const refreshAnalytics = async () => {
     try {
       setLoading(true);
-      await axios.post("/analytics/analytics",{},{
-        headers: { Authorization: `Bearer ${token}` },
-      });
+      await axios.post(
+        "/analytics/analytics",
+        {},
+        {
+          headers: { Authorization: `Bearer ${token}` },
+        }
+      );
       toast.success("Analytics updated successfully");
       await fetchAnalytics();
     } catch (error) {
@@ -63,20 +78,46 @@ export default function Analytics() {
     );
 
   const stats = [
-    { label: "Customers", value: analytics.total_customers, color: "#1C2428", path: "customers" },
-    { label: "Products", value: analytics.total_products, color: "#A67C52", path: "products" },
-    { label: "Total Orders", value: analytics.total_orders, color: "#D6C6B8", path: "orders" },
-    { label: "Revenue", value: `$${analytics.total_revenue}`, color: "#D6B893", path: "revenue" },
+    {
+      label: "Customers",
+      value: analytics.total_customers,
+      color: "#1C2428",
+      path: "customers",
+    },
+    {
+      label: "Products",
+      value: analytics.total_products,
+      color: "#A67C52",
+      path: "products",
+    },
+    {
+      label: "Total Orders",
+      value: analytics.total_orders,
+      color: "#D6C6B8",
+      path: "orders",
+    },
+    {
+      label: "Revenue",
+      value: `$${analytics.total_revenue}`,
+      color: "#D6B893",
+      path: "revenue",
+    },
   ];
 
-  const salesData = analytics.sales_data || [];
-  const revenueData = analytics.revenue_data || [];
+  const salesData = Array.isArray(analytics.sales_data)
+    ? analytics.sales_data
+    : [];
+  const revenueData = Array.isArray(analytics.revenue_data)
+    ? analytics.revenue_data
+    : [];
 
   return (
     <div className="p-6 w-full flex flex-col gap-8">
       {/* Header */}
       <div className="flex items-center justify-between">
-        <h1 className="text-2xl font-semibold text-foreground">Business Analytics</h1>
+        <h1 className="text-2xl font-semibold text-foreground">
+          Business Analytics
+        </h1>
         <button
           onClick={refreshAnalytics}
           disabled={loading}
@@ -109,7 +150,9 @@ export default function Analytics() {
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
         {/* Sales Bar Chart */}
         <div className="bg-card border border-border rounded-xl p-6 shadow-sm">
-          <h2 className="text-lg font-semibold mb-5 text-foreground">Top Selling Products</h2>
+          <h2 className="text-lg font-semibold mb-5 text-foreground">
+            Top Selling Products
+          </h2>
           {salesData.length > 0 ? (
             <ResponsiveContainer width="100%" height={300}>
               <BarChart data={salesData}>
@@ -120,27 +163,33 @@ export default function Analytics() {
               </BarChart>
             </ResponsiveContainer>
           ) : (
-            <p className="text-center text-sm text-muted-foreground">No sales data available</p>
+            <p className="text-center text-sm text-muted-foreground">
+              No sales data available
+            </p>
           )}
         </div>
 
         {/* Revenue Pie Chart */}
         <div className="bg-card border border-border rounded-xl p-6 shadow-sm">
-          <h2 className="text-lg font-semibold mb-5 text-foreground">Revenue by Category</h2>
+          <h2 className="text-lg font-semibold mb-5 text-foreground">
+            Revenue by Category
+          </h2>
           {revenueData.length > 0 ? (
             <ResponsiveContainer width="100%" height={300}>
               <PieChart>
                 <Pie
-                  data={revenueData?.map(item => ({
-                      ...item,
-                      revenue: parseFloat(item.revenue)
-                    }))}
+                  data={revenueData?.map((item) => ({
+                    ...item,
+                    revenue: parseFloat(item.revenue),
+                  }))}
                   dataKey="revenue"
                   nameKey="category"
                   cx="50%"
                   cy="50%"
                   outerRadius={90}
-                  label={({ name, percent }) => `${name} ${(percent * 100).toFixed(0)}%`}
+                  label={({ name, percent }) =>
+                    `${name} ${(percent * 100).toFixed(0)}%`
+                  }
                 >
                   {revenueData.map((_, i) => (
                     <Cell key={i} fill={COLORS[i % COLORS.length]} />
@@ -157,7 +206,9 @@ export default function Analytics() {
               </PieChart>
             </ResponsiveContainer>
           ) : (
-            <p className="text-center text-sm text-muted-foreground">No revenue data available</p>
+            <p className="text-center text-sm text-muted-foreground">
+              No revenue data available
+            </p>
           )}
         </div>
       </div>

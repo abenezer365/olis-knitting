@@ -273,6 +273,16 @@ function FeaturedProducts() {
                                   ? "#800020"
                                   : color.toLowerCase() === "blush"
                                   ? "#de5d83"
+                                  : color.toLowerCase() === "brown"
+                                  ? "#8B4513"
+                                  : color.toLowerCase() === "purple"
+                                  ? "#800080"
+                                  : color.toLowerCase() === "pink"
+                                  ? "#FFC0CB"
+                                  : color.toLowerCase() === "orange"
+                                  ? "#FFA500"
+                                  : color.toLowerCase() === "yellow"
+                                  ? "#FFFF00"
                                   : "#ccc",
                             }}
                             title={color}

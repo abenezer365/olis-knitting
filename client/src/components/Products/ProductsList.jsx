@@ -56,7 +56,7 @@ function ProductList({
             >
               <Link to={`/products/${product.id}`} className="block h-full">
                 <img
-                loading="lazy"
+                  loading="lazy"
                   src={mainImage}
                   alt={product.name}
                   className="object-cover w-full h-full group-hover:scale-105 transition-transform duration-300"
@@ -170,6 +170,16 @@ function ProductList({
                                     ? "#800020"
                                     : color.toLowerCase() === "blush"
                                     ? "#de5d83"
+                                    : color.toLowerCase() === "brown"
+                                    ? "#8B4513"
+                                    : color.toLowerCase() === "purple"
+                                    ? "#800080"
+                                    : color.toLowerCase() === "pink"
+                                    ? "#FFC0CB"
+                                    : color.toLowerCase() === "orange"
+                                    ? "#FFA500"
+                                    : color.toLowerCase() === "yellow"
+                                    ? "#FFFF00"
                                     : "#ccc",
                               }}
                               title={color}
@@ -187,7 +197,12 @@ function ProductList({
                     {product.sizes && product.sizes.length > 0 && (
                       <div className="flex items-center gap-2">
                         <span>Sizes:</span>
-                        <span>{product.sizes.slice(0, 3).join(", ")}</span>
+                        <span>
+                          {product.sizes
+                            .map((size) => size.toUpperCase())
+                            .slice(0, 3)
+                            .join(", ")}
+                        </span>
                         {product.sizes.length > 3 && (
                           <span className="text-xs">
                             +{product.sizes.length - 3}

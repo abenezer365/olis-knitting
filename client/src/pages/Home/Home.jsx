@@ -5,13 +5,14 @@ import ImageBackground from "@/components/Home/ImageBackground";
 import FeaturedProducts from "@/components/Home/FeaturedProducts";
 import AppleCardsCarouselDemo from "@/components/Home/AppleCardsCarouselDemo";
 import { useEffect } from "react";
+import ContactSection from "@/components/Home/ContactSection";
 
 export default function Home() {
   useEffect(() => {
     window.scrollTo({
       top: 0,
       left: 0,
-      behavior: 'smooth'
+      behavior: "smooth",
     });
   });
   return (
@@ -22,6 +23,7 @@ export default function Home() {
       <AboutSection />
       <TestimonialSection />
       <FAQSection />
+      <ContactSection />
     </main>
   );
 }
