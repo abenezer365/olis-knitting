@@ -129,34 +129,34 @@ export const placeOrder = async (req, res) => {
       <!-- Order Information -->
       <div class="order-info">
         <div class="info-row">
-          <span class="info-label">Order Number: </span>
+          <span class="info-label">Order Number:&nbsp; </span>
           <span class="info-value">#${orderId}</span>
         </div>
         <div class="info-row">
-          <span class="info-label">Order Date: </span>
+          <span class="info-label">Order Date:&nbsp; </span>
           <span class="info-value">${currentDate}</span>
         </div>
         <div class="info-row">
-          <span class="info-label">Customer: </span>
+          <span class="info-label">Customer:&nbsp; </span>
           <span class="info-value">${customerName}</span>
         </div>
         <div class="info-row">
-          <span class="info-label">Email: </span>
+          <span class="info-label">Email:&nbsp; </span>
           <span class="info-value">${customer.email}</span>
         </div>
         <div class="info-row">
-          <span class="info-label">Phone: </span>
+          <span class="info-label">Phone: &nbsp;</span>
           <span class="info-value">${customer.phone}</span>
         </div>
         <div class="info-row">
-          <span class="info-label total-amount">Order Total: </span>
+          <span class="info-label total-amount">Order Total: &nbsp;</span>
           <span class="info-value total-amount">$${parseFloat(total_amount).toFixed(2)}</span>
         </div>
       </div>
 
       <!-- Tracking Section -->
       <div class="tracking-section">
-        <a style="color:white;" href="http://localhost:5173/order/${newOrder.uuid}" class="track-btn" target="_blank">
+        <a style="color:white;" href="https://olisknitwear.com/order/${newOrder.uuid}" class="track-btn" target="_blank">
           Track Your Order
         </a>
         <p style="margin-top: 15px; color: #666666; font-size: 14px;">
@@ -169,30 +169,19 @@ export const placeOrder = async (req, res) => {
         <div class="payment-title">💳 Complete Your Payment</div>
         <p>To proceed with your order, please complete the payment via bank transfer and share the proof with us:</p>
         <div class="contact-details">
-          📧 payments@olisknitwear.com<br>
-          📱 +251 911 234 567
+          📧 olis.knitting@gmail.com<br>
+          📱 +251 91 227 3435
         </div>
       </div>
-
-      <!-- Brand Story -->
-      <div class="story-section">
-        <p class="story-text">
-          "Every stitch tells a story of empowerment. Oli's Knitwear began as a mother's love for her family, 
-          weaving warmth and comfort into every piece. Today, it's a movement supporting women artisans in Ethiopia, 
-          creating sustainable fashion that makes a difference."
-        </p>
-      </div>
-
-      <p>We appreciate your trust in us and look forward to delivering exceptional craftsmanship to you.</p>
-    </div>
+   </div>
 
     <!-- Footer -->
     <div class="footer">
       <div class="footer-content">
         <div class="brand" style="color: #FAF8F3; font-size: 24px;">Oli's Knitwear</div>
         <div class="footer-links">
-          <a style="color:white;" href="mailto:info@olisknitwear.com" class="footer-link">Contact Us</a>
-          <a style="color:white;" href="https://olisknitting.netlify.app" class="footer-link" target="_blank">Visit Website</a>
+          <a style="color:white;" href="mailto:olis.knitting@gmail.com" class="footer-link">Contact Us</a>
+          <a style="color:white;" href="https://olisknitwear.com" class="footer-link" target="_blank">Visit Website</a>
         </div>
         <div class="signature">
           <p>&copy; ${now} Oli's Knitwear. All rights reserved.</p>
@@ -842,23 +831,13 @@ export const paymentStatus = async (req, res) => {
         </p>
       </div>
 
-      <!-- Brand Story -->
-      <div class="story-section">
-        <p class="story-text">
-          "Your support empowers women artisans in Ethiopia, creating sustainable fashion that tells a story of hope, dignity, and craftsmanship passed down through generations."
-        </p>
-      </div>
-
-      <p>We appreciate your business and look forward to delivering exceptional quality to you. If you have any questions, feel free to reach out to our customer care team.</p>
-    </div>
-
     <!-- Footer -->
     <div class="footer">
       <div class="footer-content">
         <div class="brand" style="color: #FAF8F3; font-size: 24px;">Oli's Knitwear</div>
         <div class="footer-links">
-          <a href="mailto:support@olisknitwear.com" class="footer-link">Customer Support</a>
-          <a href="https://olisknitting.netlify.app" class="footer-link" target="_blank">Visit Website</a>
+          <a style="color:white;" href="mailto:support@olisknitwear.com" class="footer-link">Customer Support</a>
+          <a style="color:white;" href="https://olisknitting.netlify.app" class="footer-link" target="_blank">Visit Website</a>
         </div>
         <div class="signature">
           <p>&copy; ${now} Oli's Knitwear. All rights reserved.</p>
