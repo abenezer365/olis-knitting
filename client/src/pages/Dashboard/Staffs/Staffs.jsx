@@ -5,14 +5,14 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { 
-  Search, 
-  Filter, 
-  Edit, 
-  Trash2, 
-  User, 
-  Mail, 
-  Phone, 
+import {
+  Search,
+  Filter,
+  Edit,
+  Trash2,
+  User,
+  Mail,
+  Phone,
   Calendar,
   Shield,
   Ban,
@@ -21,7 +21,7 @@ import {
   UserPlus,
   Key,
   Crown,
-  Users
+  Users,
 } from "lucide-react";
 import {
   Dialog,
@@ -40,13 +40,13 @@ import {
 import { Label } from "@/components/ui/label";
 
 function Staffs() {
-    useEffect(() => {
+  useEffect(() => {
     window.scrollTo({
       top: 0,
       left: 0,
-      behavior: 'smooth'
+      behavior: "smooth",
     });
-  },[]);
+  }, []);
   const [users, setUsers] = useState([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState("");
@@ -61,7 +61,7 @@ function Staffs() {
     last_name: "",
     email: "",
     phone: "",
-    role: "employee"
+    role: "employee",
   });
   const [createForm, setCreateForm] = useState({
     first_name: "",
@@ -69,7 +69,7 @@ function Staffs() {
     email: "",
     phone: "",
     password: "",
-    role: "employee"
+    role: "employee",
   });
   const token = localStorage.getItem("token");
 
@@ -94,20 +94,18 @@ function Staffs() {
 
   const filteredUsers = users.filter((user) => {
     const searchLower = searchTerm.toLowerCase();
-    const matchesSearch = 
+    const matchesSearch =
       user.first_name?.toLowerCase().includes(searchLower) ||
       user.last_name?.toLowerCase().includes(searchLower) ||
       user.email?.toLowerCase().includes(searchLower) ||
       user.phone?.includes(searchTerm);
-    
-    const matchesRole = 
-      roleFilter === "all" || 
-      user.role?.toLowerCase() === roleFilter;
-    
-    const matchesStatus = 
-      statusFilter === "all" || 
-      user.status?.toLowerCase() === statusFilter;
-    
+
+    const matchesRole =
+      roleFilter === "all" || user.role?.toLowerCase() === roleFilter;
+
+    const matchesStatus =
+      statusFilter === "all" || user.status?.toLowerCase() === statusFilter;
+
     return matchesSearch && matchesRole && matchesStatus;
   });
 
@@ -118,19 +116,24 @@ function Staffs() {
       last_name: user.last_name || "",
       email: user.email || "",
       phone: user.phone || "",
-      role: user.role || "employee"
+      role: user.role || "employee",
     });
     setEditModalOpen(true);
   };
 
   const handleSaveEdit = async () => {
     try {
-      await axios.patch("/user/edit", {
-        ...editForm,
-        id: selectedUser.id
-      }, {
-        headers: { Authorization: `Bearer ${token}` },
-      });
+      await axios.patch(
+        "/user/edit-staff",
+        {
+          // Changed from "/user/edit"
+          ...editForm,
+          id: selectedUser.id,
+        },
+        {
+          headers: { Authorization: `Bearer ${token}` },
+        }
+      );
       toast.success("Staff member updated successfully");
       setEditModalOpen(false);
       fetchUsers();
@@ -153,7 +156,7 @@ function Staffs() {
         email: "",
         phone: "",
         password: "",
-        role: "employee"
+        role: "employee",
       });
       fetchUsers();
     } catch (error) {
@@ -168,19 +171,19 @@ function Staffs() {
   };
 
   const confirmDelete = async () => {
-    try {  
+    try {
       await axios.delete(`/user/delete/${selectedUser.id}`, {
-        headers: { 
-          Authorization: `Bearer ${token}`
-        }
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
       });
-      
+
       toast.success("Staff member deleted successfully");
       setDeleteModalOpen(false);
       fetchUsers();
     } catch (error) {
       console.log("Error deleting staff member:", error);
-      
+
       if (error.response?.status === 403) {
         toast.error("You don't have permission to delete staff members");
       } else if (error.response?.status === 401) {
@@ -193,11 +196,11 @@ function Staffs() {
 
   const handleStatusAction = async (action, user) => {
     setSelectedUser(user);
-    
+
     try {
       let endpoint = "";
       let successMessage = "";
-      
+
       switch (action) {
         case "activate":
           endpoint = `/user/activate/${user.id}`;
@@ -214,10 +217,14 @@ function Staffs() {
         default:
           return;
       }
-      
-      await axios.patch(endpoint, {}, {
-        headers: { Authorization: `Bearer ${token}` },
-      });
+
+      await axios.patch(
+        endpoint,
+        {},
+        {
+          headers: { Authorization: `Bearer ${token}` },
+        }
+      );
       toast.success(successMessage);
       fetchUsers();
     } catch (error) {
@@ -228,28 +235,40 @@ function Staffs() {
 
   const getRoleVariant = (role) => {
     switch (role?.toLowerCase()) {
-      case "admin": return "destructive";
-      case "manager": return "default";
-      case "employee": return "secondary";
-      default: return "outline";
+      case "admin":
+        return "destructive";
+      case "manager":
+        return "default";
+      case "employee":
+        return "secondary";
+      default:
+        return "outline";
     }
   };
 
   const getStatusVariant = (status) => {
     switch (status?.toLowerCase()) {
-      case "active": return "active";
-      case "inactive": return "inactive";
-      case "suspended": return "banned";
-      default: return "outline";
+      case "active":
+        return "active";
+      case "inactive":
+        return "inactive";
+      case "suspended":
+        return "banned";
+      default:
+        return "outline";
     }
   };
 
   const getRoleIcon = (role) => {
     switch (role?.toLowerCase()) {
-      case "admin": return <Crown className="h-4 w-4" />;
-      case "manager": return <Shield className="h-4 w-4" />;
-      case "employee": return <User className="h-4 w-4" />;
-      default: return <User className="h-4 w-4" />;
+      case "admin":
+        return <Crown className="h-4 w-4" />;
+      case "manager":
+        return <Shield className="h-4 w-4" />;
+      case "employee":
+        return <User className="h-4 w-4" />;
+      default:
+        return <User className="h-4 w-4" />;
     }
   };
 
@@ -285,46 +304,49 @@ function Staffs() {
         </div>
 
         {/* Filters */}
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4 my-7">
-              <div className="relative bg-muted rounded-sm">
-                <Search className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
-                <Input
-                  placeholder="Search staff by name, email, or phone..."
-                  value={searchTerm}
-                  onChange={(e) => setSearchTerm(e.target.value)}
-                  className="pl-10"
-                />
-              </div>
-              <Select value={roleFilter} onValueChange={setRoleFilter}>
-                <SelectTrigger>
-                  <Shield className="h-4 w-4 mr-2" />
-                  <SelectValue placeholder="Filter by role" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="all">All Roles</SelectItem>
-                  <SelectItem value="admin">Admin</SelectItem>
-                  <SelectItem value="manager">Manager</SelectItem>
-                  <SelectItem value="employee">Employee</SelectItem>
-                </SelectContent>
-              </Select>
-              <Select value={statusFilter} onValueChange={setStatusFilter}>
-                <SelectTrigger>
-                  <Filter className="h-4 w-4 mr-2" />
-                  <SelectValue placeholder="Filter by status" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="all">All Status</SelectItem>
-                  <SelectItem value="active">Active</SelectItem>
-                  <SelectItem value="inactive">Inactive</SelectItem>
-                  <SelectItem value="suspended">Suspended</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 my-7">
+          <div className="relative bg-muted rounded-sm">
+            <Search className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
+            <Input
+              placeholder="Search staff by name, email, or phone..."
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              className="pl-10"
+            />
+          </div>
+          <Select value={roleFilter} onValueChange={setRoleFilter}>
+            <SelectTrigger>
+              <Shield className="h-4 w-4 mr-2" />
+              <SelectValue placeholder="Filter by role" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">All Roles</SelectItem>
+              <SelectItem value="admin">Admin</SelectItem>
+              <SelectItem value="manager">Manager</SelectItem>
+              <SelectItem value="employee">Employee</SelectItem>
+            </SelectContent>
+          </Select>
+          <Select value={statusFilter} onValueChange={setStatusFilter}>
+            <SelectTrigger>
+              <Filter className="h-4 w-4 mr-2" />
+              <SelectValue placeholder="Filter by status" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">All Status</SelectItem>
+              <SelectItem value="active">Active</SelectItem>
+              <SelectItem value="inactive">Inactive</SelectItem>
+              <SelectItem value="suspended">Suspended</SelectItem>
+            </SelectContent>
+          </Select>
+        </div>
 
         {/* Staff Grid */}
         <div className="grid gap-4">
           {filteredUsers.map((user) => (
-            <Card key={user.id} className="hover:shadow-lg transition-shadow border-l-4 border-l-accent">
+            <Card
+              key={user.id}
+              className="hover:shadow-lg transition-shadow border-l-4 border-l-accent"
+            >
               <CardContent className="p-6">
                 <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
                   {/* User Info */}
@@ -338,7 +360,10 @@ function Staffs() {
                           {user.first_name} {user.last_name}
                         </h3>
                         <div className="flex gap-2">
-                          <Badge variant={getRoleVariant(user.role)} className="gap-1">
+                          <Badge
+                            variant={getRoleVariant(user.role)}
+                            className="gap-1"
+                          >
                             {getRoleIcon(user.role)}
                             {user.role}
                           </Badge>
@@ -359,7 +384,8 @@ function Staffs() {
                         {user.created_at && (
                           <div className="flex items-center gap-2">
                             <Calendar className="h-3 w-3" />
-                            Joined {new Date(user.created_at).toLocaleDateString()}
+                            Joined{" "}
+                            {new Date(user.created_at).toLocaleDateString()}
                           </div>
                         )}
                       </div>
@@ -422,14 +448,18 @@ function Staffs() {
           <Card>
             <CardContent className="p-12 text-center">
               <Users className="h-16 w-16 text-muted-foreground mx-auto mb-4" />
-              <h3 className="text-xl font-semibold mb-2">No staff members found</h3>
+              <h3 className="text-xl font-semibold mb-2">
+                No staff members found
+              </h3>
               <p className="text-muted-foreground mb-4">
-                {searchTerm || roleFilter !== "all" || statusFilter !== "all" 
+                {searchTerm || roleFilter !== "all" || statusFilter !== "all"
                   ? "Try adjusting your search or filters"
-                  : "Get started by adding your first staff member"
-                }
+                  : "Get started by adding your first staff member"}
               </p>
-              <Button onClick={() => setCreateModalOpen(true)} className="gap-2">
+              <Button
+                onClick={() => setCreateModalOpen(true)}
+                className="gap-2"
+              >
                 <UserPlus className="h-4 w-4" />
                 Add First Staff Member
               </Button>
@@ -449,14 +479,18 @@ function Staffs() {
                   <Label>First Name</Label>
                   <Input
                     value={editForm.first_name}
-                    onChange={(e) => setEditForm({...editForm, first_name: e.target.value})}
+                    onChange={(e) =>
+                      setEditForm({ ...editForm, first_name: e.target.value })
+                    }
                   />
                 </div>
                 <div className="space-y-2">
                   <Label>Last Name</Label>
                   <Input
                     value={editForm.last_name}
-                    onChange={(e) => setEditForm({...editForm, last_name: e.target.value})}
+                    onChange={(e) =>
+                      setEditForm({ ...editForm, last_name: e.target.value })
+                    }
                   />
                 </div>
               </div>
@@ -465,19 +499,28 @@ function Staffs() {
                 <Input
                   type="email"
                   value={editForm.email}
-                  onChange={(e) => setEditForm({...editForm, email: e.target.value})}
+                  onChange={(e) =>
+                    setEditForm({ ...editForm, email: e.target.value })
+                  }
                 />
               </div>
               <div className="space-y-2">
                 <Label>Phone</Label>
                 <Input
                   value={editForm.phone}
-                  onChange={(e) => setEditForm({...editForm, phone: e.target.value})}
+                  onChange={(e) =>
+                    setEditForm({ ...editForm, phone: e.target.value })
+                  }
                 />
               </div>
               <div className="space-y-2">
                 <Label>Role</Label>
-                <Select value={editForm.role} onValueChange={(value) => setEditForm({...editForm, role: value})}>
+                <Select
+                  value={editForm.role}
+                  onValueChange={(value) =>
+                    setEditForm({ ...editForm, role: value })
+                  }
+                >
                   <SelectTrigger>
                     <SelectValue />
                   </SelectTrigger>
@@ -493,9 +536,7 @@ function Staffs() {
               <Button variant="outline" onClick={() => setEditModalOpen(false)}>
                 Cancel
               </Button>
-              <Button onClick={handleSaveEdit}>
-                Save Changes
-              </Button>
+              <Button onClick={handleSaveEdit}>Save Changes</Button>
             </DialogFooter>
           </DialogContent>
         </Dialog>
@@ -512,14 +553,24 @@ function Staffs() {
                   <Label>First Name *</Label>
                   <Input
                     value={createForm.first_name}
-                    onChange={(e) => setCreateForm({...createForm, first_name: e.target.value})}
+                    onChange={(e) =>
+                      setCreateForm({
+                        ...createForm,
+                        first_name: e.target.value,
+                      })
+                    }
                   />
                 </div>
                 <div className="space-y-2">
                   <Label>Last Name *</Label>
                   <Input
                     value={createForm.last_name}
-                    onChange={(e) => setCreateForm({...createForm, last_name: e.target.value})}
+                    onChange={(e) =>
+                      setCreateForm({
+                        ...createForm,
+                        last_name: e.target.value,
+                      })
+                    }
                   />
                 </div>
               </div>
@@ -528,14 +579,18 @@ function Staffs() {
                 <Input
                   type="email"
                   value={createForm.email}
-                  onChange={(e) => setCreateForm({...createForm, email: e.target.value})}
+                  onChange={(e) =>
+                    setCreateForm({ ...createForm, email: e.target.value })
+                  }
                 />
               </div>
               <div className="space-y-2">
                 <Label>Phone</Label>
                 <Input
                   value={createForm.phone}
-                  onChange={(e) => setCreateForm({...createForm, phone: e.target.value})}
+                  onChange={(e) =>
+                    setCreateForm({ ...createForm, phone: e.target.value })
+                  }
                 />
               </div>
               <div className="space-y-2">
@@ -543,12 +598,19 @@ function Staffs() {
                 <Input
                   type="password"
                   value={createForm.password}
-                  onChange={(e) => setCreateForm({...createForm, password: e.target.value})}
+                  onChange={(e) =>
+                    setCreateForm({ ...createForm, password: e.target.value })
+                  }
                 />
               </div>
               <div className="space-y-2">
                 <Label>Role</Label>
-                <Select value={createForm.role} onValueChange={(value) => setCreateForm({...createForm, role: value})}>
+                <Select
+                  value={createForm.role}
+                  onValueChange={(value) =>
+                    setCreateForm({ ...createForm, role: value })
+                  }
+                >
                   <SelectTrigger>
                     <SelectValue />
                   </SelectTrigger>
@@ -561,12 +623,13 @@ function Staffs() {
               </div>
             </div>
             <DialogFooter>
-              <Button variant="outline" onClick={() => setCreateModalOpen(false)}>
+              <Button
+                variant="outline"
+                onClick={() => setCreateModalOpen(false)}
+              >
                 Cancel
               </Button>
-              <Button onClick={handleCreate}>
-                Create Staff Member
-              </Button>
+              <Button onClick={handleCreate}>Create Staff Member</Button>
             </DialogFooter>
           </DialogContent>
         </Dialog>
@@ -580,12 +643,17 @@ function Staffs() {
             <div className="py-4">
               <p className="text-muted-foreground">
                 Are you sure you want to delete{" "}
-                <strong>{selectedUser?.first_name} {selectedUser?.last_name}</strong>?
-                This action cannot be undone and will remove all their access.
+                <strong>
+                  {selectedUser?.first_name} {selectedUser?.last_name}
+                </strong>
+                ? This action cannot be undone and will remove all their access.
               </p>
             </div>
             <DialogFooter>
-              <Button variant="outline" onClick={() => setDeleteModalOpen(false)}>
+              <Button
+                variant="outline"
+                onClick={() => setDeleteModalOpen(false)}
+              >
                 Cancel
               </Button>
               <Button variant="destructive" onClick={confirmDelete}>

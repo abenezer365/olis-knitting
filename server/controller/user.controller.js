@@ -191,6 +191,54 @@ export async function editProfile(req, res) {
   }
 }
 
+// Update staff member (Admin only) - Separate from profile editing
+export async function updateStaff(req, res) {
+  try {
+    const { id, first_name, last_name, email, phone, role } = req.body;
+
+    // ✅ Validation
+    if (!id || !first_name || !last_name || !email || !phone || !role) {
+      return res.status(400).json({
+        success: false,
+        message: "All fields are required for staff update.",
+      });
+    }
+
+    // ✅ Check for duplicate email (excluding current staff member)
+    const [existingUser] = await connection.execute(
+      "SELECT id FROM users WHERE email = ? AND id != ?",
+      [email, id]
+    );
+
+    if (existingUser.length > 0) {
+      return res.status(409).json({
+        success: false,
+        message: "Email already in use by another staff member.",
+      });
+    }
+
+    // ✅ Update staff member (don't update password here)
+    await connection.execute(
+      `UPDATE users 
+       SET first_name = ?, last_name = ?, email = ?, phone = ?, role = ?
+       WHERE id = ?`,
+      [first_name, last_name, email, phone, role, id]
+    );
+
+    return res.status(200).json({
+      success: true,
+      message: "Staff member updated successfully!",
+    });
+  } catch (error) {
+    console.error("Error updating staff:", error);
+    return res.status(500).json({
+      success: false,
+      message: "Internal server error.",
+      error: error.message,
+    });
+  }
+}
+
 //Check User
 export async function checkUser(req, res) {
   const userId = req.user.id;
