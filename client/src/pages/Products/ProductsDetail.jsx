@@ -75,10 +75,34 @@ function ProductsDetail() {
     category: product.category_name,
     rating: product.rating ? parseFloat(product.rating) : 4.0,
     description: product.description,
-    colors: product.available_colors || [],
-    sizes: product.available_sizes || [],
-    images: [product.image, ...(product.other_images || [])].filter(Boolean),
+    colors: parseJsonField(product.available_colors) || [],
+    sizes: parseJsonField(product.available_sizes) || [],
+    images: [
+      product.image,
+      ...(parseJsonField(product.other_images) || []),
+    ].filter(Boolean),
   });
+
+  // Helper function to parse JSON strings safely
+  const parseJsonField = (field) => {
+    if (!field) return null;
+
+    try {
+      // If it's already an array, return it
+      if (Array.isArray(field)) return field;
+
+      // If it's a string, try to parse it
+      if (typeof field === "string") {
+        const parsed = JSON.parse(field);
+        return Array.isArray(parsed) ? parsed : null;
+      }
+
+      return null;
+    } catch (error) {
+      console.error("Error parsing JSON field:", error);
+      return null;
+    }
+  };
 
   const getRelatedProducts = (allProducts, currentProduct) => {
     const others = allProducts.filter((p) => p.id !== currentProduct.id);

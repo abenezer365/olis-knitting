@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import { Link } from "react-router-dom";
 import { ShoppingCart, Eye } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -18,11 +18,51 @@ function ProductList({
 }) {
   const [hoveredImageId, setHoveredImageId] = useState(null);
 
+  // 🧠 Normalize product data before rendering
+  const normalizedProducts = useMemo(() => {
+    return products.map((product) => {
+      let parsedColors = [];
+      let parsedSizes = [];
+      let parsedImages = [];
+
+      try {
+        parsedColors = Array.isArray(product.colors)
+          ? product.colors
+          : JSON.parse(product.colors || "[]");
+      } catch {
+        parsedColors = [];
+      }
+
+      try {
+        parsedSizes = Array.isArray(product.sizes)
+          ? product.sizes
+          : JSON.parse(product.sizes || "[]");
+      } catch {
+        parsedSizes = [];
+      }
+
+      try {
+        parsedImages = Array.isArray(product.other_images)
+          ? product.other_images
+          : JSON.parse(product.other_images || "[]");
+      } catch {
+        parsedImages = [];
+      }
+
+      return {
+        ...product,
+        colors: parsedColors,
+        sizes: parsedSizes,
+        images: [product.image, ...parsedImages].filter(Boolean),
+      };
+    });
+  }, [products]);
+
   const formatPrice = (price) => {
     if (currency === "ETB") {
       return `${(price * currencyRate).toFixed(0)} ${currency}`;
     }
-    return `$${price.toFixed(2)}`;
+    return `$${parseFloat(price).toFixed(2)}`;
   };
 
   const handleAddToCart = (arg1, arg2) => {
@@ -37,18 +77,39 @@ function ProductList({
     onQuickPreview(product);
   };
 
+  const getColorCode = (color) => {
+    const map = {
+      white: "#f8f8f8",
+      black: "#000000",
+      red: "#ff0000",
+      blue: "#0000ff",
+      green: "#00ff00",
+      cream: "#fffdd0",
+      beige: "#f5f5dc",
+      gray: "#808080",
+      navy: "#000080",
+      burgundy: "#800020",
+      blush: "#de5d83",
+      brown: "#8B4513",
+      purple: "#800080",
+      pink: "#FFC0CB",
+      orange: "#FFA500",
+      yellow: "#FFFF00",
+    };
+    return map[color.toLowerCase()] || "#ccc";
+  };
+
   return (
     <div className="space-y-4">
-      {products.map((product) => {
-        const productImages = product.images || [product.image].filter(Boolean);
-        const mainImage = productImages[0] || "/placeholder.svg";
+      {normalizedProducts.map((product) => {
+        const mainImage = product.images[0] || "/placeholder.svg";
 
         return (
           <div
             key={product.id}
             className="grid grid-cols-1 md:grid-cols-[auto_1fr_auto] gap-4 bg-card border border-border rounded-lg overflow-hidden hover:shadow-lg transition-shadow duration-300 p-4"
           >
-            {/* Product Image - hover shows Quick Preview + Add to Cart */}
+            {/* Product Image */}
             <div
               className="relative w-full h-48 md:w-48 md:h-48 bg-secondary rounded-lg overflow-hidden shrink-0"
               onMouseEnter={() => setHoveredImageId(product.id)}
@@ -133,12 +194,12 @@ function ProductList({
 
                   {/* Price */}
                   <p className="text-xl font-bold text-primary mb-2">
-                    {formatPrice(product.price)}
+                    {formatPrice(parseFloat(product.price))}
                   </p>
 
                   {/* Colors and Sizes */}
                   <div className="flex flex-wrap gap-4 text-sm text-muted-foreground">
-                    {product.colors && product.colors.length > 0 && (
+                    {product.colors.length > 0 && (
                       <div className="flex items-center gap-2">
                         <span>Colors:</span>
                         <div className="flex gap-1">
@@ -146,42 +207,7 @@ function ProductList({
                             <div
                               key={index}
                               className="w-4 h-4 rounded-full border border-border"
-                              style={{
-                                backgroundColor:
-                                  color.toLowerCase() === "white"
-                                    ? "#f8f8f8"
-                                    : color.toLowerCase() === "black"
-                                    ? "#000000"
-                                    : color.toLowerCase() === "red"
-                                    ? "#ff0000"
-                                    : color.toLowerCase() === "blue"
-                                    ? "#0000ff"
-                                    : color.toLowerCase() === "green"
-                                    ? "#00ff00"
-                                    : color.toLowerCase() === "cream"
-                                    ? "#fffdd0"
-                                    : color.toLowerCase() === "beige"
-                                    ? "#f5f5dc"
-                                    : color.toLowerCase() === "gray"
-                                    ? "#808080"
-                                    : color.toLowerCase() === "navy"
-                                    ? "#000080"
-                                    : color.toLowerCase() === "burgundy"
-                                    ? "#800020"
-                                    : color.toLowerCase() === "blush"
-                                    ? "#de5d83"
-                                    : color.toLowerCase() === "brown"
-                                    ? "#8B4513"
-                                    : color.toLowerCase() === "purple"
-                                    ? "#800080"
-                                    : color.toLowerCase() === "pink"
-                                    ? "#FFC0CB"
-                                    : color.toLowerCase() === "orange"
-                                    ? "#FFA500"
-                                    : color.toLowerCase() === "yellow"
-                                    ? "#FFFF00"
-                                    : "#ccc",
-                              }}
+                              style={{ backgroundColor: getColorCode(color) }}
                               title={color}
                             />
                           ))}
@@ -194,7 +220,7 @@ function ProductList({
                       </div>
                     )}
 
-                    {product.sizes && product.sizes.length > 0 && (
+                    {product.sizes.length > 0 && (
                       <div className="flex items-center gap-2">
                         <span>Sizes:</span>
                         <span>

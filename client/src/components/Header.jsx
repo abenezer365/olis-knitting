@@ -164,7 +164,7 @@ function Header() {
                   </span>
                 )}
               </button>
-              {/* {user ? (
+              {user ? (
                 <Link to="/dashboard/">
                   <button
                     className="p-2 hover:bg-secondary rounded-lg transition-colors"
@@ -181,7 +181,7 @@ function Header() {
                 >
                   <LogIn size={20} />
                 </button>
-              )} */}
+              )}
 
               {/* Mobile Menu Toggle */}
               <button

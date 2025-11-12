@@ -68,7 +68,7 @@ export default function ContactSection() {
         <div className="mt-12 flex flex-col md:flex-row items-center justify-between gap-6 bg-primary/5 border border-border rounded-xl p-8">
           <div>
             <h3 className="text-2xl font-bungee text-foreground mb-2">
-              Ready to discuss your project?
+              Ready to order your custom Designs?
             </h3>
             <p className="text-muted-foreground">
               Send us a message or chat directly on WhatsApp or Telegram

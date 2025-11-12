@@ -32,9 +32,51 @@ function FeaturedProducts() {
 
         if (response.data.success) {
           // Transform API data and take first 4 products as featured
-          const products = response.data.products
-            .slice(0, 4)
-            .map((product) => ({
+          // const products = response.data.products
+          //   .slice(0, 4)
+          //   .map((product) => ({
+          //     id: product.id,
+          //     uuid: product.uuid,
+          //     name: product.name,
+          //     price: parseFloat(product.price),
+          //     image: product.image,
+          //     category: product.category_name,
+          //     rating: product.rating ? parseFloat(product.rating) : 4.0,
+          //     description: product.description,
+          //     colors: product.available_colors || [],
+          //     sizes: product.available_sizes || [],
+          //     images: [product.image, ...(product.other_images || [])].filter(
+          //       Boolean
+          //     ),
+          //   }));
+
+          // setFeaturedProducts(products);
+          const products = response.data.products.slice(0, 4).map((product) => {
+            let colors = [];
+            let sizes = [];
+            let otherImages = [];
+
+            try {
+              // Parse if string, else keep array
+              colors =
+                typeof product.available_colors === "string"
+                  ? JSON.parse(product.available_colors)
+                  : product.available_colors || [];
+
+              sizes =
+                typeof product.available_sizes === "string"
+                  ? JSON.parse(product.available_sizes)
+                  : product.available_sizes || [];
+
+              otherImages =
+                typeof product.other_images === "string"
+                  ? JSON.parse(product.other_images)
+                  : product.other_images || [];
+            } catch (err) {
+              console.error("Error parsing product fields:", err);
+            }
+
+            return {
               id: product.id,
               uuid: product.uuid,
               name: product.name,
@@ -43,12 +85,11 @@ function FeaturedProducts() {
               category: product.category_name,
               rating: product.rating ? parseFloat(product.rating) : 4.0,
               description: product.description,
-              colors: product.available_colors || [],
-              sizes: product.available_sizes || [],
-              images: [product.image, ...(product.other_images || [])].filter(
-                Boolean
-              ),
-            }));
+              colors,
+              sizes,
+              images: [product.image, ...otherImages].filter(Boolean),
+            };
+          });
 
           setFeaturedProducts(products);
         }

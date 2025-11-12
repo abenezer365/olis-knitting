@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import { Link } from "react-router-dom";
 import { ShoppingCart, Eye } from "lucide-react";
 import {
@@ -17,11 +17,51 @@ function ProductGrid({
 }) {
   const [hoveredImageId, setHoveredImageId] = useState(null);
 
+  // 🧠 Normalize products data before rendering
+  const normalizedProducts = useMemo(() => {
+    return products.map((product) => {
+      let parsedColors = [];
+      let parsedSizes = [];
+      let parsedImages = [];
+
+      try {
+        parsedColors = Array.isArray(product.colors)
+          ? product.colors
+          : JSON.parse(product.colors || "[]");
+      } catch {
+        parsedColors = [];
+      }
+
+      try {
+        parsedSizes = Array.isArray(product.sizes)
+          ? product.sizes
+          : JSON.parse(product.sizes || "[]");
+      } catch {
+        parsedSizes = [];
+      }
+
+      try {
+        parsedImages = Array.isArray(product.other_images)
+          ? product.other_images
+          : JSON.parse(product.other_images || "[]");
+      } catch {
+        parsedImages = [];
+      }
+
+      return {
+        ...product,
+        colors: parsedColors,
+        sizes: parsedSizes,
+        images: [product.image, ...parsedImages].filter(Boolean),
+      };
+    });
+  }, [products]);
+
   const formatPrice = (price) => {
     if (currency === "ETB") {
       return `${(price * currencyRate).toFixed(0)} ${currency}`;
     }
-    return `$${price.toFixed(2)}`;
+    return `$${parseFloat(price).toFixed(2)}`;
   };
 
   const handleAddToCart = (e, product) => {
@@ -36,11 +76,14 @@ function ProductGrid({
     onQuickPreview(product);
   };
 
+  console.log("Products:", products);
+  console.log("Normalized Products:", normalizedProducts);
+
   return (
     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-      {products.map((product) => {
-        const productImages = product.images || [product.image].filter(Boolean);
-        const mainImage = productImages[0] || "/placeholder.svg";
+      {normalizedProducts.map((product) => {
+        const mainImage = product.images?.[0] || "/placeholder.svg";
+        const colorsArray = product.colors || [];
 
         return (
           <div
@@ -66,7 +109,6 @@ function ProductGrid({
               {hoveredImageId === product.id && (
                 <div className="absolute inset-0 bg-black/40 flex items-center justify-center gap-4 transition-all duration-300">
                   <TooltipProvider>
-                    {/* Quick Preview Button */}
                     <Tooltip>
                       <TooltipTrigger asChild>
                         <button
@@ -81,7 +123,6 @@ function ProductGrid({
                       </TooltipContent>
                     </Tooltip>
 
-                    {/* Add to Cart Button */}
                     <Tooltip>
                       <TooltipTrigger asChild>
                         <button
@@ -117,25 +158,19 @@ function ProductGrid({
                   {product.name}
                 </h3>
 
-                {/* Category */}
-                {/* <p className="text-sm text-muted-foreground mb-2">
-                  {product.category}
-                </p> */}
-
-                {/* Description (truncated) */}
                 <p className="text-sm text-muted-foreground line-clamp-2 mb-3">
                   {product.description}
                 </p>
 
                 <div className="flex items-center justify-between">
                   <p className="text-lg font-bold text-primary">
-                    {formatPrice(product.price)}
+                    {formatPrice(parseFloat(product.price))}
                   </p>
 
                   {/* Colors Preview */}
-                  {product.colors && product.colors.length > 0 && (
+                  {colorsArray.length > 0 && (
                     <div className="flex gap-1">
-                      {product.colors.slice(0, 3).map((color, index) => (
+                      {colorsArray.slice(0, 3).map((color, index) => (
                         <div
                           key={index}
                           className="w-4 h-4 rounded-full border border-border"
@@ -178,9 +213,10 @@ function ProductGrid({
                           title={color}
                         />
                       ))}
-                      {product.colors.length > 3 && (
+
+                      {colorsArray.length > 3 && (
                         <div className="w-3 h-3 rounded-full bg-muted flex items-center justify-center text-xs">
-                          +{product.colors.length - 3}
+                          +{colorsArray.length - 3}
                         </div>
                       )}
                     </div>
