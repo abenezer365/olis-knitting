@@ -358,7 +358,7 @@ function OrderConfirmation() {
                   {order.shipping_fee_id && (
                     <div className="flex justify-between items-center text-lg">
                       <span className="text-muted-foreground">
-                        Shipping Fee (per 1 kg):
+                        Shipping Fee (per 0.5 kg):
                       </span>
                       <span className="font-semibold">
                         {getPrice(order.shipping_start)}

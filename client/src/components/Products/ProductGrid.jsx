@@ -76,8 +76,6 @@ function ProductGrid({
     onQuickPreview(product);
   };
 
-  console.log("Products:", products);
-  console.log("Normalized Products:", normalizedProducts);
 
   return (
     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">

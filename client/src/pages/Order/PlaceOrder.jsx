@@ -538,7 +538,7 @@ function PlaceOrder() {
                       <div className="mt-3 p-3 bg-muted rounded-lg">
                         <div className="flex justify-between items-center text-sm">
                           <span className="text-muted-foreground">
-                            Shipping Fee (per 1 kg):
+                            Shipping Fee (per 0.5 kg):
                           </span>
                           <span className="font-semibold">
                             {currency === "ETB"
@@ -554,7 +554,7 @@ function PlaceOrder() {
                         </div>
                         <p className="text-xs text-muted-foreground mt-1">
                           Starting price for {selectedShippingFee.country_name}{" "}
-                          per 1 kg
+                          per 0.5 kg
                         </p>
                       </div>
                     )}

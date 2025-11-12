@@ -394,7 +394,7 @@ function OrderTracking1() {
                     {/* Shipping Fee */}
                     {order.shipping_start && (
                       <div className="flex justify-between items-center text-lg">
-                        <span className="text-gray-600">Shipping Fee:</span>
+                        <span className="text-gray-600">Shipping Fee(per 0.5 kg):</span>
                         <span className="font-bold text-gray-900">{formatPrice(order.shipping_start)}</span>
                       </div>
                     )}
