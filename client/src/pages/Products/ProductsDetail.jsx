@@ -7,6 +7,7 @@ import RelatedProducts from "@/components/Products/RelatedProducts";
 import { useGlobalContext } from "@/contexts/Context";
 import { FaWhatsapp, FaTelegramPlane } from "react-icons/fa";
 import axiosInstance from "@/utils/axios.instance";
+import { getImageUrl } from "@/utils/urlHelper";
 
 function ProductsDetail() {
   useEffect(() => {
@@ -66,22 +67,33 @@ function ProductsDetail() {
     }
   }, [id]);
 
-  const transformProduct = (product) => ({
+const transformProduct = (product) => {
+  // Parse other_images safely
+  let otherImages = [];
+  try {
+    otherImages = JSON.parse(product.other_images || "[]");
+  } catch (error) {
+    console.error("Error parsing other_images:", error);
+    otherImages = [];
+  }
+
+  return {
     id: product.id,
     uuid: product.uuid,
     name: product.name,
     price: parseFloat(product.price),
-    image: product.image,
+    image: product.image, // Keep relative path for cart/database
     category: product.category_name,
     rating: product.rating ? parseFloat(product.rating) : 4.0,
     description: product.description,
     colors: parseJsonField(product.available_colors) || [],
     sizes: parseJsonField(product.available_sizes) || [],
     images: [
-        `${product.image}?f=auto&q=auto&w=800`,
-        ...(JSON.parse(product.other_images || "[]").map(img => `${img}?f=auto&q=auto&w=800`))
-      ]
-  });
+      getImageUrl(product.image), // Main image with full URL
+      ...otherImages.map(img => getImageUrl(img)) // Other images with full URLs
+    ]
+  };
+};
 
   // Helper function to parse JSON strings safely
   const parseJsonField = (field) => {

@@ -17,7 +17,11 @@ import anayticsRouter from "./routes/analytics.routes.js";
 import shippingRoutes from "./routes/shipping.routes.js";
 import shippingfeeRouter from "./routes/shippingfee.routes.js";
 import authRouter from "./routes/auth.routes.js";
+import path from "path";
+import { fileURLToPath } from "url";
 
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 // Configuration
 dotenv.config();
 const PORT = process.env.PORT;
@@ -29,6 +33,8 @@ const app = express();
 app.use(cors());
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
+app.use("/upload", express.static(path.join(__dirname, "upload")));
+
 
 // Endpoints
 app.use("/api/user", userRouter);

@@ -13,6 +13,7 @@ import {
   ChevronLeft,
   ChevronRight,
 } from "lucide-react";
+import { getImageUrl } from "@/utils/urlHelper";
 
 function Products() {
   useEffect(() => {
@@ -228,12 +229,6 @@ function Products() {
     addForm.other_images.forEach((file, index) => {
       formData.append("other_images", file);
     });
-
-    // Debug: Check what's in FormData
-    console.log("FormData contents:");
-    for (let [key, value] of formData.entries()) {
-      console.log(key, value);
-    }
 
     try {
       setLoading(true);
@@ -485,7 +480,7 @@ function Products() {
                 <div className="relative h-80 bg-muted/30 overflow-hidden">
                   <img
                     loading="lazy"
-                    src={product.image}
+                    src={getImageUrl(product.image)}
                     alt={product.name}
                     className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
                   />

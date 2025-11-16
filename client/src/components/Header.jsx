@@ -12,6 +12,7 @@ import { GlobalContext, useGlobalContext } from "@/contexts/Context";
 import axios from "@/utils/axios.instance";
 import { toast } from "sonner";
 import logo from "/logo_complement.png";
+import { getImageUrl } from "@/utils/urlHelper";
 
 function Header() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -282,7 +283,7 @@ function Header() {
                       >
                         <div className="relative w-20 h-20 shrink-0 rounded-lg overflow-hidden">
                           <img
-                            src={item.image || "/placeholder.svg"}
+                            src={getImageUrl(item.image)}
                             alt={item.name}
                             className="w-full h-full object-cover rounded-lg"
                           />

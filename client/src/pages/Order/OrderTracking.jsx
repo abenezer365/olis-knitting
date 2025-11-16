@@ -20,6 +20,7 @@ import {
   Ship,
   Crown
 } from "lucide-react";
+import { getImageUrl } from "@/utils/urlHelper";
 
 function OrderTracking1() {
     useEffect(() => {
@@ -358,7 +359,7 @@ function OrderTracking1() {
                       className="flex gap-4 p-6 bg-linear-to-r from-blue-50 to-purple-50 rounded-2xl border border-blue-100"
                     >
                       <img
-                        src={item.image}
+                        src={getImageUrl(item.image)}
                         alt={item.name}
                         className="w-20 h-20 object-cover rounded-xl shadow-md"
                       />
@@ -892,7 +893,7 @@ function OrderTracking2() {
                       className="flex gap-4 p-6 bg-secondary/50 rounded-xl border border-border"
                     >
                       <img
-                        src={item.image}
+                        src={getImageUrl(item.image)}
                         alt={item.name}
                         className="w-20 h-20 object-cover rounded-lg shadow-sm border border-border"
                       />

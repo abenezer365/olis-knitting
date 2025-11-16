@@ -24,6 +24,7 @@ import {
 } from "lucide-react";
 import { useGlobalContext } from "@/contexts/Context";
 import { useProducts } from "@/hooks/useProducts";
+import { getImageUrl } from "@/utils/urlHelper";
 function PlaceOrder() {
   const { cart, updateQuantity, removeFromCart, total, clearCart } =
     useGlobalContext();
@@ -236,7 +237,7 @@ function PlaceOrder() {
                     className="flex gap-4 p-4 bg-muted rounded-lg"
                   >
                     <img
-                      src={item.image}
+                      src={getImageUrl(item.image)}
                       alt={item.name}
                       className="w-20 h-20 object-cover rounded"
                     />

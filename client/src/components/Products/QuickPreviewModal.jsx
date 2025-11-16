@@ -8,6 +8,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { ShoppingCart } from "lucide-react";
 import { FaWhatsapp, FaTelegramPlane } from "react-icons/fa";
+import { getImageUrl } from "@/utils/urlHelper";
 
 function QuickPreviewModal({
   product,
@@ -89,7 +90,7 @@ function QuickPreviewModal({
             onMouseMove={handleMouseMove}
           >
             <img
-              src={`${mainImage}?f=auto&q=auto`}
+              src={getImageUrl(mainImage)}
               alt={product.name}
               className={`object-contain w-full h-full transition-transform duration-200 ${
                 zoom ? "scale-150" : "scale-100"

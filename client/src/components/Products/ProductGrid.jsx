@@ -7,6 +7,7 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
+import { getImageUrl } from "@/utils/urlHelper";
 
 function ProductGrid({
   products,
@@ -97,7 +98,7 @@ function ProductGrid({
               <Link to={`/products/${product.id}`} className="block h-full">
                 <img
                   loading="lazy"
-                  src={`${mainImage}?f=auto&q=auto`}
+                  src={getImageUrl(mainImage)}
                   alt={product.name}
                   className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
                 />

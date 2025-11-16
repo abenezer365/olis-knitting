@@ -1,8 +1,11 @@
 import connection from "../config/database.config.js";
 import { v4 as uuidv4 } from "uuid";
+import fs from "fs";
+import path from "path";
 
 // Add product controller
 export async function addProduct(req, res) {
+  console.log(req.body)
   const { name, description, price, rating, category_id, available_sizes, available_colors } = req.body;
   const imageUrl = req.body.image_url;
   const otherImagesUrls = req.body.other_images_urls || [];
@@ -102,49 +105,6 @@ export async function editProduct(req, res) {
     });
   }
 }
-// Change image controller
-export async function changeImage(req, res) {
-  const { id } = req.body;
-  const imageUrl = req.body.image_url;
-
-  if (!imageUrl) {
-    return res.status(400).json({
-      success: false,
-      message: "No image provided",
-    });
-  }
-
-  try {
-    const [product] = await connection.execute(
-      "SELECT * FROM products WHERE id = ?",
-      [id]
-    );
-
-    if (product.length === 0) {
-      return res.status(404).json({
-        success: false,
-        message: "Product not found",
-      });
-    }
-
-    await connection.execute(
-      "UPDATE products SET image = ?, updated_at = NOW() WHERE id = ?",
-      [imageUrl, id]
-    );
-
-    return res.status(200).json({
-      success: true,
-      message: "Product image updated successfully ✅",
-      image_url: imageUrl,
-    });
-  } catch (error) {
-    return res.status(500).json({
-      success: false,
-      message: "Error updating image",
-      error: error.message,
-    });
-  }
-}
 
 // Get all products controller
 export async function getAllProducts(req, res) {
@@ -209,6 +169,7 @@ export async function deleteProduct(req, res) {
   const { id } = req.params;
 
   try {
+    // 1. Get product from database
     const [existing] = await connection.execute(
       "SELECT * FROM products WHERE id = ?",
       [id]
@@ -221,11 +182,17 @@ export async function deleteProduct(req, res) {
       });
     }
 
+    const product = existing[0];
+    
+    // 2. Extract folder name from image URL and delete folder
+    await deleteProductFolder(product);
+
+    // 3. Delete from database
     await connection.execute("DELETE FROM products WHERE id = ?", [id]);
 
     return res.status(200).json({
       success: true,
-      message: "Product deleted successfully ✅",
+      message: "Product and all images deleted successfully ✅",
     });
   } catch (error) {
     return res.status(500).json({
@@ -235,3 +202,54 @@ export async function deleteProduct(req, res) {
     });
   }
 }
+
+// Helper function to delete product folder
+async function deleteProductFolder(product) {
+  try {
+    // Method 1: Extract from image URL (most reliable)
+    let folderName = null;
+    
+    if (product.image) {
+      // Extract folder name from image URL: "/upload/products/winter-wool-sweater/main.jpg"
+      const urlParts = product.image.split('/');
+      if (urlParts.length >= 4) {
+        folderName = urlParts[3]; // "winter-wool-sweater"
+      }
+    }
+    
+    // Method 2: If URL extraction fails, create slug from product name
+    if (!folderName && product.name) {
+      folderName = createSlug(product.name);
+    }
+    
+    if (folderName) {
+      const productFolder = path.join(process.cwd(), "upload", "products", folderName);
+      
+      // Check if folder exists and delete it
+      if (fs.existsSync(productFolder)) {
+        fs.rmSync(productFolder, { recursive: true, force: true });
+        console.log(`🗑️ Deleted product folder: ${productFolder}`);
+        return true;
+      } else {
+        console.log(`ℹ️ Product folder not found: ${productFolder}`);
+        return false;
+      }
+    } else {
+      console.log("⚠️ Could not determine product folder name");
+      return false;
+    }
+  } catch (error) {
+    console.error("Error deleting product folder:", error);
+    return false;
+  }
+}
+
+// Reuse the same slug function from your upload middleware
+const createSlug = (name) => {
+  return name
+    .toLowerCase()
+    .trim()
+    .replace(/[^\w\s-]/g, '')
+    .replace(/[\s_-]+/g, '-')
+    .replace(/^-+|-+$/g, '');
+};

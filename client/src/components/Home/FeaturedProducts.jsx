@@ -13,6 +13,7 @@ import QuickPreviewModal from "@/components/Products/QuickPreviewModal";
 import { useGlobalContext } from "@/contexts/Context";
 import { Skeleton } from "@/components/ui/skeleton";
 import axiosInstance from "@/utils/axios.instance";
+import { getImageUrl } from "@/utils/urlHelper";
 
 function FeaturedProducts() {
   const [featuredProducts, setFeaturedProducts] = useState([]);
@@ -206,7 +207,7 @@ function FeaturedProducts() {
                 <div className="relative overflow-hidden aspect-square">
                   <Link to={`/products/${product.id}`}>
                     <img
-                      src={`${product.image}?f=auto&q=auto`}
+                      src={getImageUrl(product.image)}
                       alt={product.name}
                       className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
                     />

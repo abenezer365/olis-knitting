@@ -14,8 +14,17 @@ import {
   MapPin,
 } from "lucide-react";
 import { FaWhatsapp, FaTelegramPlane, FaInstagram } from "react-icons/fa";
+import { getImageUrl } from "@/utils/urlHelper";
 
 function OrderConfirmation() {
+   useEffect(() => {
+    // Check if page has already "refreshed"
+    if (!sessionStorage.getItem("firstLoadRefreshed")) {
+      sessionStorage.setItem("firstLoadRefreshed", "true");
+      window.location.reload(); // refresh once
+    }
+  }, []);
+  
   useEffect(() => {
     window.scrollTo({
       top: 0,
@@ -84,13 +93,16 @@ function OrderConfirmation() {
     toast.success(`${field} copied to clipboard`);
   };
 
-const generateOrderMessage = () => {
-  if (!orderData) return "";
+
+  const generateOrderMessage = () => {
+  if (!orderData || !orderData.products || orderData.products.length === 0) {
+    return "Hello! I would like to discuss payment for my order. Please provide me with payment options and next steps.";
+  }
 
   const order = orderData;
   const customer = orderData.client || {};
 
-  let items = orderData.products || []; // This is correct
+  let items = orderData.products;
 
   // ✅ Parse if backend sends it as a JSON string
   if (typeof items === "string") {
@@ -102,16 +114,25 @@ const generateOrderMessage = () => {
     }
   }
 
-  // Debug: Check what items contains
-  console.log("Items array:", items);
-  console.log("Items length:", items.length);
-  console.log("Items content:", JSON.stringify(items, null, 2));
+  // Ensure items is an array and has valid data
+  if (!Array.isArray(items) || items.length === 0) {
+    return `Hello! I would like to discuss payment for my order #${order.id}
 
-  const itemList = items.length > 0 
-    ? items
-        .map((item) => `• ${item.name} (Qty: ${item.quantity}) - $${parseFloat(item.price).toFixed(2)}`)
-        .join("\n")
-    : "No items found.";
+Customer: ${customer.fname} ${customer.lname}
+Email: ${customer.email}
+Phone: ${customer.phone}
+
+Please let me know the available payment options and next steps.`;
+  }
+
+  const itemList = items
+    .map((item) => {
+      const itemName = item.name || "Unknown Item";
+      const quantity = item.quantity || 1;
+      const price = parseFloat(item.price || 0).toFixed(2);
+      return `• ${itemName} (Qty: ${quantity}) - $${price}`;
+    })
+    .join("\n");
 
   return `
 Hello! I would like to discuss payment for my order #${order.id}
@@ -119,7 +140,7 @@ Hello! I would like to discuss payment for my order #${order.id}
 Order Details:
 ${itemList}
 
-Total Amount: $${parseFloat(order.total_amount).toFixed(2)}
+Total Amount: $${parseFloat(order.total_amount || 0).toFixed(2)}
 Customer: ${customer.fname} ${customer.lname}
 Email: ${customer.email}
 Phone: ${customer.phone}
@@ -128,9 +149,9 @@ Please let me know the available payment options and next steps.
   `.trim();
 };
 
-
-
-  const handleSocialMediaRedirect = (platform) => {
+const handleSocialMediaRedirect = (platform) => {
+  // Add a small delay to ensure state is updated
+  setTimeout(() => {
     const message = encodeURIComponent(generateOrderMessage());
     const urls = {
       whatsapp: `https://wa.me/+251956518897?text=${message}`,
@@ -138,8 +159,13 @@ Please let me know the available payment options and next steps.
       instagram: `https://instagram.com/_olis_`,
     };
 
-    window.open(urls[platform], "_blank");
-  };
+    if (message && message !== "Hello! I would like to discuss payment for my order. Please provide me with payment options and next steps.") {
+      window.open(urls[platform], "_blank");
+    } else {
+      toast.error("Order details are not ready yet. Please try again in a moment.");
+    }
+  }, 100);
+};
 
   if (loading) {
     return (
@@ -348,7 +374,7 @@ Please let me know the available payment options and next steps.
                     className="flex gap-4 p-4 border rounded-lg"
                   >
                     <img
-                      src={item.image}
+                      src={getImageUrl(item.image)}
                       alt={item.name}
                       className="w-16 h-16 object-cover rounded-lg"
                     />
