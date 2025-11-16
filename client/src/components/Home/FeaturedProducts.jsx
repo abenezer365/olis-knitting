@@ -206,7 +206,7 @@ function FeaturedProducts() {
                 <div className="relative overflow-hidden aspect-square">
                   <Link to={`/products/${product.id}`}>
                     <img
-                      src={product.image}
+                      src={`${product.image}?f=auto&q=auto`}
                       alt={product.name}
                       className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
                     />

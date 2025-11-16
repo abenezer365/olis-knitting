@@ -82,7 +82,7 @@ export default function ContactUs() {
                       <h3 className="font-semibold text-foreground mb-1">
                         Phone
                       </h3>
-                      <p className="text-muted-foreground">+251 91 227 3435</p>
+                      <p className="text-muted-foreground">+251 95 651 8897</p>
                     </div>
                   </div>
 
@@ -221,7 +221,7 @@ export default function ContactUs() {
                 <div className="flex gap-4">
                   {/* WhatsApp Button */}
                   <a
-                    href="https://wa.me/251912273435"
+                    href="https://wa.me/251956518897"
                     target="_blank"
                     rel="noopener noreferrer"
                     className="group flex items-center gap-3 bg-linear-to-r from-green-500 to-green-600 text-white px-6 py-3 rounded-2xl shadow-md hover:shadow-lg transition-all duration-300 font-medium"

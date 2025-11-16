@@ -20,9 +20,15 @@ const uploadCloudinary = async (req, res, next) => {
       for (const file of req.files.other_images) {
         const fileBuffer = `data:${file.mimetype};base64,${file.buffer.toString("base64")}`;
         const result = await cloudinary.uploader.upload(fileBuffer, {
-          folder: "olis",
-          resource_type: "image",
-        });
+        folder: "olis",
+        resource_type: "image",
+        format: "webp",      // 🔥 force WebP output
+        transformation: [
+          { width: 1080, height: 1080, crop: "limit" },
+          { quality: "auto" }
+        ],
+      });
+
         otherImagesUrls.push(result.secure_url);
       }
       

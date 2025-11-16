@@ -22,7 +22,7 @@ export default function RelatedProducts({ products, onProductClick }) {
           >
             <div className="relative h-60 bg-secondary overflow-hidden">
               <img
-                src={product.image || "/placeholder.svg"}
+                src={`${product.image}?f=auto&q=auto`}
                 alt={product.name}
                 className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
               />

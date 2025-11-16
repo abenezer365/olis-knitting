@@ -118,7 +118,7 @@ function ProductList({
               <Link to={`/products/${product.id}`} className="block h-full">
                 <img
                   loading="lazy"
-                  src={mainImage}
+                  src={`${mainImage}?f=auto&q=auto`}
                   alt={product.name}
                   className="object-cover w-full h-full group-hover:scale-105 transition-transform duration-300"
                 />

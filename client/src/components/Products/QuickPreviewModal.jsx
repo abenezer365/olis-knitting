@@ -89,7 +89,7 @@ function QuickPreviewModal({
             onMouseMove={handleMouseMove}
           >
             <img
-              src={mainImage}
+              src={`${mainImage}?f=auto&q=auto`}
               alt={product.name}
               className={`object-contain w-full h-full transition-transform duration-200 ${
                 zoom ? "scale-150" : "scale-100"
@@ -199,7 +199,7 @@ function QuickPreviewModal({
             <div className="flex gap-2 pt-2">
               {/* WhatsApp Button */}
               <a
-                href="https://wa.me/2519112273435"
+                href="https://wa.me/251956518897"
                 target="_blank"
                 rel="noopener noreferrer"
                 className="group flex items-center gap-3 bg-linear-to-r from-green-500 to-green-600 text-white px-6 py-3 rounded-2xl shadow-md hover:shadow-lg transition-all duration-300 font-medium"

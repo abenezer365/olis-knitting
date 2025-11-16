@@ -7,7 +7,7 @@ export default function Loading() {
   const [textIndex, setTextIndex] = useState(0);
 
   const messages = [
-    "Weaving something beautiful...",
+    "Knitting something beautiful...",
     "Crafting your fashion story...",
     "Finishing the final stitch...",
     "Ready to drape your style..."

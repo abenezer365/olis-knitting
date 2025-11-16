@@ -132,6 +132,11 @@ function Orders() {
     }
   };
 
+  const handleRefresh = () => {
+  toast.info("Refreshing orders...");
+  fetchOrders();
+};
+
   const confirmDelete = async () => {
     try {  
       await axios.delete(`/order/delete/${selectedOrder.id}`, {
@@ -216,10 +221,20 @@ function Orders() {
       <div className="max-w-7xl mx-auto">
         
         {/* Header */}
-        <div className="mb-8">
-          <h1 className="text-3xl font-bold text-foreground mb-2">Order Management</h1>
-          <p className="text-muted-foreground">Manage and track all customer orders</p>
+        <div className="mb-8 flex items-center justify-between flex-wrap gap-3">
+          <div>
+            <h1 className="text-3xl font-bold text-foreground mb-2">Order Management</h1>
+            <p className="text-muted-foreground">Manage and track all customer orders</p>
+          </div>
+          <button
+            onClick={handleRefresh}
+            className="flex items-center gap-2 px-4 py-2 bg-accent text-accent-foreground rounded-lg hover:bg-accent/90 transition-colors"
+          >
+            <ArrowUpDown className="h-4 w-4" />
+            Refresh
+          </button>
         </div>
+
 
         {/* Filters Card */}
         <div className="bg-card rounded-xl border border-accent/20 p-6 mb-8 shadow-sm">

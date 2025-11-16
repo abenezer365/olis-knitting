@@ -84,36 +84,58 @@ function OrderConfirmation() {
     toast.success(`${field} copied to clipboard`);
   };
 
-  const generateOrderMessage = () => {
-    if (!orderData) return "";
+const generateOrderMessage = () => {
+  if (!orderData) return "";
 
-    const order = orderData;
-    const customer = orderData.client || {};
-    const items = orderData.products || [];
+  const order = orderData;
+  const customer = orderData.client || {};
 
-    const itemList = items
-      .map((item) => `• ${item.name} (Qty: ${item.quantity}) - $${item.price}`)
-      .join("\n");
+  let items = orderData.products || []; // This is correct
 
-    return `Hello! I would like to discuss payment for my order #${order.id}
+  // ✅ Parse if backend sends it as a JSON string
+  if (typeof items === "string") {
+    try {
+      items = JSON.parse(items);
+    } catch {
+      console.warn("Failed to parse products JSON");
+      items = [];
+    }
+  }
 
-        Order Details:
-        ${itemList}
+  // Debug: Check what items contains
+  console.log("Items array:", items);
+  console.log("Items length:", items.length);
+  console.log("Items content:", JSON.stringify(items, null, 2));
 
-        Total Amount: $${order.total_amount}
-        Customer: ${customer.fname} ${customer.lname}
-        Email: ${customer.email}
-        Phone: ${customer.phone}
+  const itemList = items.length > 0 
+    ? items
+        .map((item) => `• ${item.name} (Qty: ${item.quantity}) - $${parseFloat(item.price).toFixed(2)}`)
+        .join("\n")
+    : "No items found.";
 
-        Please let me know the available payment options and next steps.`;
-  };
+  return `
+Hello! I would like to discuss payment for my order #${order.id}
+
+Order Details:
+${itemList}
+
+Total Amount: $${parseFloat(order.total_amount).toFixed(2)}
+Customer: ${customer.fname} ${customer.lname}
+Email: ${customer.email}
+Phone: ${customer.phone}
+
+Please let me know the available payment options and next steps.
+  `.trim();
+};
+
+
 
   const handleSocialMediaRedirect = (platform) => {
     const message = encodeURIComponent(generateOrderMessage());
     const urls = {
-      whatsapp: `https://wa.me/+251972936889?text=${message}`,
-      telegram: `https://t.me/lil_kimber?text=${message}`,
-      instagram: `https://instagram.com/abenether_`,
+      whatsapp: `https://wa.me/+251956518897?text=${message}`,
+      telegram: `https://t.me/Olisknitting?text=${message}`,
+      instagram: `https://instagram.com/_olis_`,
     };
 
     window.open(urls[platform], "_blank");

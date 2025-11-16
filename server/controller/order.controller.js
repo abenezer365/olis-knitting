@@ -464,10 +464,178 @@ export const orderStatus = async (req, res) => {
       return res.status(400).json({ message: "Invalid order status" });
     }
 
+    // Get order details with customer information before updating
+    const [orderRows] = await connection.execute(
+      `SELECT o.*, c.first_name, c.last_name, c.email, c.phone 
+       FROM orders o 
+       JOIN customers c ON o.customer_id = c.id 
+       WHERE o.id = ?`,
+      [id]
+    );
+
+    if (orderRows.length === 0) {
+      return res.status(404).json({ message: "Order not found" });
+    }
+
+    const order = orderRows[0];
+    const customerName = `${order.first_name} ${order.last_name}`;
+
+    // Update the order status
     await connection.execute(
       `UPDATE orders SET order_status = ? WHERE id = ?`,
       [order_status, id]
     );
+
+    // Send email notification when order is completed
+    if (order_status === "completed") {
+      const transporter = nodemailer.createTransport({
+        service: "gmail",
+        auth: {
+          user: process.env.EMAIL,
+          pass: process.env.PASSWORD,
+        },
+      });
+
+      const now = new Date().getFullYear();
+      const completionDate = new Date().toLocaleDateString("en-US", {
+        weekday: "long",
+        year: "numeric",
+        month: "long",
+        day: "numeric",
+      });
+
+      const mailOptions = {
+        from: `"Oli's Knitwear" <${process.env.EMAIL}>`,
+        to: order.email,
+        subject: `🎊 Order Completed #${order.id} – Ready for You!`,
+        html: `<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Order Completed - Oli's Knitwear</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { background-color: #FAF8F3; font-family: 'Georgia', serif; color: #1a1a1a; line-height: 1.6; }
+    .container { max-width: 100%; background: linear-gradient(135deg, #FAF8F3 0%, #F5F1E8 100%); }
+    .header { background: linear-gradient(135deg, #A67C52 0%, #8B6E4B 100%); padding: 50px 20px; text-align: center; color: #FAF8F3; }
+    .header-content { max-width: 600px; margin: 0 auto; }
+    .brand { font-size: 42px; font-weight: bold; margin-bottom: 10px; letter-spacing: 1px; }
+    .tagline { font-size: 18px; opacity: 0.9; font-style: italic; }
+    .content { padding: 50px 20px; max-width: 600px; margin: 0 auto; }
+    .greeting { font-size: 20px; margin-bottom: 30px; color: #1a1a1a; }
+    .completion-card { background: #FFFFFF; padding: 40px; border-radius: 20px; margin: 30px 0; box-shadow: 0 8px 30px rgba(166, 124, 82, 0.15); text-align: center; }
+    .completion-icon { font-size: 64px; margin-bottom: 20px; }
+    .completion-title { font-size: 32px; font-weight: bold; color: #A67C52; margin-bottom: 15px; }
+    .order-info { background: #F5F1E8; padding: 25px; border-radius: 12px; margin: 25px 0; }
+    .info-row { display: flex; justify-content: space-between; padding: 12px 0; border-bottom: 1px solid #E8E3D8; }
+    .info-row:last-child { border-bottom: none; }
+    .info-label { font-weight: 600; color: #666666; }
+    .info-value { font-weight: 600; color: #1a1a1a; }
+    .total-amount { font-size: 24px; color: #A67C52; font-weight: bold; }
+    .next-steps { background: #E8F5E8; padding: 25px; border-radius: 12px; margin: 30px 0; }
+    .steps-title { font-size: 20px; font-weight: bold; color: #2E7D32; margin-bottom: 15px; }
+    .step { display: flex; align-items: center; margin: 15px 0; }
+    .step-number { background: #2E7D32; color: white; width: 30px; height: 30px; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin-right: 15px; font-weight: bold; }
+    .tracking-section { text-align: center; margin: 40px 0; }
+    .track-btn { display: inline-block; background: linear-gradient(135deg, #A67C52 0%, #8B6E4B 100%); color: white; padding: 16px 40px; text-decoration: none; border-radius: 30px; font-weight: 600; font-size: 16px; box-shadow: 0 4px 15px rgba(166, 124, 82, 0.3); transition: transform 0.2s; }
+    .track-btn:hover { transform: translateY(-2px); }
+    .story-section { background: #FFFFFF; padding: 30px; border-radius: 16px; margin: 30px 0; font-style: italic; text-align: center; }
+    .story-text { color: #666666; line-height: 1.8; }
+    .footer { background: linear-gradient(135deg, #1a1a1a 0%, #2a2a2a 100%); color: #FAF8F3; text-align: center; padding: 40px 20px; }
+    .footer-content { max-width: 600px; margin: 0 auto; }
+    .footer-links { margin: 20px 0; }
+    .footer-link { color: #D4C5B0; text-decoration: none; margin: 0 15px; }
+    .signature { margin-top: 30px; font-size: 16px; color: #D4C5B0; }
+    @media (max-width: 600px) {
+      .header { padding: 40px 20px; }
+      .brand { font-size: 32px; }
+      .content { padding: 30px 20px; }
+      .completion-card, .order-info { padding: 20px; }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <!-- Header -->
+    <div class="header">
+      <div class="header-content">
+        <div class="brand">Oli's Knitwear</div>
+        <div class="tagline">Your Handcrafted Order is Complete!</div>
+      </div>
+    </div>
+
+    <!-- Content -->
+    <div class="content">
+      <p class="greeting">Dear ${customerName},</p>
+      
+      <p>We're thrilled to let you know that your Oli's Knitwear order has been completed! Every stitch has been carefully crafted with love and attention to detail.</p>
+
+      <!-- Completion Card -->
+      <div class="completion-card">
+        <div class="completion-icon">✨</div>
+        <div class="completion-title">Order Completed</div>
+        <p>Your handcrafted pieces are now ready! We've put our heart into creating something special just for you.</p>
+      </div>
+
+      <!-- Order Information -->
+      <div class="order-info">
+        <div class="info-row">
+          <span class="info-label">Order Number: &nbsp;</span>
+          <span class="info-value">#${order.id}</span>
+        </div>
+        <div class="info-row">
+          <span class="info-label">Completion Date: &nbsp;</span>
+          <span class="info-value">${completionDate}</span>
+        </div>
+        <div class="info-row">
+          <span class="info-label">Customer: &nbsp;</span>
+          <span class="info-value">${customerName}</span>
+        </div>
+        <div class="info-row">
+          <span class="info-label">Order Total: &nbsp;</span>
+          <span class="info-value total-amount">$${parseFloat(order.total_amount).toFixed(2)}</span>
+        </div>
+        <div class="info-row">
+          <span class="info-label">Status: &nbsp;</span>
+          <span class="info-value" style="color: #A67C52; font-weight: bold;">Completed & Ready</span>
+        </div>
+      </div>
+
+    
+      <!-- Tracking Section -->
+      <div class="tracking-section">
+        <a style="color:white;" href="https://olisknitwear.com/order/${order.uuid}" class="track-btn" target="_blank">
+          Track Your Order
+        </a>
+        <p style="margin-top: 15px; color: #666666; font-size: 14px;">
+          Monitor shipping updates and delivery timeline
+        </p>
+      </div>
+
+    <!-- Footer -->
+    <div class="footer">
+      <div class="footer-content">
+        <div class="brand" style="color: #FAF8F3; font-size: 24px;">Oli's Knitwear</div>
+        <div class="footer-links">
+          <a style="color:white;" href="mailto:olis.knitting@gmail.com" class="footer-link">Contact Us</a>
+          <a style="color:white;" href="https://olisknitwear.com" class="footer-link" target="_blank">Visit Website</a>
+        </div>
+        <div class="signature">
+          <p>&copy; ${now} Oli's Knitwear. All rights reserved.</p>
+          <p style="font-size: 12px; margin-top: 10px; opacity: 0.8;">
+            Handmade in Ethiopia with Purpose & Pride
+          </p>
+        </div>
+      </div>
+    </div>
+  </div>
+</body>
+</html>`,
+      };
+
+      await transporter.sendMail(mailOptions);
+    }
 
     return res.status(200).json({
       message: "Order status updated successfully",

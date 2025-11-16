@@ -78,9 +78,9 @@ function ProductsDetail() {
     colors: parseJsonField(product.available_colors) || [],
     sizes: parseJsonField(product.available_sizes) || [],
     images: [
-      product.image,
-      ...(parseJsonField(product.other_images) || []),
-    ].filter(Boolean),
+        `${product.image}?f=auto&q=auto&w=800`,
+        ...(JSON.parse(product.other_images || "[]").map(img => `${img}?f=auto&q=auto&w=800`))
+      ]
   });
 
   // Helper function to parse JSON strings safely
@@ -313,7 +313,7 @@ function ProductsDetail() {
               {/* Contact Buttons */}
               <div className="flex gap-3 mt-8">
                 <a
-                  href="https://wa.me/251912273435"
+                  href="https://wa.me/251956518897"
                   target="_blank"
                   rel="noopener noreferrer"
                   className="group flex items-center gap-3 bg-linear-to-r from-green-500 to-green-600 text-white px-6 py-3 rounded-2xl shadow-md hover:shadow-lg transition-all duration-300 font-medium"
