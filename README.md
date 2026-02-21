@@ -7,18 +7,6 @@ Designed with both aesthetics and functionality in mind, the website combines a 
 
 ---
 
-## Purpose of the Website
-The main goal of the Olis Fashion Website is to enhance the brand’s digital reach and provide a professional online experience for both customers and internal staff. The website allows visitors to:  
-
-- Discover Olis’ products across multiple categories.  
-- Read about the brand’s story, mission, and values.  
-- Place orders easily using a simple, guided ordering system.  
-- Receive notifications and order tracking updates to stay informed about their purchases.  
-
-For the internal team, the website provides tools to efficiently manage products, track and verify orders, and access relevant data to support business decisions.  
-
----
-
 ## Key Features
 While the website is simple for users, it integrates several key features that make it professional and practical:  
 
