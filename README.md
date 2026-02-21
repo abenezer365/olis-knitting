@@ -31,17 +31,6 @@ While the website is simple for users, it integrates several key features that m
 
 ---
 
-## Value Proposition
-The Olis Fashion Website serves as more than just an online catalog. It provides:  
-
-- A professional digital presence for Olis, improving credibility and visibility.  
-- A seamless, reliable, and informative shopping experience for customers.  
-- Practical management tools for internal staff, enabling efficient order handling and data tracking.  
-- A platform that can be expanded in the future for additional features such as e-commerce payments, marketing tools, or content updates.  
-
-By combining style, functionality, and simplicity, the website strengthens the connection between Olis and its customers while enhancing internal operations and efficiency.
-
----
 
 ## Conclusion
 The Olis Fashion Website is a thoughtful, elegant, and functional platform that represents the brand online. It ensures that both customers and staff have a smooth, engaging, and professional experience, while reflecting Olis’ dedication to quality, craftsmanship, and storytelling in every aspect of its digital presence.
