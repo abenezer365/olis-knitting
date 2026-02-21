@@ -41,7 +41,7 @@ function Dashboard() {
         <Header className="w-[90%]" value={[showSidebar,setShowSidebar]}/>
         <div className="w-full mt-5">
         <Routes>
-          <Route path="/" element={<Analytics />} />
+          <Route path="/analytics" element={<Analytics />} />
           <Route path="/orders" element={<Orders />} />
           <Route path="/customers" element={<Customers />} />
           <Route path="/staff" element={<Staffs />} />
