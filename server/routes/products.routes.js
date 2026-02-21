@@ -6,7 +6,7 @@ import handleFileUpload from "../middlewares/upload.js";
 
 const router = express.Router();
 
-router.post("/addProduct",authenticate, authorize("admin"), handleFileUpload, addProduct);
+router.post("/addProduct", handleFileUpload, addProduct);
 router.get("/getProducts", getAllProducts);
 router.get("/get/:id", getSingleProduct);
 router.patch("/edit/:id", authenticate, authorize("admin"), editProduct)

@@ -1,6 +1,6 @@
 import { v4 as uuidv4 } from "uuid";
 import connection from "../config/database.config.js";
-import nodemailer from "nodemailer";
+import transporter from "../utils/mailer.util.js";
 
 // Place order controller
 export const placeOrder = async (req, res) => {
@@ -44,14 +44,6 @@ export const placeOrder = async (req, res) => {
 
     const customer = customerRows[0];
     const customerName = `${customer.first_name} ${customer.last_name}`;
-
-    const transporter = nodemailer.createTransport({
-      service: "gmail",
-      auth: {
-        user: process.env.EMAIL,
-        pass: process.env.PASSWORD,
-      },
-    });
 
     const now = new Date().getFullYear();
     const currentDate = new Date().toLocaleDateString("en-US", {
@@ -157,15 +149,14 @@ export const placeOrder = async (req, res) => {
         <div class="info-row">
           <span class="info-label total-amount">Order Total: &nbsp;</span>
           <span class="info-value total-amount">$${parseFloat(
-            total_amount
-          ).toFixed(2)}</span>
+        total_amount
+      ).toFixed(2)}</span>
         </div>
       </div>
 
       <!-- Tracking Section -->
       <div class="tracking-section">
-        <a style="color:white;" href="https://olisknitwear.com/order/${
-          newOrder.uuid
+        <a style="color:white;" href="${process.env.FRONTEND_URL}/order/${newOrder.uuid
         }" class="track-btn" target="_blank">
           Track Your Order
         </a>
@@ -191,7 +182,7 @@ export const placeOrder = async (req, res) => {
         <div class="brand" style="color: #FAF8F3; font-size: 24px;">Oli's Knitwear</div>
         <div class="footer-links">
           <a style="color:white;" href="mailto:olis.knitting@gmail.com" class="footer-link">Contact Us</a>
-          <a style="color:white;" href="https://olisknitwear.com" class="footer-link" target="_blank">Visit Website</a>
+          <a style="color:white;" href="${process.env.FRONTEND_URL}" class="footer-link" target="_blank">Visit Website</a>
         </div>
         <div class="signature">
           <p>&copy; ${now} Oli's Knitwear. All rights reserved.</p>
@@ -255,11 +246,26 @@ export const getAllOrders = async (req, res) => {
         JOIN products p ON oi.product_id = p.id`
     );
 
-    // Step 3: Group products under each order
-    const formattedOrders = orders.map((order) => {
-      const products = orderedItems
-        .filter((item) => item.order_id === order.id)
-        .map((item) => ({
+    // Step 3: Group products under each order using a Map for O(N) performance
+    const ordersMap = new Map();
+    orders.forEach(order => {
+      ordersMap.set(order.id, {
+        ...order,
+        client: {
+          id: order.customer_id,
+          fname: order.customer_fname,
+          lname: order.customer_lname,
+          email: order.customer_email,
+          phone: order.customer_phone,
+        },
+        products: []
+      });
+    });
+
+    orderedItems.forEach(item => {
+      if (ordersMap.has(item.order_id)) {
+        const order = ordersMap.get(item.order_id);
+        order.products.push({
           id: item.product_id,
           name: item.product_name,
           image: item.product_image,
@@ -272,22 +278,11 @@ export const getAllOrders = async (req, res) => {
             starting_price: order.shipping_start,
             maximum_price: order.shipping_max,
           },
-        }));
-
-      return {
-        ...order,
-        client: {
-          id: order.customer_id,
-          fname: order.customer_fname,
-          lname: order.customer_lname,
-          email: order.customer_email,
-          phone: order.customer_phone,
-        },
-        products,
-      };
+        });
+      }
     });
 
-    res.status(200).json(formattedOrders);
+    res.status(200).json(Array.from(ordersMap.values()));
   } catch (error) {
     console.error("Error fetching orders:", error);
     res.status(500).json({ message: "Failed to fetch orders" });
@@ -488,14 +483,6 @@ export const orderStatus = async (req, res) => {
 
     // Send email notification when order is completed
     if (order_status === "completed") {
-      const transporter = nodemailer.createTransport({
-        service: "gmail",
-        auth: {
-          user: process.env.EMAIL,
-          pass: process.env.PASSWORD,
-        },
-      });
-
       const now = new Date().getFullYear();
       const completionDate = new Date().toLocaleDateString("en-US", {
         weekday: "long",
@@ -605,7 +592,7 @@ export const orderStatus = async (req, res) => {
     
       <!-- Tracking Section -->
       <div class="tracking-section">
-        <a style="color:white;" href="https://olisknitwear.com/order/${order.uuid}" class="track-btn" target="_blank">
+        <a style="color:white;" href="${process.env.FRONTEND_URL}/order/${order.uuid}" class="track-btn" target="_blank">
           Track Your Order
         </a>
         <p style="margin-top: 15px; color: #666666; font-size: 14px;">
@@ -619,7 +606,7 @@ export const orderStatus = async (req, res) => {
         <div class="brand" style="color: #FAF8F3; font-size: 24px;">Oli's Knitwear</div>
         <div class="footer-links">
           <a style="color:white;" href="mailto:olis.knitting@gmail.com" class="footer-link">Contact Us</a>
-          <a style="color:white;" href="https://olisknitwear.com" class="footer-link" target="_blank">Visit Website</a>
+          <a style="color:white;" href="${process.env.FRONTEND_URL}" class="footer-link" target="_blank">Visit Website</a>
         </div>
         <div class="signature">
           <p>&copy; ${now} Oli's Knitwear. All rights reserved.</p>
@@ -688,14 +675,6 @@ export const deliveryStatus = async (req, res) => {
 
     // Send delivery confirmation email if status is 'delivered'
     if (delivery_status === "delivered") {
-      const transporter = nodemailer.createTransport({
-        service: "gmail",
-        auth: {
-          user: process.env.EMAIL,
-          pass: process.env.PASSWORD,
-        },
-      });
-
       const now = new Date().getFullYear();
       const deliveryDate = new Date().toLocaleDateString("en-US", {
         weekday: "long",
@@ -778,9 +757,8 @@ export const deliveryStatus = async (req, res) => {
       <div class="celebration-card">
         <div class="celebration-icon">🎁</div>
         <div class="celebration-title">Successfully Delivered!</div>
-        <p>Your order #${
-          order.id
-        } was delivered on ${deliveryDate}. We hope you love your new handcrafted pieces!</p>
+        <p>Your order #${order.id
+          } was delivered on ${deliveryDate}. We hope you love your new handcrafted pieces!</p>
       </div>
 
       <!-- Delivery Information -->
@@ -797,8 +775,8 @@ export const deliveryStatus = async (req, res) => {
           <div class="info-item">
             <div class="info-label">Order Total</div>
             <div class="info-value">$${parseFloat(order.total_amount).toFixed(
-              2
-            )}</div>
+            2
+          )}</div>
           </div>
           <div class="info-item">
             <div class="info-label">Status</div>
@@ -812,7 +790,7 @@ export const deliveryStatus = async (req, res) => {
         <p style="margin-bottom: 20px; color: #666666; font-size: 16px;">
           Love your new pieces? Share your experience and help other customers discover the beauty of handcrafted knitwear.
         </p>
-        <a style="color:white;" href="https://olisknitting.netlify.app/contact" class="review-btn" target="_blank">
+        <a style="color:white;" href="${process.env.FRONTEND_URL}/contact" class="review-btn" target="_blank">
           Share Your Experience
         </a>
       </div>
@@ -823,7 +801,7 @@ export const deliveryStatus = async (req, res) => {
       <div class="footer-content">
         <div class="brand" style="color: #FAF8F3; font-size: 24px;">Oli's Knitwear</div>
         <div class="footer-links">
-          <a style="color:white;" href="https://olisknitwear.com" class="footer-link" target="_blank">Shop Again</a>
+          <a style="color:white;" href="${process.env.FRONTEND_URL}" class="footer-link" target="_blank">Shop Again</a>
           <a style="color:white;" href="mailto:olis.knitting@gmail.com" class="footer-link">Support</a>
         </div>
         <div class="signature">
@@ -889,14 +867,6 @@ export const paymentStatus = async (req, res) => {
 
     // Send payment confirmation email if status is 'paid'
     if (payment_status === "paid") {
-      const transporter = nodemailer.createTransport({
-        service: "gmail",
-        auth: {
-          user: process.env.EMAIL,
-          pass: process.env.PASSWORD,
-        },
-      });
-
       const now = new Date().getFullYear();
       const currentDate = new Date().toLocaleDateString("en-US", {
         weekday: "long",
@@ -994,8 +964,8 @@ export const paymentStatus = async (req, res) => {
         <div class="info-row">
           <span class="info-label">Amount Paid: &nbsp;</span>
           <span class="info-value total-amount">$${parseFloat(
-            order.total_amount
-          ).toFixed(2)}</span>
+          order.total_amount
+        ).toFixed(2)}</span>
         </div>
         <div class="info-row">
           <span class="info-label">Payment Status: &nbsp;</span>
@@ -1006,9 +976,8 @@ export const paymentStatus = async (req, res) => {
 
       <!-- Tracking Section -->
       <div class="tracking-section">
-        <a style="color:white;" href="https://olisknitwear.com/order/${
-          order.uuid
-        }" class="track-btn" target="_blank">
+        <a style="color:white;" href="${process.env.FRONTEND_URL}/order/${order.uuid
+          }" class="track-btn" target="_blank">
           Track Your Order
         </a>
         <p style="margin-top: 15px; color: #666666; font-size: 14px;">
@@ -1025,7 +994,7 @@ export const paymentStatus = async (req, res) => {
         <div class="brand" style="color: #FAF8F3; font-size: 24px;">Oli's Knitwear</div>
         <div class="footer-links">
           <a style="color:white;" href="mailto:olis.knitting@gmail.com" class="footer-link">Customer Support</a>
-          <a style="color:white;" href="https://olisknitwear.com/" class="footer-link" target="_blank">Visit Website</a>
+          <a style="color:white;" href="${process.env.FRONTEND_URL}/" class="footer-link" target="_blank">Visit Website</a>
         </div>
         <div class="signature">
           <p>&copy; ${now} Oli's Knitwear. All rights reserved.</p>

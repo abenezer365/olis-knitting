@@ -1,6 +1,6 @@
 import { v4 as uuidv4 } from "uuid";
 import connection from "../config/database.config.js"
-import nodemailer from "nodemailer"
+import transporter from "../utils/mailer.util.js"
 
 // Write message controller
 export const writeMessage = async (req, res) => {
@@ -63,20 +63,12 @@ export const replyMessage = async (req, res) => {
     }
 
     // Send beautiful email notification to the user
-    const transporter = nodemailer.createTransport({
-      service: "gmail",
-      auth: {
-        user: process.env.EMAIL,
-        pass: process.env.PASSWORD,
-      },
-    });
-
     const now = new Date().getFullYear();
-    const replyDate = new Date().toLocaleDateString('en-US', { 
-      weekday: 'long', 
-      year: 'numeric', 
-      month: 'long', 
-      day: 'numeric' 
+    const replyDate = new Date().toLocaleDateString('en-US', {
+      weekday: 'long',
+      year: 'numeric',
+      month: 'long',
+      day: 'numeric'
     });
 
     const mailOptions = {
@@ -155,12 +147,12 @@ export const replyMessage = async (req, res) => {
             "${message.message}"
           </div>
           <div style="font-size: 14px; color: #666666; text-align: right;">
-            Sent on: ${new Date(message.created_at).toLocaleDateString('en-US', { 
-              weekday: 'long', 
-              year: 'numeric', 
-              month: 'long', 
-              day: 'numeric' 
-            })}
+            Sent on: ${new Date(message.created_at).toLocaleDateString('en-US', {
+        weekday: 'long',
+        year: 'numeric',
+        month: 'long',
+        day: 'numeric'
+      })}
           </div>
         </div>
 
@@ -218,8 +210,8 @@ export const replyMessage = async (req, res) => {
         <div class="brand" style="color: #FAF8F3; font-size: 24px;">Oli's Knitwear</div>
         <div class="footer-links">
           <a href="mailto:support@olisknitwear.com" class="footer-link">Quick Support</a>
-          <a href="https://olisknitting.netlify.app/faq" class="footer-link" target="_blank">FAQ</a>
-          <a href="https://olisknitting.netlify.app" class="footer-link" target="_blank">Our Collection</a>
+          <a href="${process.env.FRONTEND_URL}/faq" class="footer-link" target="_blank">FAQ</a>
+          <a href="${process.env.FRONTEND_URL}" class="footer-link" target="_blank">Our Collection</a>
         </div>
         <div class="signature">
           <p>&copy; ${now} Oli's Knitwear. All rights reserved.</p>

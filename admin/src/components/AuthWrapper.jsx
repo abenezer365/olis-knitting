@@ -8,7 +8,7 @@ function AuthWrapper({ children }) {
 
   useEffect(() => {
     if (!loading && !user) {
-      navigate('/unauthorized');
+      navigate('/login');
     }
   }, [user, loading, navigate]);
 

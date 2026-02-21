@@ -18,21 +18,21 @@ function Sidebar() {
   const location = useLocation();
   const { user } = useGlobalContext();
   const role = user.role;
-  
+
   const isActive = (path) =>
     location.pathname === path
       ? "bg-muted text-primary"
       : "";
-      
+
   const initials = `${user.first_name?.[0] || ""}${user.last_name?.[0] || ""}`.toUpperCase();
 
   return (
     <div className="w-3/5 text-xs md:text-[15px] h-full fixed top-0 left-0 z-10000 overflow-y-auto bg-[#253036] text-white pb-5 md:w-1/5">
       <div className="flex flex-col items-center bg-[#1C2428] text-beige py-2.5">
         {role == "admin" ? (
-          <img 
-            src={profilepic} 
-            alt="Admin Logo" 
+          <img
+            src={profilepic}
+            alt="Admin Logo"
             className="w-22 h-22 rounded-full border-muted-200 border-2"
           />
         ) : (
@@ -46,15 +46,15 @@ function Sidebar() {
           {role === "admin"
             ? "ADMIN"
             : role === "manager"
-            ? "MANAGER"
-            : role === "employee"
-            ? "EMPLOYEE"
-            : "MR. X"}
+              ? "MANAGER"
+              : role === "employee"
+                ? "EMPLOYEE"
+                : "MR. X"}
         </p>
       </div>
-      
+
       <div className="flex flex-col">
-        <Link to="/dashboard/">
+        <Link to="/">
           <div
             className={`flex gap-2.5 items-center py-2.5 px-5 pl-7 cursor-pointer transition-colors duration-200 ${isActive("/dashboard/")}`}
           >
@@ -63,7 +63,7 @@ function Sidebar() {
           </div>
         </Link>
 
-        <Link to="/dashboard/orders">
+        <Link to="/orders">
           <div
             className={`flex gap-2.5 items-center py-2.5 px-5 pl-7 cursor-pointer transition-colors duration-200 ${isActive("/dashboard/orders")}`}
           >
@@ -72,7 +72,7 @@ function Sidebar() {
           </div>
         </Link>
 
-        <Link to="/dashboard/customers">
+        <Link to="/customers">
           <div
             className={`flex gap-2.5 items-center py-2.5 px-5 pl-7 cursor-pointer transition-colors duration-200 ${isActive("/dashboard/customers")}`}
           >
@@ -81,7 +81,7 @@ function Sidebar() {
           </div>
         </Link>
 
-        <Link to="/dashboard/products">
+        <Link to="/products">
           <div
             className={`flex gap-2.5 items-center py-2.5 px-5 pl-7 cursor-pointer transition-colors duration-200 ${isActive("/dashboard/products")}`}
           >
@@ -89,8 +89,8 @@ function Sidebar() {
             <p>Products</p>
           </div>
         </Link>
-        
-        <Link to="/dashboard/category">
+
+        <Link to="/category">
           <div
             className={`flex gap-2.5 items-center py-2.5 px-5 pl-7 cursor-pointer transition-colors duration-200 ${isActive("/dashboard/category")}`}
           >
@@ -99,8 +99,8 @@ function Sidebar() {
           </div>
         </Link>
         {
-          role == "admin" && 
-          <Link to="/dashboard/revenue">
+          role == "admin" &&
+          <Link to="/revenue">
             <div
               className={`flex gap-2.5 items-center py-2.5 px-5 pl-7 cursor-pointer transition-colors duration-200 ${isActive("/dashboard/revenue")}`}
             >
@@ -110,7 +110,7 @@ function Sidebar() {
           </Link>
         }
 
-        <Link to="/dashboard/messages">
+        <Link to="/messages">
           <div
             className={`flex gap-2.5 items-center py-2.5 px-5 pl-7 cursor-pointer transition-colors duration-200 ${isActive("/dashboard/messages")}`}
           >
@@ -119,7 +119,7 @@ function Sidebar() {
           </div>
         </Link>
 
-        <Link to="/dashboard/currency">
+        <Link to="/currency">
           <div
             className={`flex gap-2.5 items-center py-2.5 px-5 pl-7 cursor-pointer transition-colors duration-200 ${isActive("/dashboard/currency")}`}
           >
@@ -127,8 +127,8 @@ function Sidebar() {
             <p>Currency Rate</p>
           </div>
         </Link>
-        
-        <Link to="/dashboard/shipping">
+
+        <Link to="/shipping">
           <div
             className={`flex gap-2.5 items-center py-2.5 px-5 pl-7 cursor-pointer transition-colors duration-200 ${isActive("/dashboard/shipping")}`}
           >
@@ -137,18 +137,18 @@ function Sidebar() {
           </div>
         </Link>
         {
-          role == "admin" && 
-            <Link to="/dashboard/staff">
-              <div
-                className={`flex gap-2.5 items-center py-2.5 px-5 pl-7 cursor-pointer transition-colors duration-200 ${isActive("/dashboard/staff")}`}
-              >
-                <FaUsers />
-                <p>Staff</p>
-              </div>
-            </Link>
+          role == "admin" &&
+          <Link to="/staff">
+            <div
+              className={`flex gap-2.5 items-center py-2.5 px-5 pl-7 cursor-pointer transition-colors duration-200 ${isActive("/dashboard/staff")}`}
+            >
+              <FaUsers />
+              <p>Staff</p>
+            </div>
+          </Link>
         }
-        
-        <Link to="/dashboard/setting">
+
+        <Link to="/setting">
           <div
             className={`flex gap-2.5 items-center py-2.5 px-5 pl-7 cursor-pointer transition-colors duration-200 ${isActive("/dashboard/setting")}`}
           >

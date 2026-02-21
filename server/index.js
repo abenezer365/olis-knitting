@@ -24,7 +24,16 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 // Configuration
 dotenv.config();
-const PORT = process.env.PORT;
+
+// ✅ Environment Variable Validation
+const requiredEnv = ["DB_HOST", "DB_USER", "DB_PASSWORD", "DB_NAME", "JWT_SECRET", "EMAIL", "PASSWORD", "FRONTEND_URL", "UPLOAD_BASE_PATH"];
+const missingEnv = requiredEnv.filter(env => !process.env[env]);
+if (missingEnv.length > 0) {
+  console.error(`❌ Missing critical environment variables: ${missingEnv.join(", ")}`);
+  process.exit(1);
+}
+
+const PORT = process.env.PORT || 5000;
 
 // Express app
 const app = express();
@@ -55,7 +64,17 @@ app.use("/api/auth", authRouter);
 app.get("/", (req, res) => {
   res.status(200).json({
     status: "Success",
-    message: "Surver is up ✅",
+    message: "Server is up ✅",
+  });
+});
+
+// ✅ Global Error Handler
+app.use((err, req, res, next) => {
+  console.error("🔥 Global Error Handler:", err);
+  res.status(err.status || 500).json({
+    status: "Error",
+    message: err.message || "Internal Server Error",
+    ...(process.env.NODE_ENV === "development" && { stack: err.stack }),
   });
 });
 
@@ -87,7 +106,7 @@ if (process.env.START_APP === "true") {
     }
     //Start Listening
     const server = app.listen(PORT, () => {
-      console.log(`🟢 Listening on https://backend.olisknitwear.com/${PORT}`);
+      console.log(`🟢 Listening on ${process.env.FRONTEND_URL}:${PORT}`);
     });
 
     // Handle server startup errors

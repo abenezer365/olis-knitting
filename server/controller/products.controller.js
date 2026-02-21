@@ -9,7 +9,7 @@ export async function addProduct(req, res) {
   const { name, description, price, rating, category_id, available_sizes, available_colors } = req.body;
   const imageUrl = req.body.image_url;
   const otherImagesUrls = req.body.other_images_urls || [];
-  
+
   if (!name || !price || !category_id || !imageUrl || !available_sizes || !available_colors) {
     return res.status(400).json({
       success: false,
@@ -20,24 +20,40 @@ export async function addProduct(req, res) {
   try {
     const productUuid = uuidv4();
 
-    // Convert comma-separated strings to arrays and then to JSON
-    const colorsArray = available_colors.split(',').map(color => color.trim());
-    const sizesArray = available_sizes.split(',').map(size => size.trim());
+    // Helper to parse comma-separated or JSON strings
+    const parseField = (field) => {
+      if (!field) return [];
+      try {
+        // If it's already an array (shouldn't happen with FormData but good for safety)
+        if (Array.isArray(field)) return field;
+        // Try parsing as JSON (e.g. '["XL", "L"]')
+        const parsed = JSON.parse(field);
+        return Array.isArray(parsed) ? parsed : [parsed];
+      } catch (e) {
+        // Fallback to comma-separated string (e.g. 'XL, L')
+        return typeof field === 'string'
+          ? field.split(',').map(item => item.trim()).filter(item => item !== '')
+          : [];
+      }
+    };
+
+    const colorsArray = parseField(available_colors);
+    const sizesArray = parseField(available_sizes);
 
     // Insert product with other_images as JSON
     await connection.execute(
       `INSERT INTO products (uuid, category_id, name, description, price, rating, image, other_images, available_colors, available_sizes)
        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
       [
-        productUuid, 
-        category_id, 
-        name, 
-        description || null, 
-        price, 
-        rating, 
-        imageUrl, 
-        JSON.stringify(otherImagesUrls), 
-        JSON.stringify(colorsArray), 
+        productUuid,
+        category_id,
+        name,
+        description || null,
+        price,
+        rating,
+        imageUrl,
+        JSON.stringify(otherImagesUrls),
+        JSON.stringify(colorsArray),
         JSON.stringify(sizesArray)
       ]
     );
@@ -83,12 +99,12 @@ export async function editProduct(req, res) {
        SET name = ?, description = ?, price = ?, category_id = ?, updated_at = NOW(), available_sizes = ?, available_colors = ? 
        WHERE id = ?`,
       [
-        name || existing[0].name, 
-        description || existing[0].description, 
-        price || existing[0].price, 
-        category_id || existing[0].category_id, 
-        JSON.stringify(sizesArray), 
-        JSON.stringify(colorsArray), 
+        name || existing[0].name,
+        description || existing[0].description,
+        price || existing[0].price,
+        category_id || existing[0].category_id,
+        JSON.stringify(sizesArray),
+        JSON.stringify(colorsArray),
         id
       ]
     );
@@ -115,7 +131,7 @@ export async function getAllProducts(req, res) {
        LEFT JOIN categories c ON p.category_id = c.id
        ORDER BY p.created_at DESC`
     );
-    
+
     return res.status(200).json({
       success: true,
       message: "Products fetched successfully ✅",
@@ -183,7 +199,7 @@ export async function deleteProduct(req, res) {
     }
 
     const product = existing[0];
-    
+
     // 2. Extract folder name from image URL and delete folder
     await deleteProductFolder(product);
 
@@ -208,7 +224,7 @@ async function deleteProductFolder(product) {
   try {
     // Method 1: Extract from image URL (most reliable)
     let folderName = null;
-    
+
     if (product.image) {
       // Extract folder name from image URL: "/upload/products/winter-wool-sweater/main.jpg"
       const urlParts = product.image.split('/');
@@ -216,15 +232,15 @@ async function deleteProductFolder(product) {
         folderName = urlParts[3]; // "winter-wool-sweater"
       }
     }
-    
+
     // Method 2: If URL extraction fails, create slug from product name
     if (!folderName && product.name) {
       folderName = createSlug(product.name);
     }
-    
+
     if (folderName) {
       const productFolder = path.join(process.cwd(), "upload", "products", folderName);
-      
+
       // Check if folder exists and delete it
       if (fs.existsSync(productFolder)) {
         fs.rmSync(productFolder, { recursive: true, force: true });
