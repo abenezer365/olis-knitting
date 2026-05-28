@@ -11,9 +11,9 @@ function Router() {
     <>
       <Routes>
         <Route path="/" element={<Login />} />
-        <Route path="/*" element={<AuthWrapper><Dashboard /></AuthWrapper>} />
         <Route path="/unauthorized" element={<Unauthorized />} />
-        <Route path="/*" element={<Unavailable />} />
+        <Route path="/dashboard/*" element={<AuthWrapper><Dashboard /></AuthWrapper>} />
+        <Route path="*" element={<Unavailable />} />
       </Routes>
     </>
   );

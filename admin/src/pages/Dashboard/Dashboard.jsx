@@ -41,18 +41,19 @@ function Dashboard() {
         <Header className="w-[90%]" value={[showSidebar,setShowSidebar]}/>
         <div className="w-full mt-5">
         <Routes>
-          <Route path="/analytics" element={<Analytics />} />
-          <Route path="/orders" element={<Orders />} />
-          <Route path="/customers" element={<Customers />} />
-          <Route path="/staff" element={<Staffs />} />
-          <Route path="/products" element={<Products />} />
-          <Route path="/category" element={<Category />} />
-          <Route path="/messages" element={<Messages />} />
-          <Route path="/revenue" element={<Revenue />} />
-          <Route path="/currency" element={<Currency />} />
-          <Route path="/setting" element={<Setting />} />
-          <Route path="/shipping" element={<Shipping />} />
-          <Route path="/*" element={<Unavailable />} />
+          <Route index element={<Analytics />} />
+          <Route path="analytics" element={<Analytics />} />
+          <Route path="orders" element={<Orders />} />
+          <Route path="customers" element={<Customers />} />
+          <Route path="staff" element={<Staffs />} />
+          <Route path="products" element={<Products />} />
+          <Route path="category" element={<Category />} />
+          <Route path="messages" element={<Messages />} />
+          <Route path="revenue" element={<Revenue />} />
+          <Route path="currency" element={<Currency />} />
+          <Route path="setting" element={<Setting />} />
+          <Route path="shipping" element={<Shipping />} />
+          <Route path="*" element={<Unavailable />} />
         </Routes>
         </div>
       </div>
