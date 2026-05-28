@@ -38,3 +38,44 @@ The Olis Fashion Website is a thoughtful, elegant, and functional platform that 
 
 **Project Status:**  
 Currently in development, with a demo version available for review and a full version planned for final deployment.
+
+---
+
+## Backend — Local development with Docker
+
+The API and a MySQL database run together via Docker Compose, so the whole team gets an identical environment.
+
+```bash
+# 1. Configure environment (fill in secrets: JWT_SECRET, EMAIL, Cloudinary keys)
+cp server/.env.example server/.env
+
+# 2. Build & start MySQL + the API
+docker compose up --build
+
+# 3. Load demo data (dev only — refuses to run in production)
+docker compose exec api npm run seed
+```
+
+- API: http://localhost:5000 — health check at `/health`
+- Default seeded admin: `admin@olisknitwear.com` / `Admin@12345` (override via `SEED_ADMIN_*`)
+- Tables are created automatically on first DB boot from `server/schema/table.sql`.
+
+### Running the API without Docker
+
+```bash
+cd server
+cp .env.example .env   # point DB_HOST at your MySQL
+npm install
+npm run seed           # optional demo data
+npm run dev            # nodemon, or `npm start`
+```
+
+### Production notes
+
+- Set `NODE_ENV=production` and a strong `JWT_SECRET`; the app fails fast if required env vars are missing.
+- Point `DB_*` at a managed MySQL instance (don't use the bundled dev DB container).
+- Set `CORS_ORIGINS` to your real admin/client domains.
+- Product images are stored in **Cloudinary** — configure `CLOUDINARY_*`.
+
+> Frontend (`admin/`, `client/`) still hardcode the API base URL in `src/utils/axios.instance.js`.
+> Switching those to an environment variable is the next planned pass.

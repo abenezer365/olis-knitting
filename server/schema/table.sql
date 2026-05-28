@@ -1,4 +1,4 @@
-CREATE TABLE categories (
+CREATE TABLE IF NOT EXISTS categories (
   id INT AUTO_INCREMENT PRIMARY KEY,
   uuid CHAR(36) NOT NULL UNIQUE,
   name VARCHAR(100) NOT NULL UNIQUE,
@@ -7,7 +7,7 @@ CREATE TABLE categories (
   INDEX (name)
 );
 
-CREATE TABLE products (
+CREATE TABLE IF NOT EXISTS products (
   id INT AUTO_INCREMENT PRIMARY KEY,
   uuid CHAR(36) NOT NULL UNIQUE,
   category_id INT NOT NULL,
@@ -29,7 +29,7 @@ CREATE TABLE products (
   FOREIGN KEY (category_id) REFERENCES categories(id) ON DELETE CASCADE
 );
 
-CREATE TABLE customers (
+CREATE TABLE IF NOT EXISTS customers (
   id INT AUTO_INCREMENT PRIMARY KEY,
   uuid CHAR(36) NOT NULL UNIQUE,
   first_name VARCHAR(100) NOT NULL,
@@ -43,7 +43,7 @@ CREATE TABLE customers (
   INDEX (status)
 );
 
-CREATE TABLE shipping_fee (
+CREATE TABLE IF NOT EXISTS shipping_fee (
   id INT AUTO_INCREMENT PRIMARY KEY,
   uuid CHAR(36) NOT NULL UNIQUE,
   country_name VARCHAR(100) NOT NULL,
@@ -57,7 +57,7 @@ CREATE TABLE shipping_fee (
 );
 
 
-CREATE TABLE orders (
+CREATE TABLE IF NOT EXISTS orders (
   id INT AUTO_INCREMENT PRIMARY KEY,
   uuid CHAR(36) NOT NULL UNIQUE,
   
@@ -84,7 +84,7 @@ CREATE TABLE orders (
   FOREIGN KEY (customer_id) REFERENCES customers(id) ON DELETE CASCADE,
   FOREIGN KEY (shipping_fee_id) REFERENCES shipping_fee(id) ON DELETE SET NULL);
 
-CREATE TABLE ordered_items (
+CREATE TABLE IF NOT EXISTS ordered_items (
   id INT AUTO_INCREMENT PRIMARY KEY,
   order_id INT NOT NULL,
   product_id INT NOT NULL,
@@ -100,7 +100,7 @@ CREATE TABLE ordered_items (
 );
 
 
-CREATE TABLE shipping_addresses (
+CREATE TABLE IF NOT EXISTS shipping_addresses (
   id INT AUTO_INCREMENT PRIMARY KEY,
   uuid CHAR(36) NOT NULL UNIQUE,
   
@@ -126,7 +126,7 @@ CREATE TABLE shipping_addresses (
   FOREIGN KEY (customer_id) REFERENCES customers(id) ON DELETE CASCADE
 );
 
-CREATE TABLE messages (
+CREATE TABLE IF NOT EXISTS messages (
   id INT AUTO_INCREMENT PRIMARY KEY,
   uuid CHAR(36) NOT NULL UNIQUE,
   
@@ -144,7 +144,7 @@ CREATE TABLE messages (
   INDEX (created_at)
 );
 
-CREATE TABLE users (
+CREATE TABLE IF NOT EXISTS users (
   id INT AUTO_INCREMENT PRIMARY KEY,
   uuid CHAR(36) NOT NULL UNIQUE,
   
@@ -165,7 +165,7 @@ CREATE TABLE users (
   INDEX (status)
 );
 
-CREATE TABLE currency_rates (
+CREATE TABLE IF NOT EXISTS currency_rates (
   id INT AUTO_INCREMENT PRIMARY KEY,
   uuid CHAR(36) NOT NULL UNIQUE,
   current_rate DECIMAL(10,4) NOT NULL,
@@ -178,7 +178,7 @@ CREATE TABLE currency_rates (
   INDEX(current_rate)
 );
 
-CREATE TABLE revenue (
+CREATE TABLE IF NOT EXISTS revenue (
   id INT AUTO_INCREMENT PRIMARY KEY,
   uuid CHAR(36) NOT NULL UNIQUE,
   
@@ -198,7 +198,7 @@ CREATE TABLE revenue (
 );
 
 
-CREATE TABLE analytics (
+CREATE TABLE IF NOT EXISTS analytics (
   id INT AUTO_INCREMENT PRIMARY KEY,
   uuid CHAR(36) NOT NULL UNIQUE,
 
