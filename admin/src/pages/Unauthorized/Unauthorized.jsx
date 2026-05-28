@@ -1,111 +1,106 @@
-import { Link } from "react-router-dom";
-import { Shield, Lock, ArrowRight, Home } from "lucide-react";
+import { Link, useNavigate } from "react-router-dom";
+import { Lock, ArrowLeft, Home, ShieldAlert } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
+import { motion } from "framer-motion";
 
 function Unauthorized() {
-  const [displayText, setDisplayText] = useState("");
-  const fullText = "Access Denied";
-  const [isVisible, setIsVisible] = useState(false);
-  
-  useEffect(() => {
-    window.scrollTo({
-      top: 0,
-      left: 0,
-      behavior: 'smooth'
-    });
-  });
+  const navigate = useNavigate();
 
   useEffect(() => {
-    setIsVisible(true);
-    
-    let i = 0;
-    const typingEffect = setInterval(() => {
-      if (i < fullText.length) {
-        setDisplayText(fullText.slice(0, i + 1));
-        i++;
-      } else {
-        clearInterval(typingEffect);
-      }
-    }, 80);
-
-    return () => clearInterval(typingEffect);
+    window.scrollTo({ top: 0, left: 0, behavior: "smooth" });
   }, []);
 
   return (
-    <div className="bg-background flex items-center justify-center p-4">
-      <div className={`text-center max-w-md transition-all duration-700 ${
-        isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'
-      }`}>
-        {/* Animated Lock Icon */}
-        <div className="relative mb-8">
-          <div className="w-32 h-32 bg-destructive/20 rounded-full flex items-center justify-center mx-auto mb-4 animate-pulse">
-            <Lock className="h-16 w-16 text-destructive" />
+    <div className="min-h-screen bg-background flex items-center justify-center p-6 relative overflow-hidden">
+      {/* Premium Background Elements */}
+      <div className="absolute inset-0 -z-10 bg-[radial-gradient(circle_at_50%_50%,rgba(239,68,68,0.05),transparent_70%)]" />
+      <div className="absolute top-[-20%] right-[-10%] w-[60%] h-[60%] bg-destructive/5 rounded-full blur-[150px] animate-pulse" />
+      <div className="absolute bottom-[-20%] left-[-10%] w-[60%] h-[60%] bg-destructive/5 rounded-full blur-[150px] animate-pulse" style={{ animationDelay: '3s' }} />
+
+      <motion.div
+        initial={{ opacity: 0, scale: 0.95 }}
+        animate={{ opacity: 1, scale: 1 }}
+        transition={{ duration: 1, ease: "easeOut" }}
+        className="text-center max-w-2xl relative"
+      >
+        {/* Animated Icon Container */}
+        <div className="relative mb-12 inline-block">
+          <motion.div
+            animate={{ 
+              scale: [1, 1.05, 1],
+              rotate: [0, 2, -2, 0]
+            }}
+            transition={{ 
+              duration: 5,
+              repeat: Infinity,
+              ease: "easeInOut"
+            }}
+            className="w-40 h-40 bg-card border border-destructive/20 rounded-full flex items-center justify-center mx-auto shadow-2xl backdrop-blur-sm"
+          >
+            <ShieldAlert className="h-20 w-20 text-destructive stroke-[1.5px]" />
+          </motion.div>
+          
+          <motion.div 
+            animate={{ scale: [1, 1.3, 1], opacity: [0.2, 0.4, 0.2] }}
+            transition={{ duration: 4, repeat: Infinity }}
+            className="absolute -inset-6 border-2 border-destructive/10 rounded-full -z-10"
+          />
+        </div>
+
+        {/* Text Content */}
+        <motion.div
+           initial={{ opacity: 0, y: 30 }}
+           animate={{ opacity: 1, y: 0 }}
+           transition={{ delay: 0.3, duration: 0.8 }}
+        >
+          <div className="flex items-center justify-center gap-2 mb-4">
+             <span className="h-px w-8 bg-destructive/30" />
+             <span className="text-xs font-bold tracking-widest text-destructive uppercase">Access Restricted</span>
+             <span className="h-px w-8 bg-destructive/30" />
           </div>
-          <div className="absolute -inset-4 border-4 border-destructive/20 rounded-full animate-ping"></div>
-        </div>
-
-        {/* Typing Text Effect */}
-        <h1 className="text-5xl font-bold mb-4 font-mono bg-linear-to-r from-destructive to-accent bg-clip-text text-transparent">
-          {displayText}
-          <span className="animate-pulse">|</span>
-        </h1>
-
-        <div className="flex items-center justify-center gap-3 mb-4">
-          <Shield className="h-6 w-6 text-muted-foreground" />
-          <p className="text-lg text-muted-foreground">
-            You are unauthorized
+          
+          <h1 className="text-6xl font-black mb-6 tracking-tight text-foreground">
+            Entry Denied
+          </h1>
+          
+          <p className="text-lg text-muted-foreground mb-12 leading-relaxed max-w-md mx-auto">
+            Your current credentials do not grant access to this sanctuary. 
+            Please return to the main hall or contact your supervisor.
           </p>
-          <Shield className="h-6 w-6 text-muted-foreground" />
-        </div>
-        
-        <p className="text-muted-foreground mb-8 leading-relaxed">
-          This area requires special permissions. 
-          It seems you've stumbled upon a restricted section. 
-          Don't worry, even the best explorers get lost sometimes!
-        </p>
-
-        {/* Animated Security Dots */}
-        <div className="flex justify-center gap-1 mb-8">
-          {[0, 1, 2, 3, 4].map((i) => (
-            <div
-              key={i}
-              className="w-1 h-1 bg-destructive rounded-full animate-bounce"
-              style={{ 
-                animationDelay: `${i * 0.1}s`,
-                animationDuration: '0.6s'
-              }}
-            />
-          ))}
-        </div>
+        </motion.div>
 
         {/* Action Buttons */}
-        <div className="flex gap-4 justify-center flex-col sm:flex-row">
-          <Button asChild variant="outline" className="gap-2">
+        <motion.div 
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.6, duration: 0.8 }}
+          className="flex flex-col sm:flex-row gap-4 justify-center items-center"
+        >
+          <Button onClick={() => navigate(-1)} variant="outline" className="h-14 px-8 rounded-full border-border hover:bg-secondary gap-3 transition-all duration-300">
+            <ArrowLeft className="h-4 w-4" />
+            <span>Go Back</span>
+          </Button>
+          
+          <Button asChild className="h-14 px-8 rounded-full bg-primary hover:bg-primary/90 shadow-xl shadow-primary/20 gap-3 transition-all duration-300">
             <Link to="/">
               <Home className="h-4 w-4" />
-              Back to Safety
+              <span>Login Page</span>
             </Link>
           </Button>
-          <Button asChild className="gap-2 bg-accent hover:bg-accent/80">
-            <Link to="/">
-              <ArrowRight className="h-4 w-4" />
-              Get Access
-            </Link>
-          </Button>
-        </div>
+        </motion.div>
 
-        {/* Fun Message */}
-        <p className="text-xs text-muted-foreground mt-8 italic">
-          🔒 This area is protected by digital dragons
-        </p>
-
-        {/* Background Security Elements */}
-        <div className="absolute inset-0 -z-10 overflow-hidden">
-          <div className="absolute -top-40 -right-32 w-80 h-80 bg-destructive/10 rounded-full blur-3xl animate-pulse"></div>
-          <div className="absolute -bottom-40 -left-32 w-80 h-80 bg-accent/10 rounded-full blur-3xl animate-pulse" style={{ animationDelay: '1.5s' }}></div>
-        </div>
-      </div>
+        {/* Security Footer */}
+        <motion.p 
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 0.6 }}
+          transition={{ delay: 1, duration: 1 }}
+          className="text-xs text-muted-foreground mt-12 font-medium tracking-wide flex items-center justify-center gap-2"
+        >
+          <Lock className="w-3 h-3" />
+          SECURE SYSTEM PROTOCOL ACTIVE
+        </motion.p>
+      </motion.div>
     </div>
   );
 }
