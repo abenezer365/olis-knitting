@@ -101,65 +101,40 @@ function PlaceOrder() {
       setIsPlacingOrder(true);
       toast.loading("Placing order...");
 
-      // ✅ Step 1: Create customer and capture ID
       const [first_name, ...rest] = customerInfo.fullName.split(" ");
       const last_name = rest.join(" ") || "Unknown";
 
-      const customerRes = await axios.post("/customer/addCustomer", {
-        first_name,
-        last_name,
-        email: customerInfo.email,
-        phone: customerInfo.phone,
-      });
-
-      // Dynamic ID extraction
-      const customer_id = customerRes.data.id;
-
-      if (!customer_id) {
-        throw new Error("Failed to get customer ID");
-      }
-
-      // ✅ Step 2: Create order and capture order ID
+      // Single atomic request: the server creates the customer, order, items and
+      // shipping address in one transaction and prices the items server-side.
       const orderRes = await axios.post("/order/placeOrder", {
-        customer_id,
-        total_amount: totalPrice,
+        customer: {
+          first_name,
+          last_name,
+          email: customerInfo.email,
+          phone: customerInfo.phone,
+        },
+        items: cart.map((item) => ({
+          product_id: item.id,
+          quantity: item.quantity,
+        })),
+        shipping: {
+          country: shippingInfo.country,
+          city: shippingInfo.city,
+          sub_city: shippingInfo.sub_city,
+          street: shippingInfo.street,
+          house_number: shippingInfo.house_number,
+          postal_code: shippingInfo.postal_code,
+          phone_number: shippingInfo.phone_number || customerInfo.phone,
+          additional_info: shippingInfo.additional_info,
+        },
         shipping_fee_id: selectedShippingFee ? selectedShippingFee.id : null,
       });
 
-      // Dynamic order ID extraction
-      const order_id = orderRes.data.order_id;
       const order_uuid = orderRes.data.uuid;
 
-      if (!order_id) {
-        throw new Error("Failed to get order ID");
+      if (!order_uuid) {
+        throw new Error("Failed to place order");
       }
-
-      // ✅ Step 3: Create shipping with captured IDs
-      await axios.post("/shipping/addShipping", {
-        order_id,
-        customer_id,
-        country: shippingInfo.country,
-        city: shippingInfo.city,
-        sub_city: shippingInfo.sub_city,
-        street: shippingInfo.street,
-        house_number: shippingInfo.house_number,
-        postal_code: shippingInfo.postal_code,
-        phone_number: shippingInfo.phone_number || customerInfo.phone,
-        additional_info: shippingInfo.additional_info,
-      });
-
-      // ✅ Step 4: Create ordered items with captured order ID
-      const orderedItemsPromises = cart.map((item) => {
-        console.log("Sending product_id:", item.id);
-        axios.post("/orderedItems/add", {
-          order_id,
-          product_id: item.id,
-          quantity: item.quantity,
-          price: item.price,
-        });
-      });
-
-      await Promise.all(orderedItemsPromises);
 
       toast.success("Order placed successfully!");
 
