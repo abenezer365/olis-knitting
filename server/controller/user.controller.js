@@ -2,9 +2,14 @@ import connection from "../config/database.config.js";
 import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
 import { v4 as uuidv4 } from "uuid";
-// .env support
-import dotenv from "dotenv";
-dotenv.config();
+import env from "../config/env.js";
+import { getPagination, buildMeta } from "../utils/pagination.js";
+
+const ALLOWED_ROLES = ["admin", "manager", "employee"];
+
+// Columns safe to return to clients (never expose password_hash).
+const USER_COLUMNS =
+  "id, uuid, first_name, last_name, email, phone, role, status, created_at, updated_at";
 
 // Sign In Controller
 export async function signin(req, res) {
@@ -41,12 +46,17 @@ export async function signin(req, res) {
     //JWT
     const { id, email, first_name, last_name, role, status } = user;
 
+    if (status !== "active") {
+      return res.status(403).json({
+        message: "Your account is not active. Contact an administrator.",
+        success: false,
+      });
+    }
+
     const token = jwt.sign(
       { id, email, first_name, last_name, role, status },
-      process.env.JWT_SECRET,
-      {
-        expiresIn: "1d",
-      }
+      env.jwtSecret,
+      { expiresIn: env.jwtExpiresIn }
     );
     return res.status(200).json({
       message: "User logged in successfully",
@@ -71,6 +81,13 @@ export async function signup(req, res) {
   if (!email || !password || !first_name || !last_name || !phone || !role) {
     return res.status(400).json({
       message: "Please enter all required fields",
+      success: false,
+    });
+  }
+
+  if (!ALLOWED_ROLES.includes(role)) {
+    return res.status(400).json({
+      message: `Invalid role. Allowed roles: ${ALLOWED_ROLES.join(", ")}`,
       success: false,
     });
   }
@@ -245,7 +262,7 @@ export async function checkUser(req, res) {
 
   try {
     const [user] = await connection.execute(
-      "SELECT * FROM users WHERE id = ? ORDER BY created_at DESC",
+      `SELECT ${USER_COLUMNS} FROM users WHERE id = ?`,
       [userId]
     );
 
@@ -273,20 +290,30 @@ export async function checkUser(req, res) {
 //Get all users info Controller
 export async function getAllUsers(req, res) {
   try {
-    const [users] = await connection.execute("SELECT * FROM users LIMIT 10");
+    const { enabled, limit, offset, page } = getPagination(req.query, {
+      defaultLimit: 20,
+    });
 
-    if (users.length === 0) {
-      return res.status(200).json({
-        error: "No employees yet!",
-        success: true,
-      });
-    }
+    const listQuery = enabled
+      ? `SELECT ${USER_COLUMNS} FROM users ORDER BY created_at DESC LIMIT ${limit} OFFSET ${offset}`
+      : `SELECT ${USER_COLUMNS} FROM users ORDER BY created_at DESC`;
 
-    res.status(200).json({
+    const [users] = await connection.query(listQuery);
+
+    const response = {
       message: "Employees data retrieved successfully",
       success: true,
-      users: users,
-    });
+      users,
+    };
+
+    if (enabled) {
+      const [[{ total }]] = await connection.query(
+        "SELECT COUNT(*) AS total FROM users"
+      );
+      response.pagination = buildMeta({ page, limit }, total);
+    }
+
+    res.status(200).json(response);
   } catch (error) {
     return res.status(500).json({
       message: "Unable to qeury employees! Internal server error!",
@@ -302,7 +329,7 @@ export async function getSingleUser(req, res) {
 
   try {
     const [user] = await connection.execute(
-      "SELECT * FROM users WHERE id = ?",
+      `SELECT ${USER_COLUMNS} FROM users WHERE id = ?`,
       [id]
     );
 

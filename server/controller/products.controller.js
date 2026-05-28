@@ -1,11 +1,11 @@
 import connection from "../config/database.config.js";
 import { v4 as uuidv4 } from "uuid";
-import fs from "fs";
-import path from "path";
+import createSlug from "../utils/slug.js";
+import { deleteByPrefix, productFolder } from "../utils/cloudinaryUpload.js";
+import { getPagination, buildMeta } from "../utils/pagination.js";
 
 // Add product controller
 export async function addProduct(req, res) {
-  console.log(req.body)
   const { name, description, price, rating, category_id, available_sizes, available_colors } = req.body;
   const imageUrl = req.body.image_url;
   const otherImagesUrls = req.body.other_images_urls || [];
@@ -109,18 +109,33 @@ export async function editProduct(req, res) {
 // Get all products controller
 export async function getAllProducts(req, res) {
   try {
-    const [rows] = await connection.execute(
-      `SELECT p.*, c.name AS category_name
+    const { enabled, limit, offset, page } = getPagination(req.query, {
+      defaultLimit: 24,
+    });
+
+    const baseQuery = `SELECT p.*, c.name AS category_name
        FROM products p
        LEFT JOIN categories c ON p.category_id = c.id
-       ORDER BY p.created_at DESC`
+       ORDER BY p.created_at DESC`;
+
+    const [rows] = await connection.query(
+      enabled ? `${baseQuery} LIMIT ${limit} OFFSET ${offset}` : baseQuery
     );
-    
-    return res.status(200).json({
+
+    const response = {
       success: true,
       message: "Products fetched successfully ✅",
       products: rows,
-    });
+    };
+
+    if (enabled) {
+      const [[{ total }]] = await connection.query(
+        "SELECT COUNT(*) AS total FROM products"
+      );
+      response.pagination = buildMeta({ page, limit }, total);
+    }
+
+    return res.status(200).json(response);
   } catch (error) {
     return res.status(500).json({
       success: false,
@@ -183,9 +198,9 @@ export async function deleteProduct(req, res) {
     }
 
     const product = existing[0];
-    
-    // 2. Extract folder name from image URL and delete folder
-    await deleteProductFolder(product);
+
+    // 2. Remove the product's images from Cloudinary (best-effort).
+    await deleteByPrefix(productFolder(createSlug(product.name)));
 
     // 3. Delete from database
     await connection.execute("DELETE FROM products WHERE id = ?", [id]);
@@ -202,54 +217,3 @@ export async function deleteProduct(req, res) {
     });
   }
 }
-
-// Helper function to delete product folder
-async function deleteProductFolder(product) {
-  try {
-    // Method 1: Extract from image URL (most reliable)
-    let folderName = null;
-    
-    if (product.image) {
-      // Extract folder name from image URL: "/upload/products/winter-wool-sweater/main.jpg"
-      const urlParts = product.image.split('/');
-      if (urlParts.length >= 4) {
-        folderName = urlParts[3]; // "winter-wool-sweater"
-      }
-    }
-    
-    // Method 2: If URL extraction fails, create slug from product name
-    if (!folderName && product.name) {
-      folderName = createSlug(product.name);
-    }
-    
-    if (folderName) {
-      const productFolder = path.join(process.cwd(), "upload", "products", folderName);
-      
-      // Check if folder exists and delete it
-      if (fs.existsSync(productFolder)) {
-        fs.rmSync(productFolder, { recursive: true, force: true });
-        console.log(`🗑️ Deleted product folder: ${productFolder}`);
-        return true;
-      } else {
-        console.log(`ℹ️ Product folder not found: ${productFolder}`);
-        return false;
-      }
-    } else {
-      console.log("⚠️ Could not determine product folder name");
-      return false;
-    }
-  } catch (error) {
-    console.error("Error deleting product folder:", error);
-    return false;
-  }
-}
-
-// Reuse the same slug function from your upload middleware
-const createSlug = (name) => {
-  return name
-    .toLowerCase()
-    .trim()
-    .replace(/[^\w\s-]/g, '')
-    .replace(/[\s_-]+/g, '-')
-    .replace(/^-+|-+$/g, '');
-};

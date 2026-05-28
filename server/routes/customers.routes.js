@@ -3,10 +3,11 @@ import express from "express";
 import { activate, addCustomer, ban, deactivate, deleteCustomer, editCustomer, getAllCustomers, getSingleCustomer } from "../controller/customers.controller.js";
 import authorize from "../middlewares/authorize.js";
 import authenticate from "../middlewares/authenticate.js";
+import { writeLimiter } from "../middlewares/rateLimiter.js";
 const router = express.Router();
 
 
-router.post("/addCustomer", addCustomer);
+router.post("/addCustomer", writeLimiter, addCustomer);
 router.get("/getCustomers",authenticate,getAllCustomers);
 router.patch("/edit/:id", authenticate,editCustomer)
 router.get("/get/:id", getSingleCustomer);

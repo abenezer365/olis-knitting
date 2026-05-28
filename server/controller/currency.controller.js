@@ -52,7 +52,6 @@ export async function updateRate(req, res) {
     });
 
   } catch (error) {
-    await connection.rollback();
     console.error("Update rate error:", error);
     return res.status(500).json({
       message: "Update failed",

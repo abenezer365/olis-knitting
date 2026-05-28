@@ -1,5 +1,6 @@
 import connection from "../config/database.config.js";
 import { v4 as uuidv4 } from "uuid";
+import { getPagination, buildMeta } from "../utils/pagination.js";
 //Add customer Controller
 export async function addCustomer(req, res) {
     const { first_name, last_name, email, phone } = req.body;
@@ -36,23 +37,29 @@ export async function addCustomer(req, res) {
 //Get all customer Controller
 export async function getAllCustomers(req, res) {
   try {
-    const [customers] = await connection.execute(
-     "SELECT * FROM customers ORDER BY registered_at DESC"
+    const { enabled, limit, offset, page } = getPagination(req.query, {
+      defaultLimit: 20,
+    });
+
+    const baseQuery = "SELECT * FROM customers ORDER BY registered_at DESC";
+    const [customers] = await connection.query(
+      enabled ? `${baseQuery} LIMIT ${limit} OFFSET ${offset}` : baseQuery
     );
 
-    if (customers.length === 0) {
-      return res.status(200).json({
-        error: "No customers yet!",
-        success: true
-      });
-    }
-
-    res.status(200).json({
+    const response = {
       message: "Customers data retrieved successfully",
       success: true,
-      customers: customers
-    })
+      customers,
+    };
 
+    if (enabled) {
+      const [[{ total }]] = await connection.query(
+        "SELECT COUNT(*) AS total FROM customers"
+      );
+      response.pagination = buildMeta({ page, limit }, total);
+    }
+
+    res.status(200).json(response);
   } catch (error) {
      return res.status(500).json({
        message: "Unable to qeury customers! Internal server error!",
