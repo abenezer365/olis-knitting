@@ -1,27 +1,39 @@
 import jwt from "jsonwebtoken";
+import env from "../config/env.js";
 
-async function authenticate(req, res, next) {
+function authenticate(req, res, next) {
   const authHeader = req.headers.authorization;
 
-if (!authHeader || !authHeader.startsWith("Bearer ")) {
+  if (!authHeader || !authHeader.startsWith("Bearer ")) {
     return res.status(401).json({
-         message: "Authentication invalid!! Access Denied. No Token Provided",
-         success: false
-         });
-      }
+      success: false,
+      message: "Authentication required. No token provided.",
+    });
+  }
+
   const token = authHeader.split(" ")[1];
-    try {
-        const {id, email, first_name, last_name, role, status } = jwt.verify(token, process.env.JWT_SECRET);
-        req.user = {id, email, first_name, last_name, role, status }; 
-        next();
-    } catch (error) {
-        return res.status(500).json({
-            message: "Invalid Token",
-            success: false,
-            error: error.message,
-        });
+
+  try {
+    const { id, email, first_name, last_name, role, status } = jwt.verify(
+      token,
+      env.jwtSecret
+    );
+
+    if (status && status !== "active") {
+      return res.status(403).json({
+        success: false,
+        message: "Your account is not active. Contact an administrator.",
+      });
     }
+
+    req.user = { id, email, first_name, last_name, role, status };
+    next();
+  } catch {
+    return res.status(401).json({
+      success: false,
+      message: "Invalid or expired token.",
+    });
+  }
 }
 
 export default authenticate;
-
